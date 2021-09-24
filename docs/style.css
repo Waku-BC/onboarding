@@ -135,8 +135,7 @@ div#Live {
 
 p#live_logo {
       padding: 1em;
-      margin-right: auto;
-      margin-left: auto;
+      margin:0 auto;
 }
 ========================================
     レフト
