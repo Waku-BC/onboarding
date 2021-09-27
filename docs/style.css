@@ -121,7 +121,9 @@ div#upload {
 
 img.transcode {
 	width: 960px;
+	height: 540px;
 	margin-left: 0px;
+	text-align: left;
 }
 
 div#SingleVideo {
