@@ -118,6 +118,11 @@ div#upload {
 	padding: 20px;
 }
 
+div#transcode {
+	float: left;
+	padding: 20px;
+}
+
 div#SingleVideo {
     margin-top: 100px;
 　　　　　　　　padding : 20px ;
