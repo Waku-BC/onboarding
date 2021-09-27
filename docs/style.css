@@ -125,7 +125,7 @@ div#transcode {
 
 img.トランスコード1 {
 	width: 960px;
-	margin-left: auto;
+	text-align:　left; 
 }
 
 div#SingleVideo {
