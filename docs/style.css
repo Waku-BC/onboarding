@@ -119,9 +119,12 @@ div#upload {
 }
 
 div#transcode {
-	text-align: left; 
+	text-align:　left; 
 	padding: 20px;
-	width: 960px;
+}
+
+img.トランスコード1 {
+width: 960px;
 }
 
 div#SingleVideo {
