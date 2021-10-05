@@ -120,8 +120,6 @@ div#upload {
 
 
 img.transcode {
-	width: 960px;
-	height: 540px;
 	margin-left: 0px;
 	text-align: left;
 }
@@ -149,7 +147,7 @@ div#Live {
 p#live_logo {
       padding: 1em;
       margin:0 auto;
-      text-align: left;
+      text-align: center;
 }
 ========================================
     レフト
