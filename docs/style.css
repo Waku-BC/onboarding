@@ -96,12 +96,13 @@ header h1 {
 
 nav {
     float: left;
-    margin-top: 56px;
+    margin-top: 100px;
 }
 
 nav ul li {
     float: left;
     margin-top: 56px;
+    margin-left: 30px;
 }
 
 nav ul li a {
