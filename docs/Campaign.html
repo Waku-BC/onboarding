@@ -11,11 +11,13 @@
 </head>
 
 <body>
-    <img class="logo"
+	<div class="logo">
+    <img
     src="http://solutions.brightcove.com/wmatsuo/campaingLogo.png"
     alt="Campaign Logo">
+    </div>
 
-    <div class="video" style="max-width: 960px;">
+    <div class="video">
         <video-js data-account="6243204265001" 
         data-player="CJhAdJCdi" 
         data-embed="default" 
@@ -23,16 +25,26 @@
         data-video-id="1730044712891280670" 
         data-playlist-id="" 
         data-application-id="" 
-        class="vjs-fluid">
+        width= "960"
+        height= "540">
     </video-js>
 </div>
 <script src="https://players.brightcove.net/6243204265001/CJhAdJCdi_default/index.min.js"></script>
 
 <style>
-    .logo .video {
-        margin-left: auto;
-        margin-right: auto; 
-    }
+    .logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+ .video {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>
 
 </body>
