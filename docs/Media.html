@@ -1,34 +1,219 @@
-<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
-    <link rel="stylesheet" href="style.css" />
-    <title>Mobile Tab Navigation</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <!-- CSS File -->
+    <link rel="stylesheet" href="styles/index.css" />
+    <title>Youtube Clone with HTML & CSS</title>
   </head>
   <body>
-    <div class="phone">
-        <iframe class="content show" src="https://players.brightcove.net/6243204265001/jbSyennJ3_default/index.html?videoId=6280857142001" allowfullscreen="" allow="encrypted-media" width="800" height="384"></iframe>
-        <iframe class="content" src="https://players.brightcove.net/6243204265001/TPDTLceNy_default/index.html?playlistId=1712764505576917339" allowfullscreen="" allow="encrypted-media" width="800" height="384"></iframe>
-        <iframe class="content" src="https://players.brightcove.net/6243204265001/jbSyennJ3_default/index.html?videoId=1726894313848007962" allowfullscreen="" allow="encrypted-media" width="800" height="384"></iframe>
-      <nav>
-        <ul>
-          <li class="active">
-            <i class="fas fa-film"></i>
-            <p>単一動画</p>
-          </li>
-          <li>
-            <i class="fas fa-photo-video"></i>
-            <p>プレイリスト</p>
-          </li>
-          <li>
-            <i class="fas fa-list-alt"></i>
-            <p>チャプター</p>
-         </li>
-        </ul>
-      </nav>
-    </div>
-    <script src="script.js"></script>
-  </body>
+      <header class="header"><div class="logo left">
+   <i id="menu" class="material-icons">menu</i>
+   <img src="http://solutions.brightcove.com/wmatsuo/navlogo.png" alt="Logo" class="logo" height="30" width="155">
+ </div>
+ 
+ <div class="search center">
+   <form action="">
+     <input type="text" placeholder="Search" />
+     <button><i class="material-icons">search</i></button>
+   </form>
+   <i class="material-icons mic">mic</i>
+ </div>
+ 
+ <div class="icons right">
+   <i class="material-icons">videocam</i>
+   <i class="material-icons">apps</i>
+   <i class="material-icons">notifications</i>
+   <i class="material-icons display-this">account_circle</i>
+ </div></header>
+      <main>
+           <div class=”side-bar”>
+   <div class="nav">
+      <a class="nav-link active">
+        <i class="material-icons">home</i>
+        <span>Home</span>
+      </a>
+      <a class="nav-link">
+     <i class="material-icons">local_fire_department</i>
+     <span>Trending</span>
+  </a>
+  <a class="nav-link">
+     <i class="material-icons">subscriptions</i>
+     <span>Subscriptions</span>
+  </a>
+</div>
+<hr>
+<a class="nav-link">
+       <i class="material-icons">library_add_check</i>
+       <span>Library</span>
+    </a>
+    <a class="nav-link">
+       <i class="material-icons">history</i>
+       <span>History</span>
+    </a>
+    <a class="nav-link">
+       <i class="material-icons">play_arrow</i>
+       <span>Your Videos</span>
+    </a>
+    <a class="nav-link">
+       <i class="material-icons">watch_later</i>
+       <span>Watch Later</span>
+    </a>
+    <a class="nav-link">
+       <i class="material-icons">thumb_up</i>
+       <span>Liked Videos</span>
+    </a>
+</div>
+	<!--Content Begins-->
+          <div class="content">
+          <video-js id="singleVideo"
+			data-account="6243204265001" 
+			data-player="jbSyennJ3" 
+			data-embed="default" 
+			controls="" 
+			data-video-id="1730044712891280670" 
+			data-playlist-id="" 
+			data-application-id=""
+            height="450"
+            width="800">
+            </video-js>
+
+<script src="https://players.brightcove.net/6243204265001/jbSyennJ3_default/index.min.js"></script>
+
+          </div>
+          <!--Content Ends-->
+      </main>
+  <!-- Main Body Ends -->
+  
+ 
+  
+  <style>
+  * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+/* header section*/
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    padding: 15px;
+  }
+  
+  main {
+   height: calc(100vh - 70px);
+   display: flex;
+   background-color: #f9f9f9;
+ }
+ 
+ /* Sidebar */ 
+.side-bar {
+    height: 100%;
+    width: 17%;
+    background-color: white;
+    overflow-y: hidden;
+  } 
+  
+  .left {
+ display: flex;
+ align-items: center;
+}
+
+.left #menu {
+ padding: 0 7px;
+ cursor: pointer;
+}
+
+.search {
+ display: flex;
+}
+
+.search form {
+ display: flex;
+ border: 1px solid #ddd;
+ height: 45px;
+}
+
+.search input {
+  width: 600px;
+  padding:10px;
+  border: 0;
+  height: 100%;
+  border-radius: 2px 0 0 2px
+}
+
+input:focus {
+  outline: none;
+  border: 1px solid #ddd;
+}
+
+.search button {
+  height: 100%;
+  width: 60px;
+  border: none;
+}
+ 
+.mic {
+  margin-top: 10px;
+}
+
+ .material-icons {
+    color: rgb(100, 100, 100);
+    padding: 0 7px;
+    cursor: pointer;
+  }
+  
+  .nav {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    margin-top: 15px;
+  }
+  
+  .nav-link {
+   display: flex;
+   align-items: center;
+   padding: 12px 25px;
+ }
+ 
+.nav-link span {
+   margin-left: 15px;
+ }
+ 
+.nav-link:hover {
+   background: #e5e5e5;
+   cursor: pointer;
+ }
+
+.active {
+   background: #e5e5e5;
+}
+
+hr {
+   height: 1px;
+   background-color: #e5e5e5;
+   border: none;
+ }
+ 
+ #singleVideo {
+ 	margin-left: 50px;
+    margin-top: 50px;
+  
+  @media (max-width: 768px) {
+    .side-bar {
+      display: none;
+    }
+  }
+  </style>
+</body>
 </html>
