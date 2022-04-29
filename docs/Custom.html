@@ -1,94 +1,95 @@
-<!doctype html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>4-01_input</title>
-<link rel="shortcut icon" href="../../_common/images/favicon.ico">
-<link href="https://fonts.googleapis.com/css?family=M+PLUS+1p:400,500" rel="stylesheet">
-<link href="../../_common/css/style.css" rel="stylesheet">
-</head>
-<body>
-<main id="main-holder">
-<h1 id="login-header">ログイン</h1>
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.8.11/tailwind.min.css"
+      integrity="sha512-KO1h5ynYuqsFuEicc7DmOQc+S9m2xiCKYlC3zcZCSEw0RGDsxcMnppRaMZnb0DdzTDPaW22ID/gAGCZ9i+RT/w=="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <title>ログイン</title>
+  </head>
+  <body>
+    <div class="background" id="background"></div>
+    <div class="bg-white rounded p-10 text-center shadow-md">
+     <form action="https://wakudemo.github.io/onboarding/Campaign.html">
+      <h1 class="text-3xl">ログイン</h1>
+      <p class="text-sm text-gray-700">動画を見るにはログインして下さい。</p>
+     
+      <div class="my-4 text-left">
+        <label for="email" class="text-gray-900">Eメール:</label>
+        <input
+          type="text"
+          class="border block w-full p-2 mt-2 rounded"
+          id="email"
+          name="bccustomguid"
+          placeholder="Eメールアドレス"
+        />
+        </div>
 
-<div class="container">
-<section>
-    <form id="login-form" action="https://wakudemo.github.io/onboarding/Campaign.html" id="form">
-        <input type="text" name="bccustomguid" class="login-form-field" placeholder="IDおよびEメール">
-        <input type="password" name="password" class="login-form-field" placeholder="パスワード">
-        <input type="submit" value="ログイン" id="login-form-submit">
-    </form>
-    <p id="output"></p>
-</section>
-</div><!-- /.container -->
-</main>
-
-<style>
-
-html {
-  height: 100%;
-}
-body {
-  height: 100%;
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  display: grid;
-  justify-items: center;
-  align-items: center;
-  background-color: #FFCE00;
-  }
-
-#main-holder {
-  width: 50%;
-  height: 70%;
-  display: grid;
-  justify-items: center;
-  align-items: center;
-  background-color: white;
-  border-radius: 7px;
-  box-shadow: 0px 0px 5px 2px black;
-}
+      <div class="my-4 text-left">
+        <label for="email" class="text-gray-900">パスワード:</label>
+        <input
+          type="password"
+          class="border block w-full p-2 mt-2 rounded"
+          id="password"
+          placeholder="パスワード"
+        />
+      </div>
   
-#login-form {
-  align-self: flex-start;
-  display: grid;
-  justify-items: center;
+
+      <button
+        class="bg-black text-white py-2 mt-4 inline-block w-full rounded"
+        type="submit"
+      >
+        送信
+      </button>
+   </form> 
+    <script src="script.js"></script>
+    
+    <style>
+	* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
 }
 
-	.login-form-field::placeholder {
-  color: #3a3a3a;
+.background {
+  background: url('http://solutions.brightcove.com/wmatsuo/bgi.jpg')
+    no-repeat center center/cover;
+  position: absolute;
+  top: -20px;
+  bottom: -20px;
+  left: -20px;
+  right: -20px;
+  z-index: -1;
+  filter: blur(20px);
 }
+    </style>
+    
+    <script>
+const password = document.getElementById('password')
+const background = document.getElementById('background')
 
-.login-form-field {
-  border: none;
-  border-bottom: 1px solid #3a3a3a;
-  margin-bottom: 10px;
-  border-radius: 3px;
-  outline: none;
-  padding: 0px 0px 5px 5px;
-}
-
-#login-form-submit {
-  width: 100%;
-  padding: 7px;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-weight: bold;
-  background-color: #FF5000;
-  cursor: pointer;
-  outline: none;
-}
-view raw
-</style>
-
-
-
-
-
-
-
-</body>
+password.addEventListener('input', (e) => {
+  const input = e.target.value
+  const length = input.length
+  const blurValue = 20 - length * 2
+  background.style.filter = `blur(${blurValue}px)`
+})
+</script>
+    
+    
+  </body>
 </html>
