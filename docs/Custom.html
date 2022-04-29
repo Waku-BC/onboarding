@@ -15,7 +15,7 @@
 <div class="container">
 <section>
     <form id="login-form" action="https://wakudemo.github.io/onboarding/Campaign.html" id="form">
-        <input type="text" name="userid" class="login-form-field" placeholder="IDおよびEメール">
+        <input type="text" name="bccustomguid" class="login-form-field" placeholder="IDおよびEメール">
         <input type="password" name="password" class="login-form-field" placeholder="パスワード">
         <input type="submit" value="ログイン" id="login-form-submit">
     </form>
@@ -93,8 +93,7 @@ view raw
 'use strict';
 
 document.getElementById('form').onsubmit = function(event) {
-    event.preventDefault();
-    var = document.getElementById('form').userid.value;
+    var = document.getElementById('form').bccustomguid.value;
 };
 </script>
 </body>
