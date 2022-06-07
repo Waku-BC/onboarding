@@ -33,7 +33,7 @@
 <script src="https://players.brightcove.net/6243204265001/nl3D9RuLK_default/index.min.js"></script>
 	
    <div id="endJump">
-	   <h3>動画終了時にリダイレクト</h3>
+	   <h3 id="title"><a href="https://player.support.brightcove.com/basics/developer-basics-custom-plugin-passing-data.html">動画終了時にリダイレクト</a></h3>
 			   <video-js data-account="6243204265001"
 				     data-player="MAD772qBL" 
 				     data-embed="default" 
@@ -61,12 +61,15 @@
   align-items: center;
   margin-bottom: 200px;
 }
+
+# title{
+	text-align: center;
+	margin: 0 auto;
 	
 #endJump{
 	display: flex;
 	justify-content: center;
 	aligh-item: center;
-	text-align: center;
 	margin: 0 auto;
 	margin-bottom: 100px;
 }
