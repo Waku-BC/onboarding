@@ -31,21 +31,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     alt="Player Logo">
     </div>
 
-    <div class="video">
-	      <video-js data-account="6243204265001" 
-			data-player="jEtUi9uzV" 
-			data-embed="default" 
-			controls="" 
-			data-video-id="6280857142001" 
-			data-playlist-id="" 
-			data-application-id="Player" 
-			width="500px" height="300">
-	      </video-js>
-
-<script src="https://players.brightcove.net/6243204265001/jEtUi9uzV_default/index.min.js"></script>
-	
-	   <h3 id="title"><a href="https://player.support.brightcove.com/basics/developer-basics-custom-plugin-passing-data.html">動画終了時にリダイレクト</a></h3>
-			   <video-js data-account="6243204265001"
+			   <video-js id="endJump" data-account="6243204265001"
 				     data-player="MAD772qBL" 
 				     data-embed="default" 
 				     controls="" 
@@ -54,8 +40,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				     data-application-id=""
 				     width="500px" height="300">
 			   </video-js>
-	</div>
+	
+	 <p id="linkHere" style='color:red; font-weight: bold; font-size: 20px'></p>
+	
 		   <script src="https://players.brightcove.net/6243204265001/MAD772qBL_default/index.min.js"></script>
+	
+	
+	
+	<script type="text/javascript">
+    videojs.getPlayer('endJump').ready(function() {
+      var endJump = this;
+
+      // +++ Wait for loadstart to read video information +++
+      endJump.on('loadstart', function(evt) {
+
+        // +++ Read test and link from video info and build anchor tag +++
+        var linkText = endJump.mediainfo.link.text,
+          linkURL = endJump.mediainfo.link.url,
+          hrefString = '<a href = "' + linkURL + '" target="_blank">' + linkText + '</a>';
+
+        // +++ Inject anchor tag into HTML +++
+        document.getElementById('linkHere').innerHTML = hrefString;
+      });
+    });
+  </script>
+	
+	
 	
 <style>
     .logo {
