@@ -50,7 +50,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	<div data-experience="62e098ae84f72a0026b019c8"　id='myPlayerID'></div>
 <script src="https://players.brightcove.net/6243204265001/experience_62e098ae84f72a0026b019c8/live.js"></script>
 
-	
+	<script>	
+  var player = videojs(‘myPlayerID’);
+  player.on(‘audience:ready’, function() {
+    // player.audience is now available for use
+  });
+   
+  // Store the string value “foo” in the slot event1
+  player.audience.track(‘event1’, ‘foo’);
+  
+  // Store the string value “bar” in the slot event2
+  player.audience.track(‘event2’, ‘bar’);
+  
+  // Store the decimal value 15.08 in slot metric1
+  player.audience.track(‘metric1’, 15.08);
+  
+  // Replace the value in slot metric1 with the number 10,
+  // and validate that the call was sent successfully
+  var result = player.audience.track(‘metric1’, 10);
+  
+  if (result) {
+     console.log(‘metric sent successfully’);
+  }
+	</script>
 
 	
 <style>
