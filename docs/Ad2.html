@@ -1,0 +1,55 @@
+<!-- Styles for the picture-in-picture plugin -->
+<link href="//players.brightcove.net/videojs-pip/1/videojs-pip.css" rel="stylesheet">
+
+<!-- Container to hold the text and video player -->
+<div class="wrap">
+  <h1>Picture In Pictureの例</h1>
+  <p>
+    動画再生開始後、ページをスクロールすると、プレーヤーがコンテンツから飛び出すが、コンテンツが再流動することはありません。スクロールルームは、縦方向と横方向の両方が利用可能です。
+  </p>
+  
+  <!-- The picture-in-picture container. This is required! -->
+  <div class="vjs-pip-container">
+    <!-- The player embed code -->
+    <video-js id="myPlayerID" 
+              data-account="6243204265001"
+              data-player="yGgdbY6ck" 
+              data-embed="default" 
+              controls="" 
+              data-video-id="1740566638273424488"
+              data-playlist-id="" 
+              data-application-id=""
+              width="560" height="315"></video-js>
+    <script src="https://players.brightcove.net/6243204265001/yGgdbY6ck_default/index.min.js"></script>
+  </div>
+  
+  <p>
+    Lorem ipsum dolor sit amet, lectus ac porttitor mauris sit nec cupidatat, lobortis tempor lacus dui id, sit amet, fringilla mi pharetra volutpat mauris. Urna in magnis neque nunc, varius suspendisse erat nullam nibh sed a, tincidunt scelerisque magnis ac tortor rutrum, eget lacus urna porta, cras vel. Enim commodo wisi bibendum ornare ullamcorper metus, mauris venenatis nulla neque suspendisse, orci odio officia, eget nunc aenean. 
+  </p>
+  <p>
+    Posuere a pellentesque praesent wisi, pede feugiat lectus egestas eget, mattis condimentum elit, vivamus amet vestibulum egestas cras donec fusce, lectus at. Quisque torquent, nulla eros, et suscipit elit, gravida consequat diam cras turpis mauris nam. Vivamus varius amet cursus elit, possimus donec arcu luctus. Libero dapibus nunc sapien.
+  </p>
+</div>
+
+<!-- Script for the picture-in-picture plugin -->
+<script src="//players.brightcove.net/videojs-pip/1/videojs-pip.min.js"></script>
+
+<style>
+  body {
+  margin: 20px;
+  min-height: 1200px;
+  min-width: 1200px;
+}
+.wrap {
+  width: 600px;
+}
+</style>
+
+<scritp>
+  videojs.getPlayer('myPlayerID').ready(function() {
+  // When the player is ready, get a reference to it
+  var myPlayer = this;
+  // Initialize the picture-in-picture plugin
+  myPlayer.pip();
+});
+  </script>
