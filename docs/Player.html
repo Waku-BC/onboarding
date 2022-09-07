@@ -31,6 +31,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     alt="Player Logo">
     </div>
 	
+	<div class="container">
 	    <div class="video">
 	      <video-js data-account="6243204265001" 
 			data-player="jEtUi9uzV" 
@@ -43,11 +44,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	      </video-js>
 	    
 </div>
-<script src="https://players.brightcove.net/6243204265001/jEtUi9uzV_default/index.min.js"></script>
+
 	
 	
 	
-    <div class="">
+    <div class="video">
 			   <video-js id="endJump" data-account="6243204265001"
 				     data-player="MAD772qBL" 
 				     data-embed="default" 
@@ -60,6 +61,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	
 	 <p id="linkHere" style='color:red; font-weight: bold; font-size: 20px'></p>
 	</div>
+	</div>
+		<script src="https://players.brightcove.net/6243204265001/jEtUi9uzV_default/index.min.js"></script>
 		   <script src="https://players.brightcove.net/6243204265001/MAD772qBL_default/index.min.js"></script>
 	
 	
@@ -93,10 +96,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   margin-bottom: 100px;
 }
 
- .video {
+ .container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-wrap: wrap;
  
 }
 
