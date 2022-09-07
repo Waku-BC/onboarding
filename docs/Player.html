@@ -33,22 +33,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	
 	<div class="container">
 	    <div class="video">
+	      <a href="https://player.support.brightcove.com/code-samples/brightcove-player-sample-simple-lightbox.html">ライトボックス(単一動画)</a>
 	      <video-js data-account="6243204265001" 
-			data-player="jEtUi9uzV" 
+			data-player="t4UWQswlX" 
 			data-embed="default" 
 			controls="" 
-			data-video-id="6280857142001" 
+			data-video-id="1743283400290025309" 
 			data-playlist-id="" 
 			data-application-id="プレーヤーページ" 
 			width="500px" height="300">
 	      </video-js>
 	    
-</div>
-
+            </div>
 	
-	
-	
-    <div class="video">
+   	      <div class="video">
+	    	<a href="https://player.support.brightcove.com/basics/developer-basics-custom-plugin-passing-data.html">動画終了時にリダイレクト</a>
 			   <video-js id="endJump" data-account="6243204265001"
 				     data-player="MAD772qBL" 
 				     data-embed="default" 
@@ -58,8 +57,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				     data-application-id=""
 				     width="500px" height="300">
 			   </video-js>
-	
-	 <p id="linkHere" style='color:red; font-weight: bold; font-size: 20px'></p>
 	</div>
 		
 		<div class="video">
@@ -77,28 +74,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 		
 		
 	</div>
-		<script src="https://players.brightcove.net/6243204265001/jEtUi9uzV_default/index.min.js"></script>
+		<script src="https://players.brightcove.net/6243204265001/t4UWQswlX_default/index.min.js"></script>
 		<script src="https://players.brightcove.net/6243204265001/MAD772qBL_default/index.min.js"></script>
 		<script src="https://players.brightcove.net/6243204265001/WJ1cGputqd_default/index.min.js"></script>
 	
 	
 	
 	<script type="text/javascript">
-    videojs.getPlayer('endJump').ready(function() {
-      var endJump = this;
-
-      // +++ Wait for loadstart to read video information +++
-      endJump.on('loadstart', function(evt) {
-
-        // +++ Read test and link from video info and build anchor tag +++
-        var linkText = endJump.mediainfo.link.text,
-          linkURL = endJump.mediainfo.link.url,
-          hrefString = '<a href = "' + linkURL + '" target="_blank">' + linkText + '</a>';
-
-        // +++ Inject anchor tag into HTML +++
-        document.getElementById('linkHere').innerHTML = hrefString;
-      });
-    });
+   
   </script>
 	
 	
