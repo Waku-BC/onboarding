@@ -97,14 +97,35 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				    width="500px" height="300px"></video-js>
 		</div>
 		
+			<div class="video">
+			<a href="https://player.support.brightcove.com/code-samples/brightcove-player-sample-password-view-video.html">パスワード</a>
+			<video-js id="myPlayerID" 
+				    data-account="6243204265001" 
+				    data-player="yQBATD3Om" 
+				    data-embed="default" 
+				    controls="" 
+				    data-video-id="1738315511285895328" 
+				    data-playlist-id="" 
+				    data-application-id=""
+				    width="500px" height="300px"></video-js>
+		</div>
+		
 	</div>
 		<script src="https://players.brightcove.net/6243204265001/P24ig9t5g2_default/index.min.js"></script>
 		<script src="https://players.brightcove.net/6243204265001/MAD772qBL_default/index.min.js"></script>
 		<script src="https://players.brightcove.net/6243204265001/WJ1cGputqd_default/index.min.js"></script>
 		<script src="https://players.brightcove.net/6243204265001/BiJN354tP_default/index.min.js"></script>
 		<script src="https://players.brightcove.net/6243204265001/4yMfTy4fk_default/index.min.js"></script>
+	        <script src="https://players.brightcove.net/6243204265001/yQBATD3Om_default/index.min.js"></script>
 	
-	
+	 <script src="http://solutions.brightcove.com/wmatsuo/password-to-view-pass-in-password.js"></script>
+
+  <script>
+    videojs.getPlayer('myPlayerID').ready(function() {
+      var myPlayer = this;
+      myPlayer.passwordToView({'password': 'newpass'});
+    });
+  </script>	
 
 	
 	
