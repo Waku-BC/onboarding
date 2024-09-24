@@ -10,7 +10,6 @@
 
 <body>
 
- <link href="https://players.brightcove.net/videojs-ima3/3/videojs.ima3.min.css" rel="stylesheet">
 
   <p>私、私達、わたし、わたし達、わたしたち、私等、私ら、わたしら、うち等、うちら、僕、僕達、ぼく、ぼくたち、僕等、僕ら、当方、弊社 、あなた、あなた達、あなた方、君、君達、きみたち、そちら、おまえ、君達、おまえ達、あなたたち、きみたち、おまえたち、貴社</p>
   <p>です。でした。ます。ました。をします。をしました。をやります。をやりました。を行います。を行いました。だ。だった。をする。をした。をしてきた、をやった。をやってきた。を行った。を行ってきた。へ行く。へ行った。へ行ってきた。へ来る。へ来た。へいらっしゃる。へいらっしゃった。と会う。と会った。と会ってきた。を見る。を見た。を見てきた。と話す。と話した。と話してきた。を聞く。を聞いた。を聞いてきた。に乗る。に乗った。に乗ってきた。無事着きました。無事到着しました。行きました。行ってきました。いっちゃった。着きます。着く予定です。到着の予定です。行きます。行く予定です。のつもりです。元気です。元気で過ごしています。無事です。無事に過ごしています。大丈夫です。ＯＫです。グーです。グッドです。心配しないで下さい。心配無用です。直りました。直しました。修理しました。戻りました。戻しました。回復しました。元気になりました。ありがとう。ありがとうございます。感謝します。感謝致します。日本に帰ります。帰る予定です。帰るつもりです。帰国します。帰国の予定です。</p>
@@ -50,82 +49,6 @@
 }
 </style>
 
-<script>
-videojs.getPlayer('myPlayerID').ready(function() {
-  var myPlayer = this,
-      isAdPlaying = false;
-
-  // +++ Configure IMA3 plugin +++
-  myPlayer.ima3({
-    // only use HTML5 mode
-    adTechOrder: ["html5"],
-    // you can increase or decrease the max amount of time to wait for an ad
-    timeout: 5000,
-    // this is where your ad tag goes
-    serverUrl:
-      "https://pubads.g.doubleclick.net/gampad/ads?iu=/21775744923/external/single_ad_samples&sz=640x480&cust_params=sample_ct%3Dlinear&ciu_szs=300x250%2C728x90&gdfp_req=1&output=vast&unviewed_position_start=1&env=vp&impl=s&correlator="
-  });
-
-  // +++ Execute every time page is scrolled +++
-  window.onscroll = checkIfVideoInView;
-
-  // +++ Called on scroll, check if in view and the play/pause +++
-  function checkIfVideoInView() {
-    // check if we are in ad or content playback
-    //  and get reference to the relevant player
-    var currentPlayer = !isAdPlaying ? myPlayer : myPlayer.ima3.adPlayer;
-    if (isScrolledIntoView(myPlayer.el())) {
-      // the player is fully in the viewport
-      currentPlayer.play();
-      // ensure the conent player is paused
-      if (isAdPlaying) {
-        myPlayer.pause();
-      }
-    } else {
-      // the player is not in the viewport
-      currentPlayer.pause();
-    }
-  }
-
-  // +++ Checks if player is in view +++
-  function isScrolledIntoView(elem) {
-    // Get the position of the viewport
-    var docViewTop = $(window).scrollTop();
-    var docViewBottom = docViewTop + $(window).height();
-
-    // get the position of the player element
-    var elemTop = $(elem).offset().top;
-    var elemBottom = elemTop + $(elem).height();
-
-    // Determine if the player element is in fully in the viewport
-    return (
-      elemBottom >= docViewTop &&
-      elemTop <= docViewBottom &&
-      elemBottom <= docViewBottom &&
-      elemTop >= docViewTop
-    );
-  }
-
-  // +++ Set Boolean value for if ad is playing +++
-  myPlayer.on(
-    [
-      "ads-ad-started",
-      "ads-ad-ended",
-      "ima3-complete",
-      "ads-ad-skipped",
-      "adserror",
-      "ads-allpods-completed"
-    ],
-    function(evtObject) {
-      if (evtObject.type == "ads-ad-started") {
-        isAdPlaying = true;
-      } else {
-        isAdPlaying = false;
-      }
-    }
-  );
-});
-</script>
 
 </body>
 
