@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Analytics</title>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HMNKXWNJPH"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HMNKXWNJPH');
+</script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+
+    header {
+      width: 100%;
+      overflow: hidden;
+    }
+
+    header img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .player-container {
+      max-width: 960px;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+
+    video-js.video-js.vjs-fluid:not(.vjs-audio-only-mode) {
+      padding-top: 56.25%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ヘッダー画像 -->
+  <header>
+    <img src="docs/images/ga.png" alt="Google Analytics Header">
+  </header>
+
+  <!-- Brightcove プレーヤー -->
+  <div class="player-container">
+    <video-js
+      data-account="6243204265001"
+      data-player="kYBnKta6l"
+      data-embed="default"
+      controls
+      data-video-id="1836960638704806717"
+      data-playlist-id=""
+      data-application-id=""
+      class="video-js vjs-fluid">
+    </video-js>
+  </div>
+
+  <!-- Brightcove プレーヤースクリプト -->
+  <script src="https://players.brightcove.net/6243204265001/kYBnKta6l_default/index.min.js"></script>
+
+</body>
+</html>
