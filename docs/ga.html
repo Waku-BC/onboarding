@@ -51,22 +51,24 @@ header img {
     <img src="images/ga.png" alt="Google Analytics Header">
   </header>
 
-  <!-- Brightcove プレーヤー -->
-  <div class="player-container">
-    <video-js
-      data-account="6243204265001"
-      data-player="kYBnKta6l"
-      data-embed="default"
-      controls
-      data-video-id="1836960638704806717"
-      data-playlist-id=""
-      data-application-id=""
-      class="video-js vjs-fluid">
-    </video-js>
-  </div>
-
-  <!-- Brightcove プレーヤースクリプト -->
-  <script src="https://players.brightcove.net/6243204265001/kYBnKta6l_default/index.min.js"></script>
+<div style="max-width: 960px;">
+  <style>
+  video-js.video-js.vjs-fluid:not(.vjs-audio-only-mode) {
+    padding-top: 56.25%;
+  }
+  </style><video-js
+    data-account="6243204265001"
+    data-player="4FPCpJFjn"
+    data-embed="default"
+    controls=""
+    data-video-id="1836960638704806717"
+    data-playlist-id=""
+    data-application-id=""
+    class="vjs-fluid"></video-js>
+</div>
+<script
+  src="https://players.brightcove.net/6243204265001/4FPCpJFjn_default/index.min.js">
+</script>
 
 </body>
 </html>
