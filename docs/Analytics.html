@@ -34,12 +34,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     alt="Live Logo">
     </div>
 	
-<div style="max-width: 960px;">
-  <style>
-  video-js.video-js.vjs-fluid:not(.vjs-audio-only-mode) {
-    padding-top: 56.25%;
-  }
-  </style><video-js
+<div class="player-wrap">
+  <video-js
     data-account="6243204265001"
     data-player="LNKIt5x7L"
     data-embed="default"
@@ -47,7 +43,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     data-video-id="1788842624055900694"
     data-playlist-id=""
     data-application-id=""
-    class="vjs-fluid"></video-js>
+ </video-js>
 </div>
 <script
   src="https://players.brightcove.net/6243204265001/LNKIt5x7L_default/index.min.js">
@@ -55,31 +51,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 	
 	
 <style>
-    .logo, .livePage {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 100px;
+/* ページ全体を中央寄せ用に整える */
+.page-center {
+  width: 100%;
+  text-align: center; /* 横方向中央揃え */
+  padding: 20px 0;
 }
 
- .container {
-  display: flex;
-  justify-content: center; 
-  aligh-content: space-between;
-  margin-bottom: 60px;
-}
-	
- .video {
-	 margin-right: 10px;
+/* ロゴを中央に表示 */
+.page-center .logo {
+  display: block;
+  margin: 0 auto 20px auto; /* 中央寄せ＋下に余白 */
+  max-width: 200px; /* ロゴサイズはお好みで調整 */
+  height: auto;
 }
 
- img [src="https://chatroll.com/t.gif"]{
-    display: none;
+/* プレーヤー部分 */
+.player-wrap {
+  width: 100%;
+  max-width: 960px;  /* プレーヤーの最大幅 */
+  margin: 0 auto;    /* 横方向中央寄せ */
+  aspect-ratio: 16 / 9; /* 16:9 比率 */
+  position: relative;
 }
-　
-	
 
+/* プレーヤー内の要素をフィット */
+.player-wrap video,
+.player-wrap iframe,
+.player-wrap .video-js {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Brightcoveの fluid モード用（古いブラウザ対応） */
+.video-js.vjs-fluid:not(.vjs-audio-only-mode) {
+  padding-top: 56.25%; /* 16:9 の比率維持 */
+}
 </style>
 
 </body>
