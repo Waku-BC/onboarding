@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Player — Implementation Gallery</title>
+
+  <style>
+    :root{
+      --black:#000;
+      --white:#fff;
+      --yellow:#EFD900;
+      --orange:#F76531;
+      --purple:#AA6C7E;
+      --blue:#4EA9D1;
+
+      --fg: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.64);
+      --border: rgba(255,255,255,.12);
+
+      --max: 1160px;
+      --h: 72px;
+
+      --shadow: 0 12px 34px rgba(0,0,0,.35);
+      --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+
+      --ease: cubic-bezier(.2,.8,.2,1);
+      --focus: 0 0 0 3px rgba(78,169,209,.35);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--fg);
+      background: var(--black);
+      overflow-x:hidden;
+    }
+    a{ color:inherit; text-decoration:none; }
+    button, input{ font:inherit; }
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    /* ===== Header (site style) ===== */
+    .header{
+      position:sticky; top:0; z-index:50;
+      height:var(--h);
+      display:flex; align-items:center;
+      background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+    }
+    .header.is-scrolled{
+      background: rgba(0,0,0,.84);
+      box-shadow: var(--shadow-soft);
+      border-bottom-color: rgba(255,255,255,.12);
+    }
+    .header-inner{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px;
+    }
+    .brand{ display:flex; align-items:center; gap:12px; min-width: 240px; }
+    .logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+    .brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+    .brand-name strong{ font-weight:800; letter-spacing:.6px; }
+    .brand-name span{ font-size:12px; color: var(--muted); }
+
+    .nav{
+      display:flex; align-items:center; gap:2px;
+      padding:6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+    }
+    .nav a{
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      color: rgba(255,255,255,.78);
+      transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+      position:relative;
+      outline:none;
+      white-space:nowrap;
+    }
+    .nav a:hover{ background: rgba(255,255,255,.08); color: rgba(255,255,255,.92); transform: translateY(-1px); }
+    .nav a:focus-visible{ box-shadow: var(--focus); }
+    .nav a[data-active="true"]{
+      color: rgba(255,255,255,.95);
+      background: rgba(255,255,255,.10);
+    }
+    .nav a[data-active="true"]::after{
+      content:"";
+      position:absolute;
+      left:16px; right:16px; bottom:6px;
+      height:2px; border-radius:999px;
+      background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+      opacity:.95;
+    }
+
+    /* ===== Page ===== */
+    .page{
+      padding: 22px 0 56px;
+      background:
+        radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%),
+        radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%),
+        var(--black);
+    }
+
+    .page-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 12px 0 18px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .page-head h1{
+      margin:0;
+      font-size: clamp(18px, 2.1vw, 26px);
+      letter-spacing: -.2px;
+    }
+    .page-head p{
+      margin:8px 0 0;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.65;
+      max-width: 80ch;
+    }
+
+    /* ===== Showcase Grid ===== */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding-top: 16px;
+    }
+
+    .panel{
+  grid-column: span 6;
+  border-radius: 22px;
+  overflow: hidden;
+  position: relative;
+
+  /* 枠線の太さはここ */
+  --bw: 3px;
+
+  border: var(--bw) solid transparent;
+
+  /* 1枚目=中の黒ガラス / 2枚目=外側のグラデ枠 */
+  background:
+    linear-gradient(rgba(0,0,0,.34), rgba(0,0,0,.34)) padding-box,
+    linear-gradient(120deg, var(--yellow), var(--orange), var(--purple), var(--blue)) border-box;
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft);
+
+  transition: transform .18s var(--ease), filter .18s var(--ease), background .18s var(--ease);
+}
+
+.panel:hover{
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+    .panel-head{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .kicker{ margin:0; font-size:12px; color: rgba(255,255,255,.62); }
+    .title{ margin:0; font-size:15px; line-height:1.25; }
+    .sub{ margin:8px 0 0; color: rgba(255,255,255,.70); font-size:13px; line-height:1.6; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+    .player{
+      position:relative;
+      aspect-ratio: 16/9;
+      background:#000;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .player .video-js,
+    .player video-js{
+      position:absolute !important;
+      inset:0;
+      width:100% !important;
+      height:100% !important;
+    }
+
+    .panel-body{
+      padding: 12px 14px 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .bullets{
+      margin:0;
+      padding-left: 18px;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.6;
+      max-width: 70ch;
+    }
+
+    /* ===== Shared Header/Nav Dropdown (overlay) ===== */
+:root{
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+
+.nav{ position:relative; }
+.nav-dd{ position:relative; display:inline-flex; align-items:center; }
+
+.nav-dd-btn{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:10px 12px;
+  border-radius:999px;
+  font-size:14px;
+  color:rgba(255,255,255,.78);
+  transition:background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  position:relative;
+  outline:none;
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+
+.nav-dd-btn:hover{
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.92);
+  transform:translateY(-1px);
+}
+.nav-dd-btn:focus-visible{ box-shadow:var(--focus); }
+
+.nav a:hover::after,
+.nav-dd-btn:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background:var(--brand-grad);
+  opacity:.95;
+}
+
+.nav-dd[data-open="true"] .nav-dd-btn,
+.nav-dd[data-active="true"] .nav-dd-btn{
+  color:rgba(255,255,255,.95);
+  background:rgba(255,255,255,.10);
+}
+.nav-dd[data-open="true"] .nav-dd-btn::after,
+.nav-dd[data-active="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background:var(--brand-grad);
+  opacity:.95;
+}
+
+.chev{
+  width:10px; height:10px;
+  display:inline-block;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform:rotate(45deg);
+  transition:transform .18s var(--ease), opacity .18s var(--ease);
+  opacity:.9;
+}
+.nav-dd[data-open="true"] .chev{ transform:rotate(225deg); }
+
+.nav-menu{
+  position:absolute;
+  top:calc(100% + 10px);
+  left:0;
+  min-width:220px;
+  padding:8px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:none;
+  z-index:80;
+}
+.nav-dd[data-open="true"] .nav-menu{ display:block; }
+
+.nav-menu a{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 10px;
+  border-radius:12px;
+  color:rgba(255,255,255,.86);
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  transition:transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+  white-space:nowrap;
+  position:relative;
+}
+.nav-menu a:hover{
+  transform:translateY(-1px);
+  background:
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box,
+    var(--brand-grad) border-box;
+  border:1px solid transparent;
+  box-shadow:0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18);
+}
+.nav-menu a[data-active="true"]{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border:1px solid transparent;
+}
+.nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background:var(--brand-grad);
+  opacity:.95;
+}
+
+@media (max-width:760px){
+  .nav{ flex-wrap:wrap; justify-content:center; }
+  .nav-menu{ left:50%; transform:translateX(-50%); }
+}
+
+/* ===== Footer ===== */
+.footer{
+  position:relative;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%),
+    linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%),
+    var(--black);
+  overflow:hidden;
+}
+
+/* top accent line */
+.footer::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:1px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.9;
+}
+
+/* subtle noise-ish sheen */
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+  opacity:.6;
+}
+
+.footer-inner{
+  position:relative;
+  z-index:1;
+  padding: 40px 0 22px;
+  display:block; /* reset legacy grid */
+}
+
+.footer-top{
+  display:grid;
+  grid-template-columns: minmax(320px, 1.3fr) minmax(260px, 1fr);
+  gap: 18px;
+  align-items:start;
+}
+
+.footer-brand{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  text-align:left;
+  max-width: 560px;
+}
+
+.footer-logo{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  flex:0 0 auto;
+  opacity:.92;
+}
+
+.footer-brand h3{
+  margin:0 0 4px 0;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+.footer-brand p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.65);
+}
+
+.footer-col h4{
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.footer-links{
+  display:grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 8px 14px;
+  align-content:start;
+}
+
+@media (max-width: 640px){
+  .footer-links{
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}
+
+.footer-links a{
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 8px;
+  border-radius: 10px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  outline:none;
+}
+
+.footer-links a:hover{
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transform: translateY(-1px);
+}
+
+.footer-links a:focus-visible{ box-shadow: var(--focus); }
+
+.footer-links .hint{
+  opacity:.75;
+  font-size: 12px;
+}
+
+.footer-divider{
+  margin: 22px 0 14px;
+  height:1px;
+  background: rgba(255,255,255,.10);
+}
+
+.footer-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+  border-top:none; /* reset legacy */
+  padding: 0; /* divider handles spacing */
+}
+
+.footer-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:wrap;
+}
+
+.footer-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.70);
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .footer-top{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .footer-inner{ padding: 34px 0 20px; }
+  .footer-top{ grid-template-columns: 1fr; }
+  .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+@media (max-width: 860px){
+  .footer-top{ grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+
+<body>
+  <!-- Header -->
+  <header class="header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="Brightcove Logo" />
+        <div class="brand-name">
+          <strong>BRIGHTCOVE</strong>
+          <span>Onboarding Engagement Manager</span>
+          <span>Implementation Gallery</span>
+        </div>
+      </a>
+  
+      <nav class="nav" aria-label="Primary">
+        <a href="index.html" data-nav="home">Home</a>
+        <a href="media.html" data-nav="media">Media</a>
+        <a href="playershow.html" data-nav="player">Player</a>
+
+        <div class="nav-dd" data-nav-group="catalog">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Catalog <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Catalog menu">
+            <a role="menuitem" href="api.html" data-nav="api">Catalog API</a>
+            <a role="menuitem" href="playlist.html" data-nav="playlist">Playlist</a>
+            <a role="menuitem" href="grid.html" data-nav="grid">Grid</a>
+          </div>
+        </div>
+
+        <div class="nav-dd" data-nav-group="advertising">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Advertising <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Advertising menu">
+            <a role="menuitem" href="ad.html" data-nav="csai">CSAI</a>
+            <a role="menuitem" href="ssai.html" data-nav="ssai">SSAI</a>
+          </div>
+        </div>
+
+        <a href="ga4_gallery.html" data-nav="ga">Google Analytics</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <div class="page-head">
+        <div>
+          <h1>Player Showcase</h1>
+          <p>
+            We will compare six player configurations side by side (minimal UI, password protection, renditions, audio-only, end-of-playback redirect, and related videos).
+            Each configuration is intended to be implemented either through Player settings or via a plugin.
+          </p>
+        </div>
+        <span class="pill">🧪 Configurations</span>
+      </div>
+
+      <!-- ===== Player Showcase: 6 configurations ===== -->
+      <div class="grid" id="playerShowcase">
+
+        <!-- 1) Player info hidden -->
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Player</p>
+              <h3 class="title">Info Hidden Player</h3>
+              <p class="sub">Player information / overlays hidden for a cleaner embed.</p>
+            </div>
+            <span class="pill">🙈 Minimal UI</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcInfoHidden"
+              data-account="6243204265001"
+              data-player="K3EzC2ATW"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Use for clean landing pages and focused playback.</li>
+            </ul>
+            <span class="pill">Config: Player</span>
+          </div>
+        </section>
+
+        <!-- 2) Password-protected -->
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Player</p>
+              <h3 class="title">Password Player</h3>
+              <p class="sub">Requires a password before playback starts.</p>
+            </div>
+            <span class="pill">🔒 Protected</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcPassword"
+              data-account="6243204265001"
+              data-player="44zncnqay"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Best for internal demos or gated onboarding content.</li>
+            </ul>
+            <span class="pill">Config: Player</span>
+          </div>
+        </section>
+
+        <!-- 3) Default rendition preset -->
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Playback</p>
+              <h3 class="title">Default Rendition Preset</h3>
+              <p class="sub">Starts with a predefined rendition / quality strategy.</p>
+            </div>
+            <span class="pill">🎚 Rendition</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcRendition"
+              data-account="6243204265001"
+              data-player="u717NLyZB"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Useful for bandwidth control or device-optimized starts.</li>
+            </ul>
+            <span class="pill">Config: Playback</span>
+          </div>
+        </section>
+
+        <!-- 4) Audio-only -->
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Engagement</p>
+              <h3 class="title">Animated Thumbnail Player</h3>
+              <p class="sub">Displays motion preview thumbnails to increase engagement before playback.</p>
+            </div>
+            <span class="pill">🖼 Preview</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcAudioOnly"
+              data-account="6243204265001"
+              data-player="TbX7a2UU6"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Animated poster or hover preview improves click-through and discovery.</li>
+            </ul>
+            <span class="pill">Config: Thumbnail</span>
+          </div>
+        </section>
+
+        <!-- 5) Redirect on ended (page-side demo) -->
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Journey</p>
+              <h3 class="title">Redirect on Ended</h3>
+              <p class="sub">When the video ends, redirect to the next step.</p>
+            </div>
+            <span class="pill">➡️ CTA</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcRedirect"
+              data-account="6243204265001"
+              data-player="vmBRLZ26j"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              data-redirect-url="index.html#next"  <!-- 任意：飛ばしたいURL -->
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Good for onboarding: “watch → next action”.</li>
+            </ul>
+            <span class="pill">Config: JS or Plugin</span>
+          </div>
+        </section>
+
+        <!-- 6) Related videos on ended -->
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Engagement</p>
+              <h3 class="title">Show Related Videos on End</h3>
+              <p class="sub">Endscreen recommendations to keep viewers engaged.</p>
+            </div>
+            <span class="pill">✨ Endscreen</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcRelated"
+              data-account="6243204265001"
+              data-player="nNQEk23XU"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Recommended for catalogs / series to increase completion→next.</li>
+            </ul>
+            <span class="pill">Config: Plugin</span>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer" aria-label="Site footer">
+  <div class="container footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="" aria-hidden="true">
+        <div>
+          <h3>Onboarding Engagement Manager</h3>
+          <p>
+            A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+          <a href="playershow.html"><span aria-hidden="true">↗</span> Player showcase</a>
+          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+          <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+          <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+          <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+          <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+          <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="footer-divider" role="separator"></div>
+
+    <div class="footer-bottom">
+      <div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
+
+      <div class="footer-badges" aria-label="Badges">
+        <span class="footer-pill">Docs-aligned</span>
+        <span class="footer-pill">Implementation-first</span>
+        <span class="footer-pill">Brightcove Player</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  <!-- Brightcove runtimes: include each unique player id used above -->
+  <script src="https://players.brightcove.net/6243204265001/K3EzC2ATW_default/index.min.js"></script>
+  <script src="https://players.brightcove.net/6243204265001/44zncnqay_default/index.min.js"></script>
+  <script src="https://players.brightcove.net/6243204265001/u717NLyZB_default/index.min.js"></script>
+  <script src="https://players.brightcove.net/6243204265001/TbX7a2UU6_default/index.min.js"></script>
+  <script src="https://players.brightcove.net/6243204265001/vmBRLZ26j_default/index.min.js"></script>
+  <script src="https://players.brightcove.net/6243204265001/nNQEk23XU_default/index.min.js"></script>
+
+  <script>
+    // Header elevation
+    const header = document.getElementById('siteHeader');
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Optional: page-side redirect demo (if not implemented by player plugin)
+    window.addEventListener('load', () => {
+      const p = window.videojs?.getPlayer('bcRedirect');
+      if(!p) return;
+
+      p.on('ended', () => {
+        const el = document.getElementById('bcRedirect');
+        const url = el?.getAttribute('data-redirect-url');
+        if(url) window.location.href = url;
+      });
+    });
+  </script>
+<script>
+(() => {
+  // Header elevation
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Dropdown open/close
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+
+  dds.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+    dd.dataset.open = "false";
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      (dd.dataset.open === "true") ? closeAll() : openOne(dd);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+
+  // Active state (by pathname)
+  const path = (location.pathname.split('/').pop() || '').toLowerCase();
+
+  // Reset active markers
+  document.querySelectorAll('.nav [data-active]').forEach(a => a.removeAttribute('data-active'));
+  document.querySelectorAll('.nav-dd').forEach(dd => dd.removeAttribute('data-active'));
+
+  const pageToNav = new Map([
+    ['index.html', 'home'],
+    ['playershow.html', 'player'],
+    ['ga4_gallery.html', 'ga'],
+    ['catalog.html', 'api'],
+    ['media.html', 'media'],
+    ['player.html', 'player'],
+    ['api.html', 'api'],
+    ['playlist.html', 'playlist'],
+    ['grid.html', 'grid'],
+    ['ad.html', 'csai'],
+    ['ssai.html', 'ssai'],
+    ['ga.html', 'ga'],
+  ]);
+
+  const key = pageToNav.get(path);
+  if (!key) return;
+
+  // Direct links
+  const direct = document.querySelector(`.nav > a[data-nav="${key}"]`);
+  if (direct) direct.dataset.active = "true";
+
+  // Dropdown items + parent highlight
+  const item = document.querySelector(`.nav-menu a[data-nav="${key}"]`);
+  if (item) {
+    item.dataset.active = "true";
+    const group = item.closest('.nav-dd');
+    if (group) group.dataset.active = "true";
+  }
+})();
+</script>
+<script>
+(() => {
+  const y = document.getElementById('footerYear');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+</script>
+</body>
+</html>
