@@ -1,0 +1,1292 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SSAI — Implementation Gallery</title>
+
+<style>
+:root{
+  --black:#000;
+  --yellow:#EFD900;
+  --orange:#F76531;
+  --purple:#AA6C7E;
+  --blue:#4EA9D1;
+
+  --fg: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.64);
+  --line: rgba(255,255,255,.12);
+
+  --max: 1160px;
+  --h: 72px;
+
+  --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --focus: 0 0 0 3px rgba(78,169,209,.35);
+
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: var(--black);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+  overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+button, input{ font:inherit; }
+
+.container{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+}
+
+/* ===== Header ===== */
+.header{
+  position:sticky; top:0; z-index:50;
+  height:var(--h);
+  display:flex; align-items:center;
+  background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.header.is-scrolled{
+  background: rgba(0,0,0,.84);
+  box-shadow: var(--shadow-soft);
+  border-bottom-color: rgba(255,255,255,.12);
+}
+.header-inner{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
+}
+.brand{ display:flex; align-items:center; gap:12px; min-width: 220px; }
+.logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+.brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+.brand-name strong{ font-weight:800; letter-spacing:.6px; }
+.brand-name span{ font-size:12px; color: var(--muted); }
+
+/* ===== Nav ===== */
+.nav{
+  position:relative;
+  display:flex; align-items:center; gap:2px;
+  padding:6px;
+  border-radius:999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
+}
+.nav a,
+.nav-dd-btn{
+  padding: 10px 12px;
+  border-radius:999px;
+  font-size:14px;
+  color: rgba(255,255,255,.78);
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  position:relative;
+  outline:none;
+  white-space:nowrap;
+}
+.nav a:hover,
+.nav-dd-btn:hover{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.96);
+  transform: translateY(-1px);
+}
+.nav a:hover::after,
+.nav-dd-btn:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.nav a:focus-visible,
+.nav-dd-btn:focus-visible{ box-shadow: var(--focus); }
+
+.nav a[data-active="true"]{
+  color: rgba(255,255,255,.95);
+  background: rgba(255,255,255,.10);
+}
+.nav a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+/* ===== Dropdown ===== */
+.nav-dd{ position:relative; display:inline-flex; align-items:center; }
+.nav-dd-btn{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.nav-dd[data-open="true"] .nav-dd-btn{
+  color: rgba(255,255,255,.95);
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.nav-dd[data-active="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.chev{
+  width:10px; height:10px;
+  display:inline-block;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform: rotate(45deg);
+  transition: transform .18s var(--ease), opacity .18s var(--ease);
+  opacity:.9;
+}
+.nav-dd[data-open="true"] .chev{ transform: rotate(225deg); }
+
+.nav-menu{
+  position:absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:none;
+  z-index:80;
+}
+.nav-dd[data-open="true"] .nav-menu{ display:block; }
+
+.nav-menu a{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  color: rgba(255,255,255,.86);
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+  white-space:nowrap;
+  position:relative;
+}
+.nav-menu a:hover{
+  transform: translateY(-1px);
+  background:
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18);
+}
+.nav-menu a[data-active="true"]{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+@media (max-width: 760px){
+  .nav{ flex-wrap:wrap; justify-content:center; }
+  .nav-menu{ left: 50%; transform: translateX(-50%); }
+}
+
+/* ===== Page ===== */
+.page{
+  padding: 22px 0 56px;
+  background:
+    radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%),
+    var(--black);
+}
+
+/* ===== Footer ===== */
+.footer{
+  position:relative;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%),
+    linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%),
+    var(--black);
+  overflow:hidden;
+}
+
+/* top accent line */
+.footer::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:1px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.9;
+}
+
+/* subtle noise-ish sheen */
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+  opacity:.6;
+}
+
+.footer-inner{
+  position:relative;
+  z-index:1;
+  padding: 40px 0 22px;
+  display:block; /* reset legacy grid */
+}
+
+.footer-top{
+  display:grid;
+  grid-template-columns: minmax(320px, 1.3fr) minmax(260px, 1fr);
+  gap: 18px;
+  align-items:start;
+}
+
+.footer-brand{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  text-align:left;
+  max-width: 560px;
+}
+
+.footer-logo{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  flex:0 0 auto;
+  opacity:.92;
+}
+
+.footer-brand h3{
+  margin:0 0 4px 0;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+.footer-brand p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.65);
+}
+
+.footer-col h4{
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.footer-links{
+  display:grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 8px 14px;
+  align-content:start;
+}
+
+@media (max-width: 640px){
+  .footer-links{
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}
+
+.footer-links a{
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 8px;
+  border-radius: 10px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  outline:none;
+}
+
+.footer-links a:hover{
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transform: translateY(-1px);
+}
+
+.footer-links a:focus-visible{ box-shadow: var(--focus); }
+
+.footer-links .hint{
+  opacity:.75;
+  font-size: 12px;
+}
+
+.footer-divider{
+  margin: 22px 0 14px;
+  height:1px;
+  background: rgba(255,255,255,.10);
+}
+
+.footer-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+  border-top:none; /* reset legacy */
+  padding: 0; /* divider handles spacing */
+}
+
+.footer-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:wrap;
+}
+
+.footer-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.70);
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .footer-top{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .footer-inner{ padding: 34px 0 20px; }
+  .footer-top{ grid-template-columns: 1fr; }
+  .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+@media (max-width: 860px){
+  .footer-top{ grid-template-columns: 1fr; }
+}
+
+/* ===== Inspector ===== *//* ===== Inspector ===== */
+h1{ margin:0 0 10px; font-size:20px; }
+.meta{ font-size:13px; opacity:.85; margin-bottom:14px; }
+
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+  align-items:start;
+}
+
+.card{
+  border-radius:14px;
+  border:1px solid transparent;
+  background:
+    linear-gradient(rgba(11,11,11,.92), rgba(11,11,11,.92)) padding-box,
+    linear-gradient(120deg,var(--yellow),var(--orange),var(--purple),var(--blue)) border-box;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 10px 30px rgba(0,0,0,.55),
+    0 4px 12px rgba(247,101,49,.25);
+  overflow:hidden;
+}
+.cardInner{
+  padding:14px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.playerWrap{
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#000;
+  line-height:0;
+}
+.playerWrap .video-js{ display:block; }
+
+.pill{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:linear-gradient(135deg,#0072CE,#00AEEF,#6E3FF3);
+}
+.pill.dim{ opacity:.72; filter:saturate(.85); }
+
+.log{
+  height:300px;
+  overflow:auto;
+  background:#070707;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:12px;
+  white-space:pre-wrap;
+}
+pre{
+  background:#070707;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  overflow:auto;
+}
+
+#playerCard{ align-self:start; height:fit-content; }
+
+/* Event category tags */
+.logLine{ display:flex; gap:8px; align-items:flex-start; padding:2px 0; }
+.tag{
+  flex:0 0 auto;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  user-select:none;
+  white-space:nowrap;
+}
+.tag.play{ background: rgba(0,174,239,.18); border-color: rgba(0,174,239,.35); }
+.tag.ad{
+  background: linear-gradient(135deg, #EFD900, #F76531);
+  border-color: rgba(247,101,49,.55);
+  color:#000;
+  box-shadow:0 0 6px rgba(247,101,49,.35);
+}
+.tag.error{ background: rgba(255,77,79,.18); border-color: rgba(255,77,79,.35); }
+.tag.buffer{ background: rgba(170,108,126,.18); border-color: rgba(170,108,126,.35); }
+.tag.info{ background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); }
+
+.logMsg{
+  font-size:12px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
+  opacity:.95;
+}
+
+/* ===== SSAI Inspector styles (original) ===== */
+h1{margin:0 0 10px;font-size:20px}
+.meta{font-size:13px;opacity:.85;margin-bottom:14px}
+
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+
+/* ===== Gradient border card (bulletproof, no mask) ===== */
+.card{
+  border-radius:14px;
+  border:1px solid transparent; /* 枠を作るために透明border */
+  background:
+    linear-gradient(rgba(11,11,11,.92), rgba(11,11,11,.92)) padding-box, /* 中身 */
+    linear-gradient(120deg,var(--yellow),var(--orange),var(--purple),var(--blue)) border-box; /* 枠 */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 10px 30px rgba(0,0,0,.55),
+    0 4px 12px rgba(247,101,49,.25);
+  overflow:hidden; /* プレーヤーがはみ出しても枠の外に出ない */
+}
+
+/* もう inner を使わなくて良い（残すなら “透明” に） */
+.cardInner{
+  background:transparent;
+  border-radius:0;
+  padding:14px;
+  backdrop-filter: blur(6px);
+}
+
+/* プレーヤー下の謎余白対策 */
+.playerWrap{
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#000;
+  line-height:0;
+}
+.playerWrap .video-js{ display:block; }
+
+.pill{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:linear-gradient(135deg,#0072CE,#00AEEF,#6E3FF3);
+}
+
+.playerWrap{
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#000;
+}
+
+.log{
+  height:300px;
+  overflow:auto;
+  background:#070707;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  font-family:monospace;
+  font-size:12px;
+  white-space:pre-wrap;
+}
+
+pre{
+  background:#070707;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  overflow:auto;
+}
+/* Player card should NOT stretch when the right card grows */
+#playerCard{
+  align-self: start;
+  height: fit-content;
+}
+
+/* Safety: prevent grid items from stretching */
+.grid{
+  align-items: start;
+}
+/* ---- Event category tags (non-breaking add-on) ---- */
+.logLine{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:2px 0;
+}
+
+.tag{
+  flex:0 0 auto;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  user-select:none;
+  white-space:nowrap;
+}
+
+.tag.play{   background: rgba(0,174,239,.18); border-color: rgba(0,174,239,.35); }
+.tag.ad{  background: linear-gradient(135deg, #EFD900, #F76531); border-color: rgba(247,101,49,.55); color:#000; box-shadow:0 0 6px rgba(247,101,49,.35);}
+.tag.ssai-ad{  background: rgba(239,217,0,.18); border: 1px solid rgba(239,217,0,.40); color: #EFD900;}
+.tag.error{  background: rgba(255,77,79,.18); border-color: rgba(255,77,79,.35); }
+.tag.buffer{ background: rgba(170,108,126,.18); border-color: rgba(170,108,126,.35); }
+.tag.info{   background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); }
+
+.logMsg{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:12px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
+  opacity:.95;
+}
+</style>
+</head>
+
+<body>
+<header class="header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="Brightcove Logo" />
+        <div class="brand-name">
+          <strong>BRIGHTCOVE</strong>
+          <span>Onboarding Engagement Manager</span>
+          <span>Implementation Gallery</span>
+        </div>
+      </a>
+  
+      <nav class="nav" aria-label="Primary">
+        <a href="media.html" data-nav="media">Media</a>
+        <a href="player.html" data-nav="player">Player</a>
+      
+        <!-- Catalog dropdown -->
+        <div class="nav-dd" data-nav-group="catalog">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Catalog
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Catalog menu">
+            <a role="menuitem" href="api.html" data-nav="api">Catalog API</a>
+            <a role="menuitem" href="playlist.html" data-nav="playlist">Playlist</a>
+            <a role="menuitem" href="grid.html" data-nav="grid">Grid</a>
+          </div>
+        </div>
+      
+        <!-- Advertising dropdown -->
+        <div class="nav-dd" data-nav-group="advertising">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Advertising
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Advertising menu">
+            <a role="menuitem" href="ad.html" data-nav="csai">CSAI</a>
+            <a role="menuitem" href="ssai.html" data-nav="ssai">SSAI</a>
+          </div>
+        </div>
+      
+        <a href="ga.html" data-nav="ga">Google Analytics</a>
+      </nav>
+    </div>
+  </header>
+
+<main class="page">
+  <div class="container">
+<h1>SSAI Advertising Inspector</h1>
+<div class="meta">
+    Visualizes server-side ad insertion (SSAI) stream events and playback state for a Brightcove SSAI player.
+    </div>
+
+<div class="grid">
+
+  <!-- Player -->
+  <div class="card" id="playerCard">
+    <div class="cardInner">
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px">
+        <div>SSAI Player</div>
+        <span class="pill" id="statePill">idle</span>
+      </div>
+
+      <div class="playerWrap">
+        <!-- 🔴 あなたのCSAIプレーヤー埋め込み -->
+        <video-js
+          id="bcPlayer"
+          data-account="6243204265001"
+          data-player="swZeTCgni"
+          data-embed="default"
+          data-video-id="1849994462098665240"
+          controls
+          playsinline
+          class="video-js vjs-fluid vjs-16-9">
+        </video-js>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Inspector -->
+  <div class="card">
+    <div class="cardInner">
+
+        <div style="margin-bottom:8px;display:flex;align-items:center;gap:8px">
+            <div>Event Log</div>
+            <span class="pill dim">browser runtime</span>
+            <span style="opacity:.65;font-size:12px">
+              SSAI stream events emitted in the browser (SSAI plugin / video.js)
+            </span>
+          </div>
+          
+          <!-- ★これがログ本体：消さないで！ -->
+          <div class="log" id="log"></div>
+
+          <div style="margin:12px 0 6px;display:flex;align-items:center;gap:8px">
+            <div>Brightcove Analytics</div>
+            <span class="pill dim">metrics payload</span>
+            <span style="opacity:.65;font-size:12px">
+              Outbound tracker events sent to metrics.brightcove.com (best-effort capture)
+            </span>
+          </div>
+          
+          <pre id="metricsDebug">{}</pre>
+
+          <div style="margin:12px 0 6px">Event ↔ Analytics Mapping</div>
+<div id="eventMap"></div>
+
+    </div>
+  </div>
+
+</div>
+  </div>
+</main>
+
+<script src="https://players.brightcove.net/6243204265001/swZeTCgni_default/index.min.js"></script>
+
+<script>
+    /* =========================================================
+       SSAI Advertising Inspector
+       1) Event Log: browser runtime (video.js / SSAI plugin)
+          - SSAI ad events are tagged as "ssai-ad"
+       2) Brightcove Analytics: metrics.brightcove.com tracker capture
+       3) Mapping table: Event ↔ Analytics (with last-seen)
+       ========================================================= */
+    
+    const $ = (sel) => document.querySelector(sel);
+    const pretty = (o) => JSON.stringify(o, null, 2);
+    
+    const ui = {
+      pill: $("#statePill"),
+      log: $("#log"),
+      metrics: $("#metricsDebug"),
+      map: $("#eventMap"),
+    };
+    
+    function setPill(text){
+      if (!ui.pill) return;
+      ui.pill.textContent = text;
+    }
+    
+    function ts(){
+      return new Date().toISOString().slice(11,19);
+    }
+    
+    /* ---------- Tagged log rendering ---------- */
+    function appendLog(tag, text){
+      if (!ui.log) return;
+    
+      // 1行HTML（タグpill + テキスト）
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.alignItems = "flex-start";
+      row.style.gap = "10px";
+      row.style.marginBottom = "6px";
+    
+      const badge = document.createElement("span");
+      badge.className = `tag ${tag}`;
+      badge.textContent = tag; // e.g. play / ssai-ad / buffer / error
+      badge.style.flex = "0 0 auto";
+    
+      const msg = document.createElement("div");
+      msg.style.whiteSpace = "pre-wrap";
+      msg.style.wordBreak = "break-word";
+      msg.textContent = `[${ts()}] ${text}`;
+    
+      row.appendChild(badge);
+      row.appendChild(msg);
+    
+      // 上に積む
+      ui.log.prepend(row);
+    }
+    
+    /* ---------- Classify runtime events ---------- */
+    function classifyRuntimeEvent(evName){
+      // SSAI広告系（SSAI pluginが ads-* を出すことが多い）
+      if (/^ads-/.test(evName) || evName === "adserror") return "ssai-ad";
+    
+      // 再生
+      if (["play","playing","pause","ended"].includes(evName)) return "play";
+    
+      // バッファ系
+      if (["waiting","stalled","suspend","loadstart"].includes(evName)) return "buffer";
+    
+      // エラー
+      if (evName === "error") return "error";
+    
+      return "play";
+    }
+    
+    /* =========================================================
+       Metrics capture (metrics.brightcove.com)
+       - Brightcove tracker often uses IMG ping (img.src)
+       ========================================================= */
+    const metricsState = {
+      events: [],
+      max: 60,
+      last: null,
+      installedAt: new Date().toISOString(),
+      lastSeenByEvent: {}, // eventName -> {ts, sample}
+    };
+    
+    function renderMetrics(){
+      if (!ui.metrics) return;
+    
+      // 画面に出すのは「重要フィールドだけ」に絞る（見やすさ優先）
+      const compact = metricsState.events.map(e => ({
+        ts: e.ts,
+        transport: e.transport,
+        event: e.event,
+        account: e.account,
+        video: e.video,
+        ads_pod_type: e.ads_pod_type,
+        ads_ad_title: e.ads_ad_title,
+        ads_ad_system: e.ads_ad_system,
+        ads_ad_duration: e.ads_ad_duration,
+        ads_ad_creative_id: e.ads_ad_creative_id,
+        seq: e.seq,
+      }));
+    
+      ui.metrics.textContent = pretty({
+        installedAt: metricsState.installedAt,
+        last: metricsState.last,
+        events: compact
+      });
+    }
+    
+    function pushMetrics(entry){
+      metricsState.last = entry;
+      metricsState.events.unshift(entry);
+      if (metricsState.events.length > metricsState.max) metricsState.events.length = metricsState.max;
+    
+      if (entry.event) {
+        metricsState.lastSeenByEvent[entry.event] = { ts: entry.ts, sample: entry };
+        renderMap(); // 対応表の "last seen" を更新
+      }
+      renderMetrics();
+    }
+    
+    function isMetricsUrl(url){
+      try { return typeof url === "string" && url.includes("metrics.brightcove.com"); }
+      catch { return false; }
+    }
+    
+    function parseTrackerQuery(url){
+      try {
+        const u = new URL(url);
+        const q = u.searchParams;
+        const get = (k) => q.get(k) ?? undefined;
+        return {
+          event: get("event"),
+          account: get("account"),
+          video: get("video"),
+          seq: get("seq"),
+          ads_pod_type: get("ads_pod_type"),
+          ads_ad_title: get("ads_ad_title"),
+          ads_ad_system: get("ads_ad_system"),
+          ads_ad_duration: get("ads_ad_duration"),
+          ads_ad_creative_id: get("ads_ad_creative_id"),
+          raw: Object.fromEntries(q.entries()), // 必要ならあとで見る用（重いので画面はcompact表示）
+        };
+      } catch {
+        return null;
+      }
+    }
+    
+    // ---- IMG ping tap (most important for BC tracker) ----
+    function installImgSrcTap(){
+      const desc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+      if (!desc || !desc.set) return;
+    
+      Object.defineProperty(HTMLImageElement.prototype, "src", {
+        get: desc.get,
+        set: function(url){
+          try {
+            if (isMetricsUrl(url)) {
+              const parsed = parseTrackerQuery(url);
+              if (parsed) {
+                pushMetrics({
+                  ts: new Date().toISOString(),
+                  transport: "img.src",
+                  url,
+                  ...parsed
+                });
+              }
+            }
+          } catch {}
+          return desc.set.call(this, url);
+        }
+      });
+    }
+    
+    // ---- sendBeacon / fetch / XHR (fallback) ----
+    function installOtherTaps(){
+      if (navigator.sendBeacon) {
+        const orig = navigator.sendBeacon.bind(navigator);
+        navigator.sendBeacon = function(url, data){
+          try {
+            if (isMetricsUrl(url)) {
+              // v2/trackerはほぼクエリだが一応保持
+              pushMetrics({
+                ts: new Date().toISOString(),
+                transport: "sendBeacon",
+                url,
+                event: "(beacon)",
+              });
+            }
+          } catch {}
+          return orig(url, data);
+        };
+      }
+    
+      if (window.fetch) {
+        const origFetch = window.fetch.bind(window);
+        window.fetch = async function(input, init){
+          const url = (typeof input === "string") ? input : (input && input.url) ? input.url : "";
+          try {
+            if (isMetricsUrl(url)) {
+              pushMetrics({
+                ts: new Date().toISOString(),
+                transport: "fetch",
+                url,
+                event: "(fetch)",
+              });
+            }
+          } catch {}
+          return origFetch(input, init);
+        };
+      }
+    
+      const XHROpen = XMLHttpRequest.prototype.open;
+      const XHRSend = XMLHttpRequest.prototype.send;
+    
+      XMLHttpRequest.prototype.open = function(method, url){
+        this.___bc_metrics_url = url;
+        return XHROpen.apply(this, arguments);
+      };
+    
+      XMLHttpRequest.prototype.send = function(body){
+        try {
+          if (isMetricsUrl(this.___bc_metrics_url)) {
+            pushMetrics({
+              ts: new Date().toISOString(),
+              transport: "xhr",
+              url: this.___bc_metrics_url,
+              event: "(xhr)",
+            });
+          }
+        } catch {}
+        return XHRSend.apply(this, arguments);
+      };
+    }
+    
+    /* =========================================================
+       Mapping table: runtime event ↔ analytics event
+       - SSAI oriented mapping
+       ========================================================= */
+    const mapping = [
+      // SSAI広告系（代表）
+      { runtime: "ads-request",         analytics: ["ad_request"] },
+      { runtime: "ads-load",            analytics: ["ad_response","ad_loaded"] },
+      { runtime: "ads-ad-started",      analytics: ["ad_begin"] },
+      { runtime: "ads-first-quartile",  analytics: ["ad_first_quartile","ad_quartile_1"] },
+      { runtime: "ads-midpoint",        analytics: ["ad_midpoint"] },
+      { runtime: "ads-third-quartile",  analytics: ["ad_third_quartile","ad_quartile_3"] },
+      { runtime: "ads-ad-ended",        analytics: ["ad_complete","ad_mode_complete"] },
+      { runtime: "adserror",            analytics: ["ad_error"] },
+    
+      // コンテンツ系（代表）
+      { runtime: "play/playing",        analytics: ["video_view","video_engagement","video_percent_viewed"] },
+      { runtime: "pause/ended",         analytics: ["video_engagement","video_complete"] },
+      { runtime: "waiting/stalled",     analytics: ["video_engagement"] },
+    ];
+    
+    function renderMap(){
+      if (!ui.map) return;
+    
+      const lastSeen = metricsState.lastSeenByEvent || {};
+    
+      const table = document.createElement("table");
+      table.style.width = "100%";
+      table.style.borderCollapse = "collapse";
+      table.style.fontSize = "12px";
+      table.style.opacity = "0.92";
+    
+      const head = document.createElement("tr");
+      ["Browser runtime event", "Analytics event(s)", "Last seen"].forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        th.style.textAlign = "left";
+        th.style.padding = "8px 10px";
+        th.style.borderBottom = "1px solid rgba(255,255,255,.12)";
+        th.style.fontWeight = "800";
+        table.appendChild(th);
+      });
+    
+      // ↑ 上のthをまとめるためのヘッダ行
+      table.innerHTML = "";
+      const thead = document.createElement("thead");
+      const trh = document.createElement("tr");
+      ["Browser runtime event", "Analytics event(s)", "Last seen"].forEach(h => {
+        const th = document.createElement("th");
+        th.textContent = h;
+        th.style.textAlign = "left";
+        th.style.padding = "8px 10px";
+        th.style.borderBottom = "1px solid rgba(255,255,255,.12)";
+        th.style.fontWeight = "800";
+        thead.appendChild(trh);
+        trh.appendChild(th);
+      });
+      table.appendChild(thead);
+    
+      const tbody = document.createElement("tbody");
+    
+      mapping.forEach(row => {
+        const tr = document.createElement("tr");
+    
+        const td1 = document.createElement("td");
+        td1.textContent = row.runtime;
+        td1.style.padding = "7px 10px";
+        td1.style.borderBottom = "1px solid rgba(255,255,255,.08)";
+        td1.style.whiteSpace = "nowrap";
+    
+        const td2 = document.createElement("td");
+        td2.textContent = row.analytics.join(", ");
+        td2.style.padding = "7px 10px";
+        td2.style.borderBottom = "1px solid rgba(255,255,255,.08)";
+    
+        // last seen: 対象analyticsのうち、最後に来たもの
+        let last = null;
+        for (const a of row.analytics) {
+          const s = lastSeen[a];
+          if (s && (!last || s.ts > last.ts)) last = s;
+        }
+    
+        const td3 = document.createElement("td");
+        td3.style.padding = "7px 10px";
+        td3.style.borderBottom = "1px solid rgba(255,255,255,.08)";
+        td3.style.opacity = "0.85";
+        td3.textContent = last ? `${last.ts.slice(11,19)} (${Object.keys(last.sample || {}).includes("seq") ? "seq "+(last.sample.seq||"") : ""})` : "-";
+    
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        tbody.appendChild(tr);
+      });
+    
+      table.appendChild(tbody);
+    
+      ui.map.innerHTML = "";
+      ui.map.appendChild(table);
+    
+      const note = document.createElement("div");
+      note.style.marginTop = "8px";
+      note.style.opacity = "0.65";
+      note.style.fontSize = "12px";
+      note.textContent = "Note: Analytics event names may vary by player/SSAI config. This table shows common mappings and highlights what was actually observed (Last seen).";
+      ui.map.appendChild(note);
+    }
+    
+    /* =========================================================
+       Wire player (SSAI)
+       ========================================================= */
+    function wirePlayer(player){
+      const vjsEvents = [
+        "loadstart","loadedmetadata","loadeddata","canplay","canplaythrough",
+        "play","playing","pause","ended","waiting","stalled","suspend","error"
+      ];
+    
+      vjsEvents.forEach(ev => {
+        player.on(ev, () => {
+          if (ev === "error") {
+            const e = player.error?.() || {};
+            appendLog("error", `event: error code=${e.code || ""} msg=${e.message || ""}`);
+            setPill("error");
+            return;
+          }
+          if (ev === "play") {
+            appendLog("play", `event: play (src=${player.currentSrc?.() || ""})`);
+            return;
+          }
+          appendLog(classifyRuntimeEvent(ev), `event: ${ev}`);
+        });
+      });
+    
+      // SSAI plugin events (often ads-*)
+      const ssaiEvents = [
+        "ads-request","ads-load","ads-ad-started","ads-ad-ended","ads-ad-skipped",
+        "ads-first-quartile","ads-midpoint","ads-third-quartile","ads-complete",
+        "ads-all-ads-completed","adserror"
+      ];
+      ssaiEvents.forEach(ev => player.on(ev, () => {
+        appendLog("ssai-ad", `event: ${ev}`);
+      }));
+    
+      setPill("ready");
+      appendLog("play", "Player ready");
+    }
+    
+    /* =========================================================
+       Boot
+       ========================================================= */
+    (function main(){
+      // install taps first
+      installImgSrcTap();
+      installOtherTaps();
+    
+      pushMetrics({
+        ts: new Date().toISOString(),
+        transport: "init",
+        url: "(hook installed)",
+        event: "init"
+      });
+    
+      renderMap();
+    
+      if (typeof window.videojs !== "function") {
+        setPill("FAILED");
+        appendLog("error", "ERROR: videojs not found (check Brightcove player script tag).");
+        return;
+      }
+    
+      const player = window.videojs.getPlayer("bcPlayer");
+      if (!player) {
+        setPill("FAILED");
+        appendLog("error", "ERROR: videojs.getPlayer('bcPlayer') returned null. Check <video-js id='bcPlayer'>.");
+        return;
+      }
+    
+      player.ready(() => wirePlayer(player));
+    })();
+    </script>
+
+<script>
+(() => {
+  // Header elevation
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Dropdown open/close
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+
+  dds.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+    dd.dataset.open = "false";
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      (dd.dataset.open === "true") ? closeAll() : openOne(dd);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+
+  // Active state (by pathname)
+  const path = (location.pathname.split('/').pop() || '').toLowerCase();
+
+  // Reset active markers
+  document.querySelectorAll('.nav [data-active]').forEach(a => a.removeAttribute('data-active'));
+  document.querySelectorAll('.nav-dd').forEach(dd => dd.removeAttribute('data-active'));
+
+  const pageToNav = new Map([
+    ['media.html', 'media'],
+    ['player.html', 'player'],
+    ['api.html', 'api'],
+    ['playlist.html', 'playlist'],
+    ['grid.html', 'grid'],
+    ['ad.html', 'csai'],
+    ['ssai.html', 'ssai'],
+    ['ga.html', 'ga'],
+  ]);
+
+  const key = pageToNav.get(path);
+  if (!key) return;
+
+  // Direct links
+  const direct = document.querySelector(`.nav > a[data-nav="${key}"]`);
+  if (direct) direct.dataset.active = "true";
+
+  // Dropdown items + parent highlight
+  const item = document.querySelector(`.nav-menu a[data-nav="${key}"]`);
+  if (item) {
+    item.dataset.active = "true";
+    const group = item.closest('.nav-dd');
+    if (group) group.dataset.active = "true";
+  }
+})();
+</script>
+
+<footer class="footer" aria-label="Site footer">
+  <div class="container footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="" aria-hidden="true">
+        <div>
+          <h3>Onboarding Engagement Manager</h3>
+          <p>
+            A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+          <a href="playershow.html"><span aria-hidden="true">↗</span> Player showcase</a>
+          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+          <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+          <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+          <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+          <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+          <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="footer-divider" role="separator"></div>
+
+    <div class="footer-bottom">
+      <div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
+
+      <div class="footer-badges" aria-label="Badges">
+        <span class="footer-pill">Docs-aligned</span>
+        <span class="footer-pill">Implementation-first</span>
+        <span class="footer-pill">Brightcove Player</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const y = document.getElementById('footerYear');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+</script>
+</body>
+</html>
