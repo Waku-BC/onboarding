@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Media — Implementation Gallery</title>
+
+<style>
+:root{
+  --black:#000;
+  --yellow:#EFD900;
+  --orange:#F76531;
+  --purple:#AA6C7E;
+  --blue:#4EA9D1;
+
+  --fg: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.64);
+  --line: rgba(255,255,255,.12);
+
+  --max: 1160px;
+  --h: 72px;
+
+  --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --focus: 0 0 0 3px rgba(78,169,209,.35);
+
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: var(--black);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+  overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+button, input{ font:inherit; }
+
+.container{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+}
+
+/* ===== Header ===== */
+.header{
+  position:sticky; top:0; z-index:50;
+  height:var(--h);
+  display:flex; align-items:center;
+  background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.header.is-scrolled{
+  background: rgba(0,0,0,.84);
+  box-shadow: var(--shadow-soft);
+  border-bottom-color: rgba(255,255,255,.12);
+}
+.header-inner{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
+}
+.brand{ display:flex; align-items:center; gap:12px; min-width: 220px; }
+.logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+.brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+.brand-name strong{ font-weight:800; letter-spacing:.6px; }
+.brand-name span{ font-size:12px; color: var(--muted); }
+
+/* ===== Nav ===== */
+.nav{
+  position:relative;
+  display:flex; align-items:center; gap:2px;
+  padding:6px;
+  border-radius:999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
+}
+.nav a,
+.nav-dd-btn{
+  padding: 10px 12px;
+  border-radius:999px;
+  font-size:14px;
+  color: rgba(255,255,255,.78);
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  position:relative;
+  outline:none;
+  white-space:nowrap;
+}
+.nav a:hover,
+.nav-dd-btn:hover{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.96);
+  transform: translateY(-1px);
+}
+.nav a:hover::after,
+.nav-dd-btn:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.nav a:focus-visible,
+.nav-dd-btn:focus-visible{ box-shadow: var(--focus); }
+
+.nav a[data-active="true"]{
+  color: rgba(255,255,255,.95);
+  background: rgba(255,255,255,.10);
+}
+.nav a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+/* ===== Dropdown ===== */
+.nav-dd{ position:relative; display:inline-flex; align-items:center; }
+.nav-dd-btn{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.nav-dd[data-open="true"] .nav-dd-btn{
+  color: rgba(255,255,255,.95);
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.nav-dd[data-active="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.chev{
+  width:10px; height:10px;
+  display:inline-block;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform: rotate(45deg);
+  transition: transform .18s var(--ease), opacity .18s var(--ease);
+  opacity:.9;
+}
+.nav-dd[data-open="true"] .chev{ transform: rotate(225deg); }
+
+.nav-menu{
+  position:absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:none;
+  z-index:80;
+}
+.nav-dd[data-open="true"] .nav-menu{ display:block; }
+
+.nav-menu a{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  color: rgba(255,255,255,.86);
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+  white-space:nowrap;
+  position:relative;
+}
+.nav-menu a:hover{
+  transform: translateY(-1px);
+  background:
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18);
+}
+.nav-menu a[data-active="true"]{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+@media (max-width: 760px){
+  .nav{ flex-wrap:wrap; justify-content:center; }
+  .nav-menu{ left: 50%; transform: translateX(-50%); }
+}
+
+/* ===== Page ===== */
+.page{
+  padding: 22px 0 56px;
+  background:
+    radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%),
+    var(--black);
+}
+
+.page-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 12px 0 18px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .page-head h1{
+      margin:0;
+      font-size: clamp(18px, 2.1vw, 26px);
+      letter-spacing: -.2px;
+    }
+    .page-head p{
+      margin:8px 0 0;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.65;
+      max-width: 80ch;
+    }
+
+    .seg{
+      display:flex; gap:6px;
+      padding:6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.28);
+    }
+    .seg button{
+      border:0;
+      background: transparent;
+      color: rgba(255,255,255,.72);
+      padding: 10px 12px;
+      border-radius: 999px;
+      cursor:pointer;
+      transition: background .18s var(--ease), color .18s var(--ease);
+      outline:none;
+      white-space:nowrap;
+      font-size: 13px;
+    }
+    .seg button[aria-pressed="true"]{
+      background: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.92);
+      position:relative;
+    }
+    .seg button[aria-pressed="true"]::after{
+      content:"";
+      position:absolute;
+      left:14px; right:14px; bottom:7px;
+      height:2px; border-radius:999px;
+      background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+      opacity:.95;
+    }
+    .seg button:focus-visible{ box-shadow: var(--focus); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding-top: 16px;
+    }
+
+    .panel{
+      grid-column: span 6;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.34);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+      position:relative;
+    }
+
+    .panel-head{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .kicker{ margin:0; font-size:12px; color: rgba(255,255,255,.62); }
+    .title{ margin:0; font-size:15px; line-height:1.25; }
+    .sub{ margin:8px 0 0; color: rgba(255,255,255,.70); font-size:13px; line-height:1.6; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+    .player{
+      position:relative;
+      aspect-ratio: 16/9;
+      background:#000;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .player .video-js,
+    .player video-js{
+      position:absolute !important;
+      inset:0;
+      width:100% !important;
+      height:100% !important;
+    }
+
+    .panel-body{
+      padding: 12px 14px 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .bullets{
+      margin:0;
+      padding-left: 18px;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.6;
+      max-width: 70ch;
+    }
+
+    /* Chapters showcase */
+    .section{
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+
+    .section-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .section-head h2{ margin:0; font-size: 14px; letter-spacing:.2px; }
+    .section-head p{
+      margin:6px 0 0;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.6;
+      max-width: 90ch;
+    }
+
+    .chap-grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding-top: 10px;
+    }
+    .chap-card{
+      grid-column: span 6;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.34);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+    .chap-meta{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .chap-list{
+      list-style:none;
+      margin:0;
+      padding: 10px 10px 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      max-height: 210px;
+      overflow:auto;
+    }
+    .chap-list button{
+      width:100%;
+      text-align:left;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.86);
+      padding: 10px 10px;
+      border-radius: 14px;
+      cursor:pointer;
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .chap-list button:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.16);
+    }
+    .chap-list button:focus-visible{ box-shadow: var(--focus); outline:none; }
+    .ts{ color: rgba(255,255,255,.62); font-size:12px; white-space:nowrap; }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .panel{ grid-column: span 12; }
+      .chap-card{ grid-column: span 12; }
+      .page-head{ flex-direction:column; align-items:flex-start; }
+    }
+
+/* ===== Footer ===== */
+.footer{
+  position:relative;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%),
+    linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%),
+    var(--black);
+  overflow:hidden;
+}
+
+/* top accent line */
+.footer::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:1px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.9;
+}
+
+/* subtle noise-ish sheen */
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+  opacity:.6;
+}
+
+.footer-inner{
+  position:relative;
+  z-index:1;
+  padding: 40px 0 22px;
+  display:block; /* reset legacy grid */
+}
+
+.footer-top{
+  display:grid;
+  grid-template-columns: minmax(320px, 1.3fr) minmax(260px, 1fr);
+  gap: 18px;
+  align-items:start;
+}
+
+.footer-brand{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  text-align:left;
+  max-width: 560px;
+}
+
+.footer-logo{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  flex:0 0 auto;
+  opacity:.92;
+}
+
+.footer-brand h3{
+  margin:0 0 4px 0;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+.footer-brand p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.65);
+}
+
+.footer-col h4{
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.footer-links{
+  display:grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 8px 14px;
+  align-content:start;
+}
+
+@media (max-width: 640px){
+  .footer-links{
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}
+
+.footer-links a{
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 8px;
+  border-radius: 10px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  outline:none;
+}
+
+.footer-links a:hover{
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transform: translateY(-1px);
+}
+
+.footer-links a:focus-visible{ box-shadow: var(--focus); }
+
+.footer-links .hint{
+  opacity:.75;
+  font-size: 12px;
+}
+
+.footer-divider{
+  margin: 22px 0 14px;
+  height:1px;
+  background: rgba(255,255,255,.10);
+}
+
+.footer-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+  border-top:none; /* reset legacy */
+  padding: 0; /* divider handles spacing */
+}
+
+.footer-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:wrap;
+}
+
+.footer-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.70);
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .footer-top{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .footer-inner{ padding: 34px 0 20px; }
+  .footer-top{ grid-template-columns: 1fr; }
+  .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+@media (max-width: 860px){
+  .footer-top{ grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+<header class="header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="Brightcove Logo" />
+        <div class="brand-name">
+          <strong>BRIGHTCOVE</strong>
+          <span>Onboarding Engagement Manager</span>
+          <span>Implementation Gallery</span>
+        </div>
+      </a>
+  
+      <nav class="nav" aria-label="Primary">
+        <a href="media.html" data-nav="media">Media</a>
+        <a href="player.html" data-nav="player">Player</a>
+      
+        <!-- Catalog dropdown -->
+        <div class="nav-dd" data-nav-group="catalog">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Catalog
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Catalog menu">
+            <a role="menuitem" href="api.html" data-nav="api">Catalog API</a>
+            <a role="menuitem" href="playlist.html" data-nav="playlist">Playlist</a>
+            <a role="menuitem" href="grid.html" data-nav="grid">Grid</a>
+          </div>
+        </div>
+      
+        <!-- Advertising dropdown -->
+        <div class="nav-dd" data-nav-group="advertising">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Advertising
+            <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Advertising menu">
+            <a role="menuitem" href="ad.html" data-nav="csai">CSAI</a>
+            <a role="menuitem" href="ssai.html" data-nav="ssai">SSAI</a>
+          </div>
+        </div>
+      
+        <a href="ga.html" data-nav="ga">Google Analytics</a>
+      </nav>
+    </div>
+  </header>
+
+<main class="page">
+    <div class="container">
+      <div class="page-head">
+        <div>
+          <h1>Media Implementations</h1>
+          <p>
+            Compare single-video vs playlist delivery, then explore chaptered playback using WebVTT.
+            These examples are aligned with documentation and show practical configurations.
+          </p>
+        </div>
+
+        <div class="seg" role="group" aria-label="View mode">
+          <button type="button" class="seg-btn" data-mode="compare" aria-pressed="true">Compare</button>
+          <button type="button" class="seg-btn" data-mode="single" aria-pressed="false">Single video</button>
+          <button type="button" class="seg-btn" data-mode="playlist" aria-pressed="false">Playlist</button>
+        </div>
+      </div>
+
+      <!-- Compare: Single vs Playlist -->
+      <div class="grid" id="compareGrid">
+        <!-- Single video -->
+        <section class="panel" data-pane="single">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Single video</p>
+              <h3 class="title">Focused playback (one asset)</h3>
+              <p class="sub">Best for landing pages, announcements, and controlled journeys.</p>
+            </div>
+            <span class="pill">🎬 Single</span>
+          </div>
+
+          <div class="player">
+            <!-- Replace video id -->
+            <video-js
+              id="bcSingle"
+              data-account="6243204265001"
+              data-player="69IXNadf9"
+              data-embed="default"
+              data-video-id="1849994266609618859"
+              controls
+              playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Simple embed: predictable UX and performance.</li>
+              <li>Ideal when you want one call-to-action and one message.</li>
+              <li>Easier to manage captions/chapters per asset.</li>
+            </ul>
+            <span class="pill">Docs-aligned</span>
+          </div>
+        </section>
+
+        <!-- Playlist -->
+        <section class="panel" data-pane="playlist">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Playlist</p>
+              <h3 class="title">Multi-video experience (sequence)</h3>
+              <p class="sub">Great for onboarding series, curricula, and catalogs.</p>
+            </div>
+            <span class="pill">📚 Playlist</span>
+          </div>
+
+          <div class="player">
+            <!-- Replace playlist id -->
+            <video-js
+              id="bcPlaylist"
+              data-account="6243204265001"
+              data-player="nT47Bk9J7"
+              data-embed="default"
+              data-playlist-id="1849995119852741477"
+              controls
+              playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Auto-advance, playlist navigation, and series progression.</li>
+              <li>Perfect for "next lesson" flows and structured learning.</li>
+              <li>Chapters still possible per item (asset-level tracks).</li>
+            </ul>
+            <span class="pill">Docs-aligned</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- Chapters showcase -->
+      <section class="section" aria-label="Chapters showcase">
+        <div class="section-head">
+          <div>
+            <h2>WebVTT Chapters Showcase</h2>
+            <p>
+              Demonstrates chapter navigation using a WebVTT file. Click a chapter to seek.
+              (Recommended: manage text tracks in Brightcove Studio. This demo also shows how to attach a VTT at runtime.)
+            </p>
+          </div>
+          <span class="pill">⏱ Chapters</span>
+        </div>
+
+        <div class="chap-grid">
+          <article class="chap-card" data-vtt-demo>
+            <div class="chap-meta">
+              <div>
+                <p class="kicker">Chaptered video</p>
+                <h3 class="title">Chapters via WebVTT</h3>
+                <p class="sub">Add a chapters track and render a clickable chapter list.</p>
+              </div>
+              <span class="pill">.vtt</span>
+            </div>
+
+            <div class="player">
+              <video-js
+                id="bcChapters"
+                data-account="6243204265001"
+                data-player="69IXNadf9"
+                data-embed="default"
+                data-video-id="1856636261160821561"
+                controls
+                playsinline
+                class="video-js vjs-fluid">
+              </video-js>
+            </div>
+
+            <ul class="chap-list" id="chapterList" aria-label="Chapters">
+              <!-- JS renders chapters here -->
+            </ul>
+          </article>
+        </div>
+      </section>
+    </div>
+  </main>
+
+<script>
+    // Header elevation
+    const header = document.getElementById('siteHeader');
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Segmented mode: compare / single / playlist
+    const segBtns = Array.from(document.querySelectorAll('.seg-btn'));
+    const compareGrid = document.getElementById('compareGrid');
+    function setMode(mode){
+      segBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+      // show/hide panels
+      const single = compareGrid.querySelector('[data-pane="single"]');
+      const playlist = compareGrid.querySelector('[data-pane="playlist"]');
+      if(mode === 'compare'){ single.style.display=''; playlist.style.display=''; return; }
+      if(mode === 'single'){ single.style.display=''; playlist.style.display='none'; return; }
+      if(mode === 'playlist'){ single.style.display='none'; playlist.style.display=''; return; }
+    }
+    segBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    setMode('compare');
+
+    // --- Chapters demo ---
+    // Replace with your hosted VTT URL (must be accessible from the browser)
+    const VTT_URL = 'YOUR_CHAPTERS_VTT_URL_HERE'; // e.g. https://example.com/chapters.vtt
+
+    function parseVttChapters(vttText){
+      // Minimal WebVTT cue parser: supports "HH:MM:SS.mmm --> HH:MM:SS.mmm" lines
+      const lines = vttText.replace(/\r/g,'').split('\n');
+      const cues = [];
+      let i = 0;
+
+      const timeToSeconds = (t) => {
+        const [hms, ms='0'] = t.split('.');
+        const parts = hms.split(':').map(Number);
+        let s = 0;
+        if(parts.length === 3) s = parts[0]*3600 + parts[1]*60 + parts[2];
+        if(parts.length === 2) s = parts[0]*60 + parts[1];
+        if(parts.length === 1) s = parts[0];
+        return s + (Number(ms)/1000);
+      };
+
+      const fmt = (sec) => {
+        const m = Math.floor(sec/60);
+        const s = Math.floor(sec%60);
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      };
+
+      while(i < lines.length){
+        const line = lines[i].trim();
+        // skip headers / empty
+        if(!line || line.startsWith('WEBVTT')){ i++; continue; }
+
+        // cue id optional
+        let timeLine = line;
+        if(!line.includes('-->') && i+1 < lines.length && lines[i+1].includes('-->')){
+          timeLine = lines[i+1].trim();
+          i++;
+        }
+
+        if(timeLine.includes('-->')){
+          const [startRaw, endRaw] = timeLine.split('-->').map(s => s.trim().split(' ')[0]);
+          const start = timeToSeconds(startRaw);
+          const end = timeToSeconds(endRaw);
+          // cue text (next non-empty line(s) until blank)
+          let text = '';
+          i++;
+          while(i < lines.length && lines[i].trim()){
+            text += (text ? ' ' : '') + lines[i].trim();
+            i++;
+          }
+          cues.push({ start, end, text: text || `Chapter ${cues.length+1}`, startLabel: fmt(start) });
+        } else {
+          i++;
+        }
+      }
+      return cues;
+    }
+
+    function renderChapters(cues, listEl, player){
+      listEl.innerHTML = '';
+      cues.forEach((c, idx) => {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.innerHTML = `<span>${c.text}</span><span class="ts">${c.startLabel}</span>`;
+        btn.addEventListener('click', () => {
+          if(player && typeof player.currentTime === 'function'){
+            player.currentTime(c.start + 0.01);
+            player.play?.();
+          }
+        });
+        li.appendChild(btn);
+        listEl.appendChild(li);
+      });
+    }
+
+    // Attach VTT as "chapters" track at runtime (demo).
+    // In production, recommended approach is to attach the chapters track in Brightcove Studio per asset.
+    function attachChaptersTrack(player, vttUrl){
+      if(!vttUrl || vttUrl.includes('YOUR_')) return;
+
+      // Brightcove player exposes Video.js player. addRemoteTextTrack works in Video.js.
+      try{
+        player.addRemoteTextTrack({
+          kind: 'chapters',
+          src: vttUrl,
+          label: 'Chapters',
+          default: true
+        }, false);
+      } catch(e){
+        console.warn('Could not attach chapters track:', e);
+      }
+    }
+
+    async function loadAndBindChapters(){
+      const listEl = document.getElementById('chapterList');
+      if(!listEl) return;
+
+      // fetch VTT + parse list
+      if(!VTT_URL || VTT_URL.includes('YOUR_')) {
+        listEl.innerHTML = '<li style="padding:10px;color:rgba(255,255,255,.65);font-size:13px;">Set <code style="color:rgba(255,255,255,.85)">VTT_URL</code> to your hosted chapters.vtt to enable this demo.</li>';
+        return;
+      }
+
+      const res = await fetch(VTT_URL, { cache: 'no-store' });
+      if(!res.ok) throw new Error(`Failed to fetch VTT: ${res.status}`);
+      const text = await res.text();
+      const cues = parseVttChapters(text);
+
+      // Wait for Brightcove player instance then bind
+      const player = window.videojs?.getPlayer('bcChapters');
+      if(player){
+        attachChaptersTrack(player, VTT_URL);
+        renderChapters(cues, listEl, player);
+      } else {
+        // fallback: render list anyway (click will be no-op)
+        renderChapters(cues, listEl, null);
+      }
+    }
+
+    // run once player scripts are ready
+    window.addEventListener('load', () => {
+      loadAndBindChapters().catch(err => {
+        console.error(err);
+        const listEl = document.getElementById('chapterList');
+        if(listEl) listEl.innerHTML = `<li style="padding:10px;color:rgba(255,255,255,.65);font-size:13px;">Failed to load chapters.vtt. Check CORS / URL.</li>`;
+      });
+    });
+  </script>
+
+<script src="https://players.brightcove.net/6243204265001/69IXNadf9_default/index.min.js"></script>
+
+<script src="https://players.brightcove.net/6243204265001/nT47Bk9J7_default/index.min.js"></script>
+
+<script>
+(() => {
+  // Header elevation
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Dropdown open/close
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+
+  dds.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+    dd.dataset.open = "false";
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      (dd.dataset.open === "true") ? closeAll() : openOne(dd);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+
+  // Active state (by pathname)
+  const path = (location.pathname.split('/').pop() || '').toLowerCase();
+
+  // Reset active markers
+  document.querySelectorAll('.nav [data-active]').forEach(a => a.removeAttribute('data-active'));
+  document.querySelectorAll('.nav-dd').forEach(dd => dd.removeAttribute('data-active'));
+
+  const pageToNav = new Map([
+    ['media.html', 'media'],
+    ['player.html', 'player'],
+    ['api.html', 'api'],
+    ['playlist.html', 'playlist'],
+    ['grid.html', 'grid'],
+    ['ad.html', 'csai'],
+    ['ssai.html', 'ssai'],
+    ['ga.html', 'ga'],
+  ]);
+
+  const key = pageToNav.get(path);
+  if (!key) return;
+
+  // Direct links
+  const direct = document.querySelector(`.nav > a[data-nav="${key}"]`);
+  if (direct) direct.dataset.active = "true";
+
+  // Dropdown items + parent highlight
+  const item = document.querySelector(`.nav-menu a[data-nav="${key}"]`);
+  if (item) {
+    item.dataset.active = "true";
+    const group = item.closest('.nav-dd');
+    if (group) group.dataset.active = "true";
+  }
+})();
+</script>
+
+<footer class="footer" aria-label="Site footer">
+  <div class="container footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="" aria-hidden="true">
+        <div>
+          <h3>Onboarding Engagement Manager</h3>
+          <p>
+            A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+          <a href="playershow.html"><span aria-hidden="true">↗</span> Player showcase</a>
+          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+          <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+          <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+          <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+          <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+          <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="footer-divider" role="separator"></div>
+
+    <div class="footer-bottom">
+      <div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
+
+      <div class="footer-badges" aria-label="Badges">
+        <span class="footer-pill">Docs-aligned</span>
+        <span class="footer-pill">Implementation-first</span>
+        <span class="footer-pill">Brightcove Player</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const y = document.getElementById('footerYear');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+</script>
+</body>
+</html>
