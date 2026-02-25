@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P19S6EZ59Q"></script>
+  <script>
+  gtag('config', 'G-P19S6EZ59Q', { debug_mode: false });
+  </script>
+
+  <title>GA4 — Implementation Gallery</title>
+  <style>
+:root{
+      --black:#000;
+      --white:#fff;
+      --yellow:#EFD900;
+      --orange:#F76531;
+      --purple:#AA6C7E;
+      --blue:#4EA9D1;
+
+      --fg: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.64);
+      --border: rgba(255,255,255,.12);
+
+      --max: 1160px;
+      --h: 72px;
+
+      --shadow: 0 12px 34px rgba(0,0,0,.35);
+      --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+
+      --ease: cubic-bezier(.2,.8,.2,1);
+      --focus: 0 0 0 3px rgba(78,169,209,.35);
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--fg);
+      background: var(--black);
+      overflow-x:hidden;
+    }
+    a{ color:inherit; text-decoration:none; }
+    button, input{ font:inherit; }
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    /* ===== Header (site style) ===== */
+    .header{
+      position:sticky; top:0; z-index:50;
+      height:var(--h);
+      display:flex; align-items:center;
+      background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+    }
+    .header.is-scrolled{
+      background: rgba(0,0,0,.84);
+      box-shadow: var(--shadow-soft);
+      border-bottom-color: rgba(255,255,255,.12);
+    }
+    .header-inner{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:14px;
+    }
+    .brand{ display:flex; align-items:center; gap:12px; min-width: 240px; }
+    .logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+    .brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+    .brand-name strong{ font-weight:800; letter-spacing:.6px; }
+    .brand-name span{ font-size:12px; color: var(--muted); }
+
+    .nav{
+      display:flex; align-items:center; gap:2px;
+      padding:6px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+    }
+    .nav a{
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 14px;
+      color: rgba(255,255,255,.78);
+      transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+      position:relative;
+      outline:none;
+      white-space:nowrap;
+    }
+    .nav a:hover{ background: rgba(255,255,255,.08); color: rgba(255,255,255,.92); transform: translateY(-1px); }
+    .nav a:focus-visible{ box-shadow: var(--focus); }
+    .nav a[data-active="true"]{
+      color: rgba(255,255,255,.95);
+      background: rgba(255,255,255,.10);
+    }
+    .nav a[data-active="true"]::after{
+      content:"";
+      position:absolute;
+      left:16px; right:16px; bottom:6px;
+      height:2px; border-radius:999px;
+      background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+      opacity:.95;
+    }
+
+    /* ===== Page ===== */
+    .page{
+      padding: 22px 0 56px;
+      background:
+        radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%),
+        radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%),
+        var(--black);
+    }
+
+    .page-head{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 12px 0 18px;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+    .page-head h1{
+      margin:0;
+      font-size: clamp(18px, 2.1vw, 26px);
+      letter-spacing: -.2px;
+    }
+    .page-head p{
+      margin:8px 0 0;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.65;
+      max-width: 80ch;
+    }
+
+    /* ===== Showcase Grid ===== */
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding-top: 16px;
+    }
+
+    .panel{
+      grid-column: span 6;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.34);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+      position:relative;
+      transition: transform .18s var(--ease), border-color .18s var(--ease), background .18s var(--ease);
+    }
+    .panel:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.18);
+      background: rgba(0,0,0,.40);
+    }
+
+    .panel-head{
+      padding: 14px 14px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .kicker{ margin:0; font-size:12px; color: rgba(255,255,255,.62); }
+    .title{ margin:0; font-size:15px; line-height:1.25; }
+    .sub{ margin:8px 0 0; color: rgba(255,255,255,.70); font-size:13px; line-height:1.6; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.22);
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+    .player{
+      position:relative;
+      aspect-ratio: 16/9;
+      background:#000;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .player .video-js,
+    .player video-js{
+      position:absolute !important;
+      inset:0;
+      width:100% !important;
+      height:100% !important;
+    }
+
+    .panel-body{
+      padding: 12px 14px 14px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .bullets{
+      margin:0;
+      padding-left: 18px;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.6;
+      max-width: 70ch;
+    }
+
+    /* ===== Footer (match look & feel) ===== */
+    .footer{
+      border-top: 1px solid rgba(255,255,255,.10);
+      background:
+        radial-gradient(900px 520px at 20% 120%, rgba(239,217,0,.08), transparent 60%),
+        radial-gradient(760px 520px at 85% 110%, rgba(78,169,209,.07), transparent 60%),
+        rgba(0,0,0,.92);
+    }
+    .footer-topline{
+      height:3px;
+      background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+      opacity:.95;
+    }
+    .footer-inner{
+      padding: 24px 0 18px;
+      display:grid;
+      grid-template-columns: 1.3fr 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .footer-brand{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      padding-right: 10px;
+    }
+    .footer-brand .row{
+      display:flex; align-items:center; gap:10px;
+    }
+    .footer-brand strong{
+      font-weight: 900;
+      letter-spacing:.6px;
+    }
+    .footer-brand p{
+      margin:0;
+      color: rgba(255,255,255,.66);
+      font-size: 13px;
+      line-height:1.7;
+      max-width: 52ch;
+    }
+
+    .footer-col h4{
+      margin: 6px 0 10px;
+      font-size: 12px;
+      letter-spacing:.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.70);
+    }
+    .footer-links{
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .footer-links a{
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      transition: background .18s var(--ease), border-color .18s var(--ease), transform .18s var(--ease);
+      width: fit-content;
+    }
+    .footer-links a:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.06);
+      border-color: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.90);
+    }
+    .footer-bottom{
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 14px 0 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      color: rgba(255,255,255,.55);
+      font-size: 12px;
+    }
+    .footer-badges{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .badge{
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.72);
+      font-size: 12px;
+      white-space:nowrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .panel{ grid-column: span 12; }
+      .nav{ display:none; }
+      .footer-inner{ grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px){
+      .footer-inner{ grid-template-columns: 1fr; }
+      .footer-bottom{ flex-direction:column; align-items:flex-start; }
+      .footer-badges{ justify-content:flex-start; }
+    }
+
+/* ===== GA4 page additions ===== */
+
+    /* 既存styleに追記するだけでOK */
+
+    .split{
+      display:grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 12px;
+      padding-top: 16px;
+      align-items: start;
+    }
+    .col-6{ grid-column: span 6; }
+
+    /* 右側iframeを綺麗に見せる */
+/* 右側の表示枠は16:9で固定し、はみ出しは隠す */
+.realtime{
+  position:relative;
+  aspect-ratio: 16/9;
+  overflow:hidden;
+  background: rgba(0,0,0,.55);
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+
+/* iframe自体は“デカく”描画して縮める（=切り抜き） */
+.realtime iframe{
+  position:absolute;
+  top:0; left:0;
+  width: 160%;     /* ←ここ調整ポイント */
+  height: 160%;    /* ←ここ調整ポイント */
+  border:0;
+  transform: scale(.625);          /* 1/1.6 = 0.625 */
+  transform-origin: 0 0;           /* 左上基準 */
+}
+    .note{
+      margin:0;
+      color: rgba(255,255,255,.70);
+      font-size: 13px;
+      line-height:1.7;
+    }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.85);
+      font-size: 13px;
+      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+      white-space:nowrap;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.18);
+    }
+  
+    @media (max-width: 980px){
+      .col-6{ grid-column: span 12; }
+    }
+
+/* ===== Shared Header/Nav Dropdown (overlay) ===== */
+:root{
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+
+.nav{ position:relative; }
+.nav-dd{ position:relative; display:inline-flex; align-items:center; }
+
+.nav-dd-btn{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  padding:10px 12px;
+  border-radius:999px;
+  font-size:14px;
+  color:rgba(255,255,255,.78);
+  transition:background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  position:relative;
+  outline:none;
+  white-space:nowrap;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+
+.nav-dd-btn:hover{
+  background:rgba(255,255,255,.08);
+  color:rgba(255,255,255,.92);
+  transform:translateY(-1px);
+}
+.nav-dd-btn:focus-visible{ box-shadow:var(--focus); }
+
+.nav a:hover::after,
+.nav-dd-btn:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background:var(--brand-grad);
+  opacity:.95;
+}
+
+.nav-dd[data-open="true"] .nav-dd-btn,
+.nav-dd[data-active="true"] .nav-dd-btn{
+  color:rgba(255,255,255,.95);
+  background:rgba(255,255,255,.10);
+}
+.nav-dd[data-open="true"] .nav-dd-btn::after,
+.nav-dd[data-active="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background:var(--brand-grad);
+  opacity:.95;
+}
+
+.chev{
+  width:10px; height:10px;
+  display:inline-block;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform:rotate(45deg);
+  transition:transform .18s var(--ease), opacity .18s var(--ease);
+  opacity:.9;
+}
+.nav-dd[data-open="true"] .chev{ transform:rotate(225deg); }
+
+.nav-menu{
+  position:absolute;
+  top:calc(100% + 10px);
+  left:0;
+  min-width:220px;
+  padding:8px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:none;
+  z-index:80;
+}
+.nav-dd[data-open="true"] .nav-menu{ display:block; }
+
+.nav-menu a{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 10px;
+  border-radius:12px;
+  color:rgba(255,255,255,.86);
+  border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.04);
+  transition:transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+  white-space:nowrap;
+  position:relative;
+}
+.nav-menu a:hover{
+  transform:translateY(-1px);
+  background:
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box,
+    var(--brand-grad) border-box;
+  border:1px solid transparent;
+  box-shadow:0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18);
+}
+.nav-menu a[data-active="true"]{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border:1px solid transparent;
+}
+.nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background:var(--brand-grad);
+  opacity:.95;
+}
+
+@media (max-width:760px){
+  .nav{ flex-wrap:wrap; justify-content:center; }
+  .nav-menu{ left:50%; transform:translateX(-50%); }
+}
+
+/* ===== Footer ===== */
+.footer{
+  position:relative;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%),
+    linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%),
+    var(--black);
+  overflow:hidden;
+}
+
+/* top accent line */
+.footer::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:1px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.9;
+}
+
+/* subtle noise-ish sheen */
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+  opacity:.6;
+}
+
+.footer-inner{
+  position:relative;
+  z-index:1;
+  padding: 40px 0 22px;
+  display:block; /* reset legacy grid */
+}
+
+.footer-top{
+  display:grid;
+  grid-template-columns: minmax(320px, 1.3fr) minmax(260px, 1fr);
+  gap: 18px;
+  align-items:start;
+}
+
+.footer-brand{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  text-align:left;
+  max-width: 560px;
+}
+
+.footer-logo{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  flex:0 0 auto;
+  opacity:.92;
+}
+
+.footer-brand h3{
+  margin:0 0 4px 0;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+.footer-brand p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.65);
+}
+
+.footer-col h4{
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.footer-links{
+  display:grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 8px 14px;
+  align-content:start;
+}
+
+@media (max-width: 640px){
+  .footer-links{
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}
+
+.footer-links a{
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 8px;
+  border-radius: 10px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  outline:none;
+}
+
+.footer-links a:hover{
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transform: translateY(-1px);
+}
+
+.footer-links a:focus-visible{ box-shadow: var(--focus); }
+
+.footer-links .hint{
+  opacity:.75;
+  font-size: 12px;
+}
+
+.footer-divider{
+  margin: 22px 0 14px;
+  height:1px;
+  background: rgba(255,255,255,.10);
+}
+
+.footer-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+  border-top:none; /* reset legacy */
+  padding: 0; /* divider handles spacing */
+}
+
+.footer-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:wrap;
+}
+
+.footer-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.70);
+}
+
+/* responsive */
+@media (max-width: 980px){
+  .footer-top{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .footer-inner{ padding: 34px 0 20px; }
+  .footer-top{ grid-template-columns: 1fr; }
+  .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+@media (max-width: 860px){
+  .footer-top{ grid-template-columns: 1fr; }
+}
+
+</style>
+</head>
+
+<body>
+  <header class="header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="index.html">
+        <img class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="Brightcove Logo" />
+        <div class="brand-name">
+          <strong>BRIGHTCOVE</strong>
+          <span>Onboarding Engagement Manager</span>
+          <span>Implementation Gallery</span>
+        </div>
+      </a>
+  
+      <nav class="nav" aria-label="Primary">
+        <a href="index.html" data-nav="home">Home</a>
+        <a href="media.html" data-nav="media">Media</a>
+        <a href="playershow.html" data-nav="player">Player</a>
+
+        <div class="nav-dd" data-nav-group="catalog">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Catalog <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Catalog menu">
+            <a role="menuitem" href="api.html" data-nav="api">Catalog API</a>
+            <a role="menuitem" href="playlist.html" data-nav="playlist">Playlist</a>
+            <a role="menuitem" href="grid.html" data-nav="grid">Grid</a>
+          </div>
+        </div>
+
+        <div class="nav-dd" data-nav-group="advertising">
+          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            Advertising <span class="chev" aria-hidden="true"></span>
+          </button>
+          <div class="nav-menu" role="menu" aria-label="Advertising menu">
+            <a role="menuitem" href="ad.html" data-nav="csai">CSAI</a>
+            <a role="menuitem" href="ssai.html" data-nav="ssai">SSAI</a>
+          </div>
+        </div>
+
+        <a href="ga4_gallery.html" data-nav="ga">Google Analytics</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      <div class="page-head">
+        <div>
+          <h1>GA4 Integration Showcase</h1>
+          <p>
+            Left: Brightcove Player (GA4 events). Right: Realtime monitoring panel.
+            Use this page to validate event mapping, video metadata, and engagement signals.
+          </p>
+        </div>
+        <span class="pill">📈 GA4 Realtime</span>
+      </div>
+
+      <div class="split">
+        <!-- Left: Player -->
+        <section class="panel col-6">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Player</p>
+              <h3 class="title">Brightcove Player with GA4 events</h3>
+              <p class="sub">Selected Brightcove GA4 events + video/player metadata are sent to GA4.</p>
+            </div>
+            <span class="pill">🟦 gtag()</span>
+          </div>
+
+          <div class="player">
+            <video-js
+              id="bcGA4"
+              data-account="6243204265001"
+              data-player="SCTToBP2d"
+              data-embed="default"
+              data-video-id="1849993856873180951"
+              controls playsinline
+              class="video-js vjs-fluid">
+            </video-js>
+          </div>
+
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Events: <code>Video Impression</code>, <code>Play Request</code>, <code>Video Engagement</code>, <code>Player Load</code>, <code>Error</code></li>
+              <li>Params: <code>seconds_viewed</code>, <code>range</code>, <code>video_duration</code>, <code>player_id</code>, <code>player_name</code>, <code>video_id</code>, <code>video_name</code></li>
+            </ul>
+            <span class="pill">Config: Page JS</span>
+          </div>
+        </section>
+
+        <!-- Right: Realtime panel -->
+        <section class="panel col-6">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Analytics</p>
+              <h3 class="title">Realtime Overview</h3>
+              <p class="sub">Monitor incoming GA4 events while interacting with the player.</p>
+            </div>
+            <span class="pill">⚡ Realtime</span>
+          </div>
+
+          <div class="realtime">
+            <!-- Option A: Looker Studio embed (recommended) -->
+            <iframe src="https://lookerstudio.google.com/embed/reporting/00c3701e-47c9-44b6-a12a-6e50d3eefc50/page/kIV1C" frameborder="0" style="border:0" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+          </div>
+
+          <div class="panel-body">
+            <p class="note">
+              Note: GA4 UI itself is typically not embeddable due to security policies.
+              Use Looker Studio embed, or build a custom realtime panel via GA4 Data API.
+            </p>
+            <div class="actions">
+              <a class="btn" href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer">Open GA4</a>
+              <span class="pill">Viewer access required</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer" aria-label="Site footer">
+  <div class="container footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="" aria-hidden="true">
+        <div>
+          <h3>Onboarding Engagement Manager</h3>
+          <p>
+            A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.
+          </p>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <nav class="footer-links" aria-label="Footer navigation">
+          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+          <a href="playershow.html"><span aria-hidden="true">↗</span> Player showcase</a>
+          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+          <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+          <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+          <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+          <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+          <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="footer-divider" role="separator"></div>
+
+    <div class="footer-bottom">
+      <div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
+
+      <div class="footer-badges" aria-label="Badges">
+        <span class="footer-pill">Docs-aligned</span>
+        <span class="footer-pill">Implementation-first</span>
+        <span class="footer-pill">Brightcove Player</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- 2) Brightcove player runtime -->
+<script src="https://players.brightcove.net/6243204265001/SCTToBP2d_default/index.min.js"></script>
+
+<!-- 3) Page behaviors + Looker refresh wiring -->
+<script>
+  // ===== UI helpers =====
+  function initHeaderElevation(){
+    const header = document.getElementById('siteHeader');
+    if(!header) return;
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  function initFooterYear(){
+    const y = document.getElementById('y');
+    if (y) y.textContent = String(new Date().getFullYear());
+  }
+
+  // ===== Layout sync: make Looker panel same height as player =====
+  function syncRealtimeHeight(){
+    // 左右を確実に取る（sectionが2つ並んでる前提）
+    const left  = document.querySelector('.split > section:nth-child(1) .player');
+    const right = document.querySelector('.split > section:nth-child(2) .realtime');
+    if(!left || !right) return;
+    right.style.height = Math.round(left.getBoundingClientRect().height) + 'px';
+  }
+
+  // ===== Looker refresh =====
+  function refreshLooker(){
+    const frame = document.querySelector('.realtime iframe');
+    if(!frame) return;
+    frame.src = frame.src;
+  }
+
+  function debounce(fn, delay){
+    let t;
+    return function(){
+      clearTimeout(t);
+      t = setTimeout(() => fn.apply(this, arguments), delay);
+    };
+  }
+
+  function initLookerAutoRefresh(){
+    // videojs がロード済み & player id が合っている前提
+    if(!window.videojs) return;
+
+    const player = videojs.getPlayer('brightcovePlayer'); // ← video-js の id と一致させる
+    if(!player) return;
+
+    const debouncedRefresh = debounce(refreshLooker, 5000);
+
+    player.on('play', debouncedRefresh);
+    player.on('timeupdate', debouncedRefresh);
+    player.on('ended', debouncedRefresh);
+  }
+
+  // ===== Boot =====
+  window.addEventListener('load', () => {
+    initHeaderElevation();
+    initFooterYear();
+
+    // 初回＆リサイズで高さ同期
+    syncRealtimeHeight();
+    window.addEventListener('resize', syncRealtimeHeight);
+
+    // プレーヤー操作に応じてLooker更新
+    initLookerAutoRefresh();
+  });
+</script>
+
+<script>
+(() => {
+  // Header elevation
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Dropdown open/close
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+
+  dds.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+    dd.dataset.open = "false";
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      (dd.dataset.open === "true") ? closeAll() : openOne(dd);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+
+  // Active state (by pathname)
+  const path = (location.pathname.split('/').pop() || '').toLowerCase();
+
+  // Reset active markers
+  document.querySelectorAll('.nav [data-active]').forEach(a => a.removeAttribute('data-active'));
+  document.querySelectorAll('.nav-dd').forEach(dd => dd.removeAttribute('data-active'));
+
+  const pageToNav = new Map([
+    ['index.html', 'home'],
+    ['playershow.html', 'player'],
+    ['ga4_gallery.html', 'ga'],
+    ['catalog.html', 'api'],
+    ['media.html', 'media'],
+    ['player.html', 'player'],
+    ['api.html', 'api'],
+    ['playlist.html', 'playlist'],
+    ['grid.html', 'grid'],
+    ['ad.html', 'csai'],
+    ['ssai.html', 'ssai'],
+    ['ga.html', 'ga'],
+  ]);
+
+  const key = pageToNav.get(path);
+  if (!key) return;
+
+  // Direct links
+  const direct = document.querySelector(`.nav > a[data-nav="${key}"]`);
+  if (direct) direct.dataset.active = "true";
+
+  // Dropdown items + parent highlight
+  const item = document.querySelector(`.nav-menu a[data-nav="${key}"]`);
+  if (item) {
+    item.dataset.active = "true";
+    const group = item.closest('.nav-dd');
+    if (group) group.dataset.active = "true";
+  }
+})();
+</script>
+<script>
+(() => {
+  const y = document.getElementById('footerYear');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+</script>
+</body>
+</html>
