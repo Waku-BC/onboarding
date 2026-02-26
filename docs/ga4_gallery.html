@@ -3,13 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-P19S6EZ59Q"></script>
   <script>
-  gtag('config', 'G-P19S6EZ59Q', { debug_mode: false });
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    // Add ?debug=1 to surface events in GA4 DebugView more reliably
+    const debugMode = new URLSearchParams(location.search).get('debug') === '1';
+    gtag('config', 'G-P19S6EZ59Q', { debug_mode: debugMode });
   </script>
 
-  <title>GA4 — Implementation Gallery</title>
+<title>GA4 — Implementation Gallery</title>
   <style>
 :root{
       --black:#000;
@@ -337,26 +342,103 @@
     }
     .col-6{ grid-column: span 6; }
 
-    /* 右側iframeを綺麗に見せる */
-/* 右側の表示枠は16:9で固定し、はみ出しは隠す */
-.realtime{
-  position:relative;
-  aspect-ratio: 16/9;
-  overflow:hidden;
-  background: rgba(0,0,0,.55);
+    /* ===== Event Log (replaces Looker iframe) ===== */
+.eventlog{
+  display:flex;
+  flex-direction:column;
+  min-height: 0;
+  padding: 12px 14px 14px;
+  gap: 10px;
   border-top: 1px solid rgba(255,255,255,.06);
 }
 
-/* iframe自体は“デカく”描画して縮める（=切り抜き） */
-.realtime iframe{
-  position:absolute;
-  top:0; left:0;
-  width: 160%;     /* ←ここ調整ポイント */
-  height: 160%;    /* ←ここ調整ポイント */
-  border:0;
-  transform: scale(.625);          /* 1/1.6 = 0.625 */
-  transform-origin: 0 0;           /* 左上基準 */
+.eventlog-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
 }
+
+.eventlog-title{
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,.86);
+}
+
+.eventlog-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.eventlog-toggle{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: rgba(255,255,255,.78);
+  font-size: 12px;
+}
+
+.eventlog-body{
+  height: 360px;
+  overflow:auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.28);
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.log-row{
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.03);
+  margin-bottom: 8px;
+}
+
+.log-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color: rgba(255,255,255,.78);
+  margin-bottom: 6px;
+}
+
+.log-name{
+  font-weight: 800;
+  color: rgba(255,255,255,.92);
+}
+
+.log-time{
+  color: rgba(255,255,255,.55);
+}
+
+.log-json{
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: rgba(255,255,255,.70);
+}
+
+.eventlog-foot{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+}
+
+
     .note{
       margin:0;
       color: rgba(255,255,255,.70);
@@ -801,12 +883,27 @@
             <span class="pill">⚡ Realtime</span>
           </div>
 
-          <div class="realtime">
-            <!-- Option A: Looker Studio embed (recommended) -->
-            <iframe src="https://lookerstudio.google.com/embed/reporting/00c3701e-47c9-44b6-a12a-6e50d3eefc50/page/kIV1C" frameborder="0" style="border:0" allowfullscreen sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
-          </div>
+          <div class="eventlog" aria-label="GA4 event log">
+            <div class="eventlog-head">
+              <div class="eventlog-title">Event Log (sent to GA4)</div>
+              <div class="eventlog-actions">
+                <label class="eventlog-toggle">
+                  <input type="checkbox" id="sendToGa" checked />
+                  <span>Send to GA4</span>
+                </label>
+                <button class="btn btn-ghost" type="button" id="clearLog">Clear</button>
+                <button class="btn" type="button" id="copyLog">Copy</button>
+              </div>
+            </div>
 
-          <div class="panel-body">
+            <div class="eventlog-body" id="eventLog"></div>
+
+            <div class="eventlog-foot">
+              <span class="pill" id="logStatus">Ready</span>
+              <span class="pill">Tip: add <code>?debug=1</code> and open GA4 DebugView</span>
+            </div>
+          </div>
+<div class="panel-body">
             <p class="note">
               Note: GA4 UI itself is typically not embeddable due to security policies.
               Use Looker Studio embed, or build a custom realtime panel via GA4 Data API.
@@ -868,7 +965,7 @@
 <!-- 2) Brightcove player runtime -->
 <script src="https://players.brightcove.net/6243204265001/SCTToBP2d_default/index.min.js"></script>
 
-<!-- 3) Page behaviors + Looker refresh wiring -->
+<!-- 3) Page behaviors -->
 <script>
   // ===== UI helpers =====
   function initHeaderElevation(){
@@ -880,59 +977,23 @@
   }
 
   function initFooterYear(){
-    const y = document.getElementById('y');
+    const y = document.getElementById('footerYear');
     if (y) y.textContent = String(new Date().getFullYear());
   }
 
-  // ===== Layout sync: make Looker panel same height as player =====
-  function syncRealtimeHeight(){
-    // 左右を確実に取る（sectionが2つ並んでる前提）
+  // Keep the right panel visually aligned with the player
+  function syncRightPanelHeight(){
     const left  = document.querySelector('.split > section:nth-child(1) .player');
-    const right = document.querySelector('.split > section:nth-child(2) .realtime');
+    const right = document.querySelector('.split > section:nth-child(2) .eventlog-body');
     if(!left || !right) return;
-    right.style.height = Math.round(left.getBoundingClientRect().height) + 'px';
+    right.style.height = Math.max(240, Math.round(left.getBoundingClientRect().height)) + 'px';
   }
 
-  // ===== Looker refresh =====
-  function refreshLooker(){
-    const frame = document.querySelector('.realtime iframe');
-    if(!frame) return;
-    frame.src = frame.src;
-  }
-
-  function debounce(fn, delay){
-    let t;
-    return function(){
-      clearTimeout(t);
-      t = setTimeout(() => fn.apply(this, arguments), delay);
-    };
-  }
-
-  function initLookerAutoRefresh(){
-    // videojs がロード済み & player id が合っている前提
-    if(!window.videojs) return;
-
-    const player = videojs.getPlayer('brightcovePlayer'); // ← video-js の id と一致させる
-    if(!player) return;
-
-    const debouncedRefresh = debounce(refreshLooker, 5000);
-
-    player.on('play', debouncedRefresh);
-    player.on('timeupdate', debouncedRefresh);
-    player.on('ended', debouncedRefresh);
-  }
-
-  // ===== Boot =====
   window.addEventListener('load', () => {
     initHeaderElevation();
     initFooterYear();
-
-    // 初回＆リサイズで高さ同期
-    syncRealtimeHeight();
-    window.addEventListener('resize', syncRealtimeHeight);
-
-    // プレーヤー操作に応じてLooker更新
-    initLookerAutoRefresh();
+    syncRightPanelHeight();
+    window.addEventListener('resize', syncRightPanelHeight);
   });
 </script>
 
@@ -1021,5 +1082,152 @@
   if (y) y.textContent = String(new Date().getFullYear());
 })();
 </script>
+
+<script>
+(() => {
+  const logEl = document.getElementById('eventLog');
+  const statusEl = document.getElementById('logStatus');
+  const sendToggle = document.getElementById('sendToGa');
+  const clearBtn = document.getElementById('clearLog');
+  const copyBtn = document.getElementById('copyLog');
+
+  if (!logEl) return;
+
+  const rows = [];
+  const fmtTime = (d) => d.toLocaleTimeString('ja-JP', { hour12:false });
+
+  function setStatus(msg){
+    if (statusEl) statusEl.textContent = msg;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function addRow(name, params, sent){
+    const at = new Date();
+    const item = { at: at.toISOString(), name, params: params || {}, sent: !!sent };
+    rows.unshift(item);
+
+    const div = document.createElement('div');
+    div.className = 'log-row';
+    div.innerHTML = `
+      <div class="log-top">
+        <div class="log-name">${escapeHtml(name)} ${sent ? '✅' : '⬜'}</div>
+        <div class="log-time">${fmtTime(at)}</div>
+      </div>
+      <div class="log-json">${escapeHtml(JSON.stringify(item.params, null, 2))}</div>
+    `;
+    logEl.prepend(div);
+    setStatus(`Last: ${name} (${sent ? 'sent' : 'local'})`);
+  }
+
+  function sendToGa(name, params){
+    const enabled = sendToggle ? sendToggle.checked : true;
+    if (!enabled) return false;
+    if (typeof window.gtag !== 'function') return false;
+
+    try{
+      window.gtag('event', name, params || {});
+      return true;
+    }catch(e){
+      return false;
+    }
+  }
+
+  function emit(name, params){
+    const sent = sendToGa(name, params);
+    addRow(name, params, sent);
+  }
+
+  clearBtn?.addEventListener('click', () => {
+    rows.length = 0;
+    logEl.innerHTML = '';
+    setStatus('Cleared');
+  });
+
+  copyBtn?.addEventListener('click', async () => {
+    const text = rows.map(r => `${r.at}\t${r.name}\t${JSON.stringify(r.params)}`).join('\n');
+    try{
+      await navigator.clipboard.writeText(text);
+      setStatus('Copied');
+    }catch(e){
+      setStatus('Copy failed');
+    }
+  });
+
+  // ---- Brightcove Player → GA4 mapping ----
+  function getPlayer(){
+    if (!window.videojs) return null;
+    try { return window.videojs.getPlayer('bcGA4'); } catch(e){ return null; }
+  }
+
+  function getContext(p){
+    const mi = p?.mediainfo || {};
+    const vid = (mi.id || mi.video_id || mi.reference_id || '');
+    const name = (mi.name || mi.title || '');
+    const dur = Number(mi.duration || p?.duration?.() || 0) || 0;
+
+    return {
+      player_id: 'SCTToBP2d',
+      video_id: String(vid || ''),
+      video_name: String(name || ''),
+      video_duration: dur ? Math.round(dur) : undefined
+    };
+  }
+
+  function setup(){
+    const p = getPlayer();
+    if (!p) { setStatus('Player not ready'); return; }
+
+    const ctxBase = () => getContext(p);
+
+    emit('player_load', { ...ctxBase(), page: 'ga4_gallery' });
+
+    p.one('loadedmetadata', () => {
+      emit('video_impression', { ...ctxBase(), page: 'ga4_gallery' });
+    });
+
+    p.on('play', () => {
+      emit('play_request', { ...ctxBase(), page: 'ga4_gallery' });
+    });
+
+    let lastBucket = -1;
+    p.on('timeupdate', () => {
+      const t = Math.floor(p.currentTime() || 0);
+      const bucket = Math.floor(t / 10);
+      if (bucket === lastBucket) return;
+      lastBucket = bucket;
+
+      const dur = Math.floor(p.duration() || 0);
+      const range = `${bucket*10}-${bucket*10+9}`;
+
+      emit('video_engagement', {
+        ...ctxBase(),
+        seconds_viewed: t,
+        range,
+        video_duration: dur || undefined,
+        page: 'ga4_gallery'
+      });
+    });
+
+    p.on('ended', () => {
+      emit('video_complete', { ...ctxBase(), page: 'ga4_gallery' });
+    });
+
+    p.on('error', () => {
+      const err = p.error() || {};
+      emit('player_error', { ...ctxBase(), code: err.code, message: err.message, page: 'ga4_gallery' });
+    });
+
+    setStatus('Listening…');
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(setup, 300);
+  });
+})();
+</script>
+
 </body>
 </html>
