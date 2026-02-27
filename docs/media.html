@@ -413,6 +413,27 @@ button, input{ font:inherit; }
       max-height: 210px;
       overflow:auto;
     }
+    .chap-card .chapters{
+      padding: 10px 10px 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .chap-card .chapters p{
+      margin:0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .chap-card .chapters p + p{ margin-top: 10px; }
+    .chap-card .chapters code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      color: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
     .chap-list button{
       width:100%;
       text-align:left;
@@ -442,6 +463,31 @@ button, input{ font:inherit; }
       .chap-card{ grid-column: span 12; }
       .page-head{ flex-direction:column; align-items:flex-start; }
     }
+    /* === Normalize player aspect ratio across cards === */
+.chap-card .player {
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.chap-card .player video-js,
+.chap-card .player .video-js {
+  width: 100%;
+  height: 100%;
+}
+.chap-grid {
+  align-items: stretch;
+}
+
+.chap-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.chap-card .chapters {
+  margin-top: auto;
+}
 
 /* ===== Footer ===== */
 .footer{
@@ -704,7 +750,7 @@ button, input{ font:inherit; }
             <video-js
               id="bcSingle"
               data-account="6243204265001"
-              data-player="69IXNadf9"
+              data-player="i7bsDiyP9"
               data-embed="default"
               data-video-id="1849994266609618859"
               controls
@@ -763,17 +809,17 @@ button, input{ font:inherit; }
       <section class="section" aria-label="Chapters showcase">
         <div class="section-head">
           <div>
-            <h2>WebVTT Chapters Showcase</h2>
+            <h2>Tracks & Localization Showcase</h2>
             <p>
-              Demonstrates chapter navigation using a WebVTT file. Click a chapter to seek.
-              (Recommended: manage text tracks in Brightcove Studio. This demo also shows how to attach a VTT at runtime.)
+              Demonstrates Brightcove text and audio track capabilities including WebVTT chapters,
+              multilingual captions, and Universal Translator dubbing.
             </p>
           </div>
           <span class="pill">⏱ Chapters</span>
         </div>
 
         <div class="chap-grid">
-          <article class="chap-card" data-vtt-demo>
+          <section class="chap-card" data-vtt-demo>
             <div class="chap-meta">
               <div>
                 <p class="kicker">Chaptered video</p>
@@ -787,7 +833,7 @@ button, input{ font:inherit; }
               <video-js
                 id="bcChapters"
                 data-account="6243204265001"
-                data-player="69IXNadf9"
+                data-player="i7bsDiyP9"
                 data-embed="default"
                 data-video-id="1856636261160821561"
                 controls
@@ -796,11 +842,45 @@ button, input{ font:inherit; }
               </video-js>
             </div>
 
-            <ul class="chap-list" id="chapterList" aria-label="Chapters">
-              <!-- JS renders chapters here -->
-            </ul>
-          </article>
-        </div>
+            <div class="chapters">
+              <p class="note">
+                Click a chapter to jump to that moment in the video. Chapters are defined via a WebVTT text track.
+              </p>
+            </div>
+          </section>
+
+          <section class="chap-card" data-ut-demo>
+            <div class="chap-meta">
+              <div>
+                <p class="kicker">Universal Translator</p>
+                <h3 class="title">Captions + Dubbing Playback</h3>
+                <p class="sub">Translated captions and dubbed audio via Universal Translator.</p>
+              </div>
+              <span class="pill">🌐 UT</span>
+            </div>
+
+            <div class="player">
+              <!-- Replace account / player / video id as needed -->
+              <video-js
+                id="bcUniversalTranslator"
+                data-account="6243204265001"
+                data-player="i7bsDiyP9"
+                data-embed="default"
+                data-video-id="1858261631136868733"
+                controls
+                playsinline
+                class="video-js vjs-fluid">
+              </video-js>
+            </div>
+
+            <div class="chapters">
+              <p>
+                Use the <strong>CC</strong> menu to switch translated captions.
+                Use the <strong>Audio / Tracks</strong> menu (if available) to select dubbed audio languages.
+              </p>
+            </div>
+          </section>
+</div>
       </section>
     </div>
   </main>
@@ -827,125 +907,7 @@ button, input{ font:inherit; }
     segBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     setMode('compare');
 
-    // --- Chapters demo ---
-    // Replace with your hosted VTT URL (must be accessible from the browser)
-    const VTT_URL = 'YOUR_CHAPTERS_VTT_URL_HERE'; // e.g. https://example.com/chapters.vtt
-
-    function parseVttChapters(vttText){
-      // Minimal WebVTT cue parser: supports "HH:MM:SS.mmm --> HH:MM:SS.mmm" lines
-      const lines = vttText.replace(/\r/g,'').split('\n');
-      const cues = [];
-      let i = 0;
-
-      const timeToSeconds = (t) => {
-        const [hms, ms='0'] = t.split('.');
-        const parts = hms.split(':').map(Number);
-        let s = 0;
-        if(parts.length === 3) s = parts[0]*3600 + parts[1]*60 + parts[2];
-        if(parts.length === 2) s = parts[0]*60 + parts[1];
-        if(parts.length === 1) s = parts[0];
-        return s + (Number(ms)/1000);
-      };
-
-      const fmt = (sec) => {
-        const m = Math.floor(sec/60);
-        const s = Math.floor(sec%60);
-        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-      };
-
-      while(i < lines.length){
-        const line = lines[i].trim();
-        // skip headers / empty
-        if(!line || line.startsWith('WEBVTT')){ i++; continue; }
-
-        // cue id optional
-        let timeLine = line;
-        if(!line.includes('-->') && i+1 < lines.length && lines[i+1].includes('-->')){
-          timeLine = lines[i+1].trim();
-          i++;
-        }
-
-        if(timeLine.includes('-->')){
-          const [startRaw, endRaw] = timeLine.split('-->').map(s => s.trim().split(' ')[0]);
-          const start = timeToSeconds(startRaw);
-          const end = timeToSeconds(endRaw);
-          // cue text (next non-empty line(s) until blank)
-          let text = '';
-          i++;
-          while(i < lines.length && lines[i].trim()){
-            text += (text ? ' ' : '') + lines[i].trim();
-            i++;
-          }
-          cues.push({ start, end, text: text || `Chapter ${cues.length+1}`, startLabel: fmt(start) });
-        } else {
-          i++;
-        }
-      }
-      return cues;
-    }
-
-    function renderChapters(cues, listEl, player){
-      listEl.innerHTML = '';
-      cues.forEach((c, idx) => {
-        const li = document.createElement('li');
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.innerHTML = `<span>${c.text}</span><span class="ts">${c.startLabel}</span>`;
-        btn.addEventListener('click', () => {
-          if(player && typeof player.currentTime === 'function'){
-            player.currentTime(c.start + 0.01);
-            player.play?.();
-          }
-        });
-        li.appendChild(btn);
-        listEl.appendChild(li);
-      });
-    }
-
-    // Attach VTT as "chapters" track at runtime (demo).
-    // In production, recommended approach is to attach the chapters track in Brightcove Studio per asset.
-    function attachChaptersTrack(player, vttUrl){
-      if(!vttUrl || vttUrl.includes('YOUR_')) return;
-
-      // Brightcove player exposes Video.js player. addRemoteTextTrack works in Video.js.
-      try{
-        player.addRemoteTextTrack({
-          kind: 'chapters',
-          src: vttUrl,
-          label: 'Chapters',
-          default: true
-        }, false);
-      } catch(e){
-        console.warn('Could not attach chapters track:', e);
-      }
-    }
-
-    async function loadAndBindChapters(){
-      const listEl = document.getElementById('chapterList');
-      if(!listEl) return;
-
-      // fetch VTT + parse list
-      if(!VTT_URL || VTT_URL.includes('YOUR_')) {
-        listEl.innerHTML = '<li style="padding:10px;color:rgba(255,255,255,.65);font-size:13px;">Set <code style="color:rgba(255,255,255,.85)">VTT_URL</code> to your hosted chapters.vtt to enable this demo.</li>';
-        return;
-      }
-
-      const res = await fetch(VTT_URL, { cache: 'no-store' });
-      if(!res.ok) throw new Error(`Failed to fetch VTT: ${res.status}`);
-      const text = await res.text();
-      const cues = parseVttChapters(text);
-
-      // Wait for Brightcove player instance then bind
-      const player = window.videojs?.getPlayer('bcChapters');
-      if(player){
-        attachChaptersTrack(player, VTT_URL);
-        renderChapters(cues, listEl, player);
-      } else {
-        // fallback: render list anyway (click will be no-op)
-        renderChapters(cues, listEl, null);
-      }
-    }
-
+  
     // run once player scripts are ready
     window.addEventListener('load', () => {
       loadAndBindChapters().catch(err => {
@@ -956,7 +918,7 @@ button, input{ font:inherit; }
     });
   </script>
 
-<script src="https://players.brightcove.net/6243204265001/69IXNadf9_default/index.min.js"></script>
+<script src="https://players.brightcove.net/6243204265001/i7bsDiyP9_default/index.min.js"></script>
 
 <script src="https://players.brightcove.net/6243204265001/nT47Bk9J7_default/index.min.js"></script>
 
