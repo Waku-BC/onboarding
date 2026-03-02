@@ -1,10 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>Media — Implementation Gallery</title>
-
 <style>
 :root{
   --black:#000;
@@ -402,17 +402,6 @@ button, input{ font:inherit; }
       gap: 12px;
     }
 
-    .chap-list{
-      list-style:none;
-      margin:0;
-      padding: 10px 10px 12px;
-      border-top: 1px solid rgba(255,255,255,.08);
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-      max-height: 210px;
-      overflow:auto;
-    }
     .chap-card .chapters{
       padding: 10px 10px 12px;
       border-top: 1px solid rgba(255,255,255,.08);
@@ -434,60 +423,12 @@ button, input{ font:inherit; }
       border-radius: 8px;
     }
 
-    .chap-list button{
-      width:100%;
-      text-align:left;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-      color: rgba(255,255,255,.86);
-      padding: 10px 10px;
-      border-radius: 14px;
-      cursor:pointer;
-      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 10px;
-    }
-    .chap-list button:hover{
-      transform: translateY(-1px);
-      background: rgba(255,255,255,.08);
-      border-color: rgba(255,255,255,.16);
-    }
-    .chap-list button:focus-visible{ box-shadow: var(--focus); outline:none; }
-    .ts{ color: rgba(255,255,255,.62); font-size:12px; white-space:nowrap; }
-
     /* Responsive */
     @media (max-width: 980px){
       .panel{ grid-column: span 12; }
       .chap-card{ grid-column: span 12; }
       .page-head{ flex-direction:column; align-items:flex-start; }
     }
-    /* === Normalize player aspect ratio across cards === */
-.chap-card .player {
-  aspect-ratio: 16 / 9;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 14px;
-}
-
-.chap-card .player video-js,
-.chap-card .player .video-js {
-  width: 100%;
-  height: 100%;
-}
-.chap-grid {
-  align-items: stretch;
-}
-
-.chap-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.chap-card .chapters {
-  margin-top: auto;
-}
 
 /* ===== Footer ===== */
 .footer{
@@ -665,226 +606,348 @@ button, input{ font:inherit; }
 @media (max-width: 860px){
   .footer-top{ grid-template-columns: 1fr; }
 }
+
+
+/* ===== AI Contents Multiplier (Shorts grid) ===== */
+.shorts-grid{
+  display:grid;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+  gap:14px;
+  margin-top:14px;
+}
+.short-card{
+  min-width:0;
+  border:1px solid rgba(255,255,255,.10);
+  background:rgba(255,255,255,.03);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 18px 50px rgba(0,0,0,.45);
+}
+.short-meta{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  padding:12px 12px 10px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.short-player{
+  position:relative;
+  aspect-ratio:9 / 16;
+  width:100%;
+  overflow:hidden;
+}
+.short-player .video-js{
+  position:absolute !important;
+  inset:0 !important;
+  width:100% !important;
+  height:100% !important;
+}
+.short-player .video-js.vjs-fluid{
+  padding-top:0 !important;
+  height:100% !important;
+}
+.short-card .video-js .vjs-control-bar{
+  font-size:12px;
+}
+@media (max-width:980px){
+  .shorts-grid{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+@media (max-width:560px){
+  .shorts-grid{ grid-template-columns:1fr; }
+}
+
+/* Track cards: ensure player tiles match height */
+.chap-card .player{
+  aspect-ratio:16 / 9;
+  width:100%;
+  overflow:hidden;
+  border-radius:14px;
+}
+
+/* ===== (追加はここから)) ===== */
+.grad-card{
+  border: 1px solid transparent; /* gradient border用 */
+  background:
+    linear-gradient(rgba(0,0,0,.34), rgba(0,0,0,.34)) padding-box, /* card fill */
+    var(--brand-grad) border-box; /* border */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    var(--shadow-soft);
+}
+
+/* “派手すぎ問題”を防ぐため、通常時は落ち着かせる */
+.grad-card{
+  filter: saturate(.92);
+}
+
+/* hover/focusで少しだけ“Brightcoveっぽい”発光 */
+.grad-card:hover,
+.grad-card:focus-within{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08) inset,
+    0 10px 30px rgba(0,0,0,.55),
+    0 0 18px rgba(247,101,49,.16);
+}
+
+/* 既存のborder指定を上書きしたい場合の保険（見た目統一） */
+.panel.grad-card,
+.chap-card.grad-card,
+.short-card.grad-card{
+  border-color: transparent;
+}
+
 </style>
 </head>
-
 <body>
 <header class="header" id="siteHeader">
-    <div class="header-inner">
-      <a class="brand" href="index.html">
-        <img class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="Brightcove Logo" />
-        <div class="brand-name">
-          <strong>BRIGHTCOVE</strong>
-          <span>Onboarding Engagement Manager</span>
-          <span>Implementation Gallery</span>
-        </div>
-      </a>
-  
-      <nav class="nav" aria-label="Primary">
-        <a href="media.html" data-nav="media">Media</a>
-        <a href="player.html" data-nav="player">Player</a>
-      
-        <!-- Catalog dropdown -->
-        <div class="nav-dd" data-nav-group="catalog">
-          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+<div class="header-inner">
+<a class="brand" href="index.html">
+<img alt="Brightcove Logo" class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg"/>
+<div class="brand-name">
+<strong>BRIGHTCOVE</strong>
+<span>Onboarding Engagement Manager</span>
+<span>Implementation Gallery</span>
+</div>
+</a>
+<nav aria-label="Primary" class="nav">
+<a data-nav="media" href="media.html">Media</a>
+<a data-nav="player" href="player.html">Player</a>
+<!-- Catalog dropdown -->
+<div class="nav-dd" data-nav-group="catalog">
+<button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
             Catalog
-            <span class="chev" aria-hidden="true"></span>
-          </button>
-          <div class="nav-menu" role="menu" aria-label="Catalog menu">
-            <a role="menuitem" href="api.html" data-nav="api">Catalog API</a>
-            <a role="menuitem" href="playlist.html" data-nav="playlist">Playlist</a>
-            <a role="menuitem" href="grid.html" data-nav="grid">Grid</a>
-          </div>
-        </div>
-      
-        <!-- Advertising dropdown -->
-        <div class="nav-dd" data-nav-group="advertising">
-          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+            <span aria-hidden="true" class="chev"></span>
+</button>
+<div aria-label="Catalog menu" class="nav-menu" role="menu">
+<a data-nav="api" href="api.html" role="menuitem">Catalog API</a>
+<a data-nav="playlist" href="playlist.html" role="menuitem">Playlist</a>
+<a data-nav="grid" href="grid.html" role="menuitem">Grid</a>
+</div>
+</div>
+<!-- Advertising dropdown -->
+<div class="nav-dd" data-nav-group="advertising">
+<button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
             Advertising
-            <span class="chev" aria-hidden="true"></span>
-          </button>
-          <div class="nav-menu" role="menu" aria-label="Advertising menu">
-            <a role="menuitem" href="ad.html" data-nav="csai">CSAI</a>
-            <a role="menuitem" href="ssai.html" data-nav="ssai">SSAI</a>
-          </div>
-        </div>
-      
-        <a href="ga4_gallery.html" data-nav="ga">Google Analytics</a>
-      </nav>
-    </div>
-  </header>
-
+            <span aria-hidden="true" class="chev"></span>
+</button>
+<div aria-label="Advertising menu" class="nav-menu" role="menu">
+<a data-nav="csai" href="ad.html" role="menuitem">CSAI</a>
+<a data-nav="ssai" href="ssai.html" role="menuitem">SSAI</a>
+</div>
+</div>
+<a data-nav="ga" href="ga4_gallery.html">Google Analytics</a>
+</nav>
+</div>
+</header>
 <main class="page">
-    <div class="container">
-      <div class="page-head">
-        <div>
-          <h1>Media Implementations</h1>
-          <p>
+<div class="container">
+<div class="page-head">
+<div>
+<h1>Media Implementations</h1>
+<p>
             Compare single-video vs playlist delivery, then explore chaptered playback using WebVTT.
             These examples are aligned with documentation and show practical configurations.
           </p>
-        </div>
-
-        <div class="seg" role="group" aria-label="View mode">
-          <button type="button" class="seg-btn" data-mode="compare" aria-pressed="true">Compare</button>
-          <button type="button" class="seg-btn" data-mode="single" aria-pressed="false">Single video</button>
-          <button type="button" class="seg-btn" data-mode="playlist" aria-pressed="false">Playlist</button>
-        </div>
-      </div>
-
-      <!-- Compare: Single vs Playlist -->
-      <div class="grid" id="compareGrid">
-        <!-- Single video -->
-        <section class="panel" data-pane="single">
-          <div class="panel-head">
-            <div>
-              <p class="kicker">Single video</p>
-              <h3 class="title">Focused playback (one asset)</h3>
-              <p class="sub">Best for landing pages, announcements, and controlled journeys.</p>
-            </div>
-            <span class="pill">🎬 Single</span>
-          </div>
-
-          <div class="player">
-            <!-- Replace video id -->
-            <video-js
-              id="bcSingle"
-              data-account="6243204265001"
-              data-player="i7bsDiyP9"
-              data-embed="default"
-              data-video-id="1849994266609618859"
-              controls
-              playsinline
-              class="video-js vjs-fluid">
-            </video-js>
-          </div>
-
-          <div class="panel-body">
-            <ul class="bullets">
-              <li>Simple embed: predictable UX and performance.</li>
-              <li>Ideal when you want one call-to-action and one message.</li>
-              <li>Easier to manage captions/chapters per asset.</li>
-            </ul>
-            <span class="pill">Docs-aligned</span>
-          </div>
-        </section>
-
-        <!-- Playlist -->
-        <section class="panel" data-pane="playlist">
-          <div class="panel-head">
-            <div>
-              <p class="kicker">Playlist</p>
-              <h3 class="title">Multi-video experience (sequence)</h3>
-              <p class="sub">Great for onboarding series, curricula, and catalogs.</p>
-            </div>
-            <span class="pill">📚 Playlist</span>
-          </div>
-
-          <div class="player">
-            <!-- Replace playlist id -->
-            <video-js
-              id="bcPlaylist"
-              data-account="6243204265001"
-              data-player="nT47Bk9J7"
-              data-embed="default"
-              data-playlist-id="1849995119852741477"
-              controls
-              playsinline
-              class="video-js vjs-fluid">
-            </video-js>
-          </div>
-
-          <div class="panel-body">
-            <ul class="bullets">
-              <li>Auto-advance, playlist navigation, and series progression.</li>
-              <li>Perfect for "next lesson" flows and structured learning.</li>
-              <li>Chapters still possible per item (asset-level tracks).</li>
-            </ul>
-            <span class="pill">Docs-aligned</span>
-          </div>
-        </section>
-      </div>
-
-      <!-- Chapters showcase -->
-      <section class="section" aria-label="Chapters showcase">
-        <div class="section-head">
-          <div>
-            <h2>Tracks & Localization Showcase</h2>
-            <p>
-              Demonstrates Brightcove text and audio track capabilities including WebVTT chapters,
-              multilingual captions, and Universal Translator dubbing.
-            </p>
-          </div>
-          <span class="pill">⏱ Chapters</span>
-        </div>
-
-        <div class="chap-grid">
-          <section class="chap-card" data-vtt-demo>
-            <div class="chap-meta">
-              <div>
-                <p class="kicker">Chaptered video</p>
-                <h3 class="title">Chapters via WebVTT</h3>
-                <p class="sub">Add a chapters track and render a clickable chapter list.</p>
-              </div>
-              <span class="pill">.vtt</span>
-            </div>
-
-            <div class="player">
-              <video-js
-                id="bcChapters"
-                data-account="6243204265001"
-                data-player="i7bsDiyP9"
-                data-embed="default"
-                data-video-id="1856636261160821561"
-                controls
-                playsinline
-                class="video-js vjs-fluid">
-              </video-js>
-            </div>
-
-            <div class="chapters">
-              <p class="note">
-                Click a chapter to jump to that moment in the video. Chapters are defined via a WebVTT text track.
-              </p>
-            </div>
-          </section>
-
-          <section class="chap-card" data-ut-demo>
-            <div class="chap-meta">
-              <div>
-                <p class="kicker">Universal Translator</p>
-                <h3 class="title">Captions + Dubbing Playback</h3>
-                <p class="sub">Translated captions and dubbed audio via Universal Translator.</p>
-              </div>
-              <span class="pill">🌐 UT</span>
-            </div>
-
-            <div class="player">
-              <!-- Replace account / player / video id as needed -->
-              <video-js
-                id="bcUniversalTranslator"
-                data-account="6243204265001"
-                data-player="i7bsDiyP9"
-                data-embed="default"
-                data-video-id="1858261631136868733"
-                controls
-                playsinline
-                class="video-js vjs-fluid">
-              </video-js>
-            </div>
-
-            <div class="chapters">
-              <p>
+</div>
+<div aria-label="View mode" class="seg" role="group">
+<button aria-pressed="true" class="seg-btn" data-mode="compare" type="button">Compare</button>
+<button aria-pressed="false" class="seg-btn" data-mode="single" type="button">Single video</button>
+<button aria-pressed="false" class="seg-btn" data-mode="playlist" type="button">Playlist</button>
+</div>
+</div>
+<!-- Compare: Single vs Playlist -->
+<div class="grid" id="compareGrid">
+<!-- Single video -->
+<section class="panel grad-card" data-pane="single">
+<div class="panel-head">
+<div>
+<p class="kicker">Single video</p>
+<h3 class="title">Focused playback (one asset)</h3>
+<p class="sub">Best for landing pages, announcements, and controlled journeys.</p>
+</div>
+<span class="pill">🎬 Single</span>
+</div>
+<div class="player">
+<!-- Replace video id -->
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1849994266609618859" id="bcSingle" playsinline="">
+</video-js>
+</div>
+<div class="panel-body">
+<ul class="bullets">
+<li>Simple embed: predictable UX and performance.</li>
+<li>Ideal when you want one call-to-action and one message.</li>
+<li>Easier to manage captions/chapters per asset.</li>
+</ul>
+<span class="pill">Docs-aligned</span>
+</div>
+</section>
+<!-- Playlist -->
+<section class="panel grad-card" data-pane="playlist">
+<div class="panel-head">
+<div>
+<p class="kicker">Playlist</p>
+<h3 class="title">Multi-video experience (sequence)</h3>
+<p class="sub">Great for onboarding series, curricula, and catalogs.</p>
+</div>
+<span class="pill">📚 Playlist</span>
+</div>
+<div class="player">
+<!-- Replace playlist id -->
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="nT47Bk9J7" data-playlist-id="1849995119852741477" id="bcPlaylist" playsinline="">
+</video-js>
+</div>
+<div class="panel-body">
+<ul class="bullets">
+<li>Auto-advance, playlist navigation, and series progression.</li>
+<li>Perfect for "next lesson" flows and structured learning.</li>
+<li>Chapters still possible per item (asset-level tracks).</li>
+</ul>
+<span class="pill">Docs-aligned</span>
+</div>
+</section>
+</div>
+<!-- Chapters showcase -->
+<section aria-label="Tracks &amp; Localization showcase" class="section">
+<div class="section-head">
+<div>
+<h2>Tracks &amp; Localization Showcase</h2>
+<p>Demonstrates Brightcove text and audio track capabilities including WebVTT chapters, multilingual captions, and Universal Translator dubbing.</p>
+</div>
+<span class="pill">🎛 Tracks</span>
+</div>
+<div class="chap-grid">
+<section class="chap-card grad-card" data-vtt-demo="">
+<div class="chap-meta">
+<div>
+<p class="kicker">Chaptered video</p>
+<h3 class="title">Chapters via WebVTT</h3>
+<p class="sub">Add a chapters track and render a clickable chapter list.</p>
+</div>
+<span class="pill">.vtt</span>
+</div>
+<div class="player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1856636261160821561" id="bcChapters" playsinline="">
+</video-js>
+</div>
+<div class="chapters"><p class="note">Use the chapter list to navigate the video timeline. Chapters are defined via WebVTT.</p>
+</div>
+</section>
+<section class="chap-card grad-card" data-ut-demo="">
+<div class="chap-meta">
+<div>
+<p class="kicker">Universal Translator</p>
+<h3 class="title">Captions + Dubbing Playback</h3>
+<p class="sub">Translated captions and dubbed audio via Universal Translator.</p>
+</div>
+<span class="pill">🌐 UT</span>
+</div>
+<div class="player">
+<!-- Replace account / player / video id as needed -->
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858261631136868733" id="bcUniversalTranslator" playsinline="">
+</video-js>
+</div>
+<div class="chapters">
+<p>
                 Use the <strong>CC</strong> menu to switch translated captions.
                 Use the <strong>Audio / Tracks</strong> menu (if available) to select dubbed audio languages.
               </p>
-            </div>
-          </section>
 </div>
-      </section>
-    </div>
-  </main>
+</section>
+</div>
+</section>
+<section aria-label="AI Contents Multiplier" class="section" id="multiplier">
+<div class="section-head">
+<div>
+<h2>AI Contents Multiplier</h2>
+<p>Short-form 9:16 clips generated from long-form content. Designed for quick review and social-style playback.</p>
+</div>
+<span class="pill">🎬 9:16</span>
+</div>
+<div aria-label="9:16 clips grid" class="shorts-grid">
+  <section class="short-card grad-card">
+<div class="short-meta">
+<div>
+<p class="kicker">Clip 01</p>
+<h3 class="title">How to Break Through the Digital Noise</h3>
+<p class="sub">9:16 clip generated by AI Contents Multiplier.</p>
+</div>
+<span class="pill">Short</span>
+</div>
+<div class="short-player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858507073939453749" id="bcShort01" playsinline=""></video-js>
+</div>
+</section>
+<section class="short-card grad-card">
+<div class="short-meta">
+<div>
+<p class="kicker">Clip 02</p>
+<h3 class="title">Turn Passive Viewers Into Active Brand Participants</h3>
+<p class="sub">9:16 clip generated by AI Contents Multiplier.</p>
+</div>
+<span class="pill">Short</span>
+</div>
+<div class="short-player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858507061306222441" id="bcShort02" playsinline=""></video-js>
+</div>
+</section>
+<section class="short-card grad-card">
+<div class="short-meta">
+<div>
+<p class="kicker">Clip 03</p>
+<h3 class="title">Meet the AI That Optimizes Video Effortlessly</h3>
+<p class="sub">9:16 clip generated by AI Contents Multiplier.</p>
+</div>
+<span class="pill">Short</span>
+</div>
+<div class="short-player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858507048794455477" id="bcShort03" playsinline=""></video-js>
+</div>
+</section>
+<section class="short-card grad-card">
+<div class="short-meta">
+<div>
+<p class="kicker">Clip 04</p>
+<h3 class="title">Connect With Global Audiences Like Never Before</h3>
+<p class="sub">9:16 clip generated by AI Contents Multiplier.</p>
+</div>
+<span class="pill">Short</span>
+</div>
+<div class="short-player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858507034598890213" id="bcShort04" playsinline=""></video-js>
+</div>
+</section>
+<section class="short-card grad-card">
+<div class="short-meta">
+<div>
+<p class="kicker">Clip 05</p>
+<h3 class="title">Take Control With Intelligent AI Content Recommendations</h3>
+<p class="sub">9:16 clip generated by AI Contents Multiplier.</p>
+</div>
+<span class="pill">Short</span>
+</div>
+<div class="short-player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858507018316720505" id="bcShort05" playsinline=""></video-js>
+</div>
+</section>
+<section class="short-card grad-card">
+<div class="short-meta">
+<div>
+<p class="kicker">Clip 06</p>
+<h3 class="title">Maximize Revenue and Reduce Your Content Costs</h3>
+<p class="sub">9:16 clip generated by AI Contents Multiplier.</p>
+</div>
+<span class="pill">Short</span>
+</div>
+<div class="short-player">
+<video-js class="video-js vjs-fluid" controls="" data-account="6243204265001" data-embed="default" data-player="i7bsDiyP9" data-video-id="1858507005945687091" id="bcShort06" playsinline=""></video-js>
+</div>
+</section>
+</div>
+</section>
 
+</div>
+</main>
 <script>
     // Header elevation
     const header = document.getElementById('siteHeader');
@@ -906,22 +969,9 @@ button, input{ font:inherit; }
     }
     segBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     setMode('compare');
-
-  
-    // run once player scripts are ready
-    window.addEventListener('load', () => {
-      loadAndBindChapters().catch(err => {
-        console.error(err);
-        const listEl = document.getElementById('chapterList');
-        if(listEl) listEl.innerHTML = `<li style="padding:10px;color:rgba(255,255,255,.65);font-size:13px;">Failed to load chapters.vtt. Check CORS / URL.</li>`;
-      });
-    });
-  </script>
-
-<script src="https://players.brightcove.net/6243204265001/i7bsDiyP9_default/index.min.js"></script>
-
+</script>
+<script src="https://players.brightcove.net/6243204265001/i7bsDiyP9_default/index.min.js"></script><script src="https://players.brightcove.net/6243204265001/69IXNadf9_default/index.min.js"></script>
 <script src="https://players.brightcove.net/6243204265001/nT47Bk9J7_default/index.min.js"></script>
-
 <script>
 (() => {
   // Header elevation
@@ -997,50 +1047,44 @@ button, input{ font:inherit; }
   }
 })();
 </script>
-
-<footer class="footer" aria-label="Site footer">
-  <div class="container footer-inner">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <img class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg" alt="" aria-hidden="true">
-        <div>
-          <h3>Onboarding Engagement Manager</h3>
-          <p>
+<footer aria-label="Site footer" class="footer">
+<div class="container footer-inner">
+<div class="footer-top">
+<div class="footer-brand">
+<img alt="" aria-hidden="true" class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg"/>
+<div>
+<h3>Onboarding Engagement Manager</h3>
+<p>
             A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.
           </p>
-        </div>
-      </div>
-
-      <div class="footer-col">
-        <h4>Explore</h4>
-        <nav class="footer-links" aria-label="Footer navigation">
-          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
-          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
-          <a href="player.html"><span aria-hidden="true">↗</span> Player showcase</a>
-          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
-          <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
-          <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
-          <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
-          <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
-          <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
-        </nav>
-      </div>
-    </div>
-
-    <div class="footer-divider" role="separator"></div>
-
-    <div class="footer-bottom">
-      <div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
-
-      <div class="footer-badges" aria-label="Badges">
-        <span class="footer-pill">Docs-aligned</span>
-        <span class="footer-pill">Implementation-first</span>
-        <span class="footer-pill">Brightcove Player</span>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+<div class="footer-col">
+<h4>Explore</h4>
+<nav aria-label="Footer navigation" class="footer-links">
+<a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+<a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+<a href="player.html"><span aria-hidden="true">↗</span> Player showcase</a>
+<a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+<a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+<a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+<a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+<a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+<a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+</nav>
+</div>
+</div>
+<div class="footer-divider" role="separator"></div>
+<div class="footer-bottom">
+<div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
+<div aria-label="Badges" class="footer-badges">
+<span class="footer-pill">Docs-aligned</span>
+<span class="footer-pill">Implementation-first</span>
+<span class="footer-pill">Brightcove Player</span>
+</div>
+</div>
+</div>
 </footer>
-
 <script>
 (() => {
   const y = document.getElementById('footerYear');
