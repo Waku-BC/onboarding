@@ -1,0 +1,2150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Brightcove Preload Demo Lab • Overview</title>
+<style>
+
+:root{
+  --black:#000;
+  --yellow:#EFD900;
+  --orange:#F76531;
+  --purple:#AA6C7E;
+  --blue:#4EA9D1;
+
+  --fg: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.64);
+  --line: rgba(255,255,255,.12);
+
+  --max: 1160px;
+  --h: 72px;
+
+  --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --focus: 0 0 0 3px rgba(78,169,209,.35);
+
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  --brand-grad-reverse: linear-gradient(270deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: var(--black);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+  overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+button, input{ font:inherit; }
+
+.container{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+}
+
+/* ===== Header ===== */
+.header{
+  position:sticky; top:0; z-index:50;
+  height:var(--h);
+  display:flex; align-items:center;
+  background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.header.is-scrolled{
+  background: rgba(0,0,0,.84);
+  box-shadow: var(--shadow-soft);
+  border-bottom-color: rgba(255,255,255,.12);
+}
+.header-inner{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
+}
+.brand{ display:flex; align-items:center; gap:12px; min-width:220px; }
+.logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+.brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+.brand-name strong{ font-weight:800; letter-spacing:.6px; }
+.brand-name span{ font-size:12px; color: var(--muted); }
+
+/* ===== Nav ===== */
+.nav{
+  position:relative;
+  display:flex; align-items:center; gap:2px;
+  padding:6px;
+  border-radius:999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
+}
+.nav a,
+.nav-dd-btn{
+  padding: 10px 12px;
+  border-radius:999px;
+  font-size:14px;
+  color: rgba(255,255,255,.78);
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  position:relative;
+  outline:none;
+  white-space:nowrap;
+}
+.nav a:hover,
+.nav-dd-btn:hover{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.96);
+  transform: translateY(-1px);
+}
+.nav a:hover::after,
+.nav-dd-btn:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.nav a:focus-visible,
+.nav-dd-btn:focus-visible{ box-shadow: var(--focus); }
+
+.nav a[data-active="true"]{
+  color: rgba(255,255,255,.95);
+  background: rgba(255,255,255,.10);
+}
+.nav a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+/* ===== Dropdown ===== */
+.nav-dd{ position:relative; display:inline-flex; align-items:center; }
+.nav-dd-btn{
+  appearance:none;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+}
+.nav-dd[data-open="true"] .nav-dd-btn{
+  color: rgba(255,255,255,.95);
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.nav-dd[data-active="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.chev{
+  width:10px; height:10px;
+  display:inline-block;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform: rotate(45deg);
+  transition: transform .18s var(--ease), opacity .18s var(--ease);
+  opacity:.9;
+}
+.nav-dd[data-open="true"] .chev{ transform: rotate(225deg); }
+
+.nav-menu{
+  position:absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:none;
+  z-index:80;
+}
+.nav-dd[data-open="true"] .nav-menu{ display:block; }
+
+.nav-menu a{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  color: rgba(255,255,255,.86);
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease);
+  white-space:nowrap;
+  position:relative;
+}
+.nav-menu a:hover{
+  transform: translateY(-1px);
+  background:
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18);
+}
+.nav-menu a[data-active="true"]{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+@media (max-width: 760px){
+  .nav{ flex-wrap:wrap; justify-content:center; }
+  .nav-menu{ left: 50%; transform: translateX(-50%); }
+}
+
+/* ===== Page ===== */
+.page{
+  padding: 22px 0 56px;
+  background:
+    radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%),
+    var(--black);
+}
+
+/* ================================
+   Heads: unified (page-head / section-head)
+   - gradient fill
+   - black glass overlay
+   - ONE pseudo-element only (no double lines)
+   ================================ */
+.page-head,
+.section-head{
+  position:relative;
+  border-radius: 18px;
+  background: var(--brand-grad);
+  overflow:hidden;
+  box-shadow: var(--shadow-soft);
+}
+
+/* glass overlay */
+.page-head::before,
+.section-head::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events:none;
+}
+
+/* keep inner content above overlay */
+.page-head > *,
+.section-head > *{
+  position:relative;
+  z-index:1;
+}
+
+/* page-head layout (keep your current flex) */
+.page-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 14px;
+  padding: 14px 14px 16px;
+margin-bottom: 10px;
+  border-top: 1px solid rgba(255,255,255,.10);
+  border-bottom: 1px solid rgba(255,255,255,.10);
+  border-left: 1px solid rgba(239,217,0,.55);
+  border-right: 1px solid rgba(78,169,209,.55);
+}
+.page-head::after{
+  content:"";
+  display:block;
+  height: 2px;
+  margin-top: 12px;
+  border-radius: 999px;
+  background: var(--brand-grad);
+  opacity: .85;
+}
+.page-head h1{
+  margin:0;
+  font-size: clamp(18px, 2.1vw, 26px);
+  letter-spacing: -.2px;
+}
+.page-head p{
+  margin:8px 0 0;
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.65;
+  max-width: 80ch;
+}
+
+/* seg stays same */
+.seg{
+  display:flex; gap:6px;
+  padding:6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.28);
+}
+.seg button{
+  border:0;
+  background: transparent;
+  color: rgba(255,255,255,.72);
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor:pointer;
+  transition: background .18s var(--ease), color .18s var(--ease);
+  outline:none;
+  white-space:nowrap;
+  font-size: 13px;
+}
+.seg button[aria-pressed="true"]{
+  background: rgba(255,255,255,.10);
+  color: rgba(255,255,255,.92);
+  position:relative;
+}
+.seg button[aria-pressed="true"]::after{
+  content:"";
+  position:absolute;
+  left:14px; right:14px; bottom:7px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.seg button:focus-visible{ box-shadow: var(--focus); }
+
+.grid{
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  padding-top: 16px;
+}
+
+.panel, .chap-card, .short-card{
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.34);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-soft);
+  overflow:hidden;
+  position:relative;
+}
+
+.panel{ grid-column: span 6; }
+
+.panel-head, .chap-meta{
+  padding: 14px 14px 10px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap: 12px;
+}
+.kicker{ margin:0; font-size:12px; color: rgba(255,255,255,.62); }
+.title{ margin:0; font-size:15px; line-height:1.25; }
+.sub{ margin:8px 0 0; color: rgba(255,255,255,.70); font-size:13px; line-height:1.6; }
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.22);
+  color: rgba(255,255,255,.72);
+  font-size: 12px;
+  white-space:nowrap;
+}
+
+.player{
+  position:relative;
+  aspect-ratio: 16/9;
+  background:#000;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.player .video-js,
+.player video-js,
+.player video,
+.player iframe{
+  position:absolute !important;
+  inset:0;
+  width:100% !important;
+  height:100% !important;
+}
+
+.panel-body{
+  padding: 12px 14px 14px;
+  display:flex;
+  gap: 10px;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.bullets{
+  margin:0;
+  padding-left: 18px;
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.6;
+  max-width: 70ch;
+}
+
+/* ===== Sections ===== */
+.section{
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,.10);
+}
+
+/* section-head layout (keep your structure) */
+.section-head{
+  position:relative;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 12px;
+
+  padding: 12px;
+  border-radius: 18px;
+
+  border: 1px solid transparent;
+
+  background:
+    linear-gradient(rgba(0,0,0,.42), rgba(0,0,0,.42)) padding-box,
+    var(--brand-grad-reverse) border-box,
+    var(--brand-grad) padding-box;
+
+  overflow:hidden;
+  box-shadow: var(--shadow-soft);
+}
+.section-head h2{ margin:0; font-size: 14px; letter-spacing:.2px; }
+.section-head p{
+  margin:6px 0 0;
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.6;
+  max-width: 90ch;
+}
+
+.chap-grid{
+  display:grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 12px;
+  padding-top: 10px;
+}
+.chap-card{ grid-column: span 6; }
+
+.chap-card .chapters{
+  padding: 10px 10px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.chap-card .chapters p{
+  margin:0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.chap-card .chapters p + p{ margin-top: 10px; }
+.chap-card .chapters code{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,.85);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.10);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+/* ===== Cards: subtle gradient border (used by .grad-card) ===== */
+.grad-card{
+  border: 1px solid transparent;
+  background:
+    linear-gradient(rgba(0,0,0,.34), rgba(0,0,0,.34)) padding-box,
+    var(--brand-grad) border-box;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    var(--shadow-soft);
+  filter: saturate(.92);
+}
+.grad-card:hover,
+.grad-card:focus-within{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08) inset,
+    0 10px 30px rgba(0,0,0,.55),
+    0 0 18px rgba(247,101,49,.16);
+}
+.panel.grad-card,
+.chap-card.grad-card,
+.short-card.grad-card{ border-color: transparent; }
+
+/* ===== Shorts shelf (1 row / 5 fixed) ===== */
+.shorts-shelf{
+  display:flex;
+  flex-wrap:nowrap;
+  gap: 12px;
+  overflow:hidden;
+  padding: 10px 0 0;
+}
+.shorts-shelf > .short-card{
+  flex: 0 0 calc((100% - 48px) / 5);
+  min-width: 0;
+  border-radius: 20px;
+}
+.short-meta{ padding: 12px 12px 10px; }
+.short-player{
+  aspect-ratio: 9 / 16;
+  position: relative;
+  width: 100%;
+  background:#000;
+  overflow:hidden;
+  border-radius: 18px;
+}
+.short-player .video-js,
+.short-player video-js,
+.short-player video,
+.short-player iframe{
+  position:absolute !important;
+  inset:0;
+  width:100% !important;
+  height:100% !important;
+}
+/* Shortsはグラデ枠を外して“プロっぽく” */
+.shorts-shelf .short-card.grad-card{
+  background: rgba(0,0,0,.34) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    var(--shadow-soft) !important;
+  filter: none !important;
+}
+.shorts-shelf .short-card.grad-card:hover,
+.shorts-shelf .short-card.grad-card:focus-within{
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08) inset,
+    0 12px 28px rgba(0,0,0,.55) !important;
+}
+.shorts-shelf .short-meta .title,
+.shorts-shelf .short-meta .sub{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 980px){
+  .panel{ grid-column: span 12; }
+  .chap-card{ grid-column: span 12; }
+  .page-head{ flex-direction:column; align-items:flex-start; }
+  .shorts-shelf{ overflow-x:auto; padding: 10px 2px 14px; }
+  .shorts-shelf > .short-card{ flex: 0 0 auto; width: clamp(150px, 22vw, 220px); }
+}
+
+/* ===== Footer ===== */
+.footer{
+  position:relative;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%),
+    linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%),
+    var(--black);
+  overflow:hidden;
+}
+.footer::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:1px;
+  background: var(--brand-grad);
+  opacity:.9;
+}
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background: radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+  opacity:.6;
+}
+.footer-inner{
+  position:relative;
+  z-index:1;
+  padding: 40px 0 22px;
+  display:block;
+}
+.footer-top{
+  display:grid;
+  grid-template-columns: minmax(320px, 1.3fr) minmax(260px, 1fr);
+  gap: 18px;
+  align-items:start;
+}
+.footer-brand{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  text-align:left;
+  max-width: 560px;
+}
+.footer-logo{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  flex:0 0 auto;
+  opacity:.92;
+}
+.footer-brand h3{
+  margin:0 0 4px 0;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+.footer-brand p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.65);
+}
+.footer-col h4{
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+.footer-links{
+  display:grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 8px 14px;
+  align-content:start;
+}
+.footer-links a{
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 8px;
+  border-radius: 10px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  outline:none;
+}
+.footer-links a:hover{
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transform: translateY(-1px);
+}
+.footer-links a:focus-visible{ box-shadow: var(--focus); }
+
+.footer-divider{
+  margin: 22px 0 14px;
+  height:1px;
+  background: rgba(255,255,255,.10);
+}
+.footer-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+}
+.footer-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:wrap;
+}
+.footer-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.70);
+}
+
+@media (max-width: 860px){
+  .footer-top{ grid-template-columns: 1fr; }
+}
+@media (max-width: 640px){
+  .footer-inner{ padding: 34px 0 20px; }
+  .footer-links{ grid-auto-flow: row; grid-template-rows: none; }
+  .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+.preload-lab{
+  --black:#000;
+  --white:#fff;
+  --yellow:#EFD900;
+  --orange:#F76531;
+  --purple:#AA6C7E;
+  --blue:#4EA9D1;
+
+  --fg: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.64);
+  --border: rgba(255,255,255,.12);
+
+  --max: 1160px;
+  --h: 72px;
+
+  --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --focus: 0 0 0 3px rgba(78,169,209,.35);
+}
+
+.preload-lab *{ box-sizing:border-box; }
+.preload-lab{ height:100%; }
+.preload-body{
+  margin:0;
+  background: var(--black);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+  overflow-x:hidden;
+}
+.preload-lab a{ color:inherit; text-decoration:none; }
+.preload-lab button, .preload-lab input{ font:inherit; }
+
+.preload-lab .container{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+}
+
+.preload-lab /* ===== Header (identical) ===== */
+.header{
+  position:sticky; top:0; z-index:50;
+  height:var(--h);
+  display:flex; align-items:center;
+  background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.preload-lab .header.is-scrolled{
+  background: rgba(0,0,0,.84);
+  box-shadow: var(--shadow-soft);
+  border-bottom-color: rgba(255,255,255,.12);
+}
+.preload-lab .header-inner{
+  width:min(var(--max), calc(100% - 32px));
+  margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px;
+}
+.preload-lab .brand{ display:flex; align-items:center; gap:12px; min-width: 220px; }
+.preload-lab .logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+.preload-lab .brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+.preload-lab .brand-name strong{ font-weight:800; letter-spacing:.6px; }
+.preload-lab .brand-name span{ font-size:12px; color: var(--muted); }
+
+.preload-lab .lab-nav{
+  display:flex; align-items:center; gap:2px;
+  padding:6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
+
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.preload-lab .lab-nav a{
+  padding: 10px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  color: rgba(255,255,255,.78);
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  position:relative;
+  outline:none;
+  white-space:nowrap;
+}
+.preload-lab .lab-nav a:hover{ background: rgba(255,255,255,.08); color: rgba(255,255,255,.92); transform: translateY(-1px); }
+.preload-lab .lab-nav a:focus-visible{ box-shadow: var(--focus); }
+.preload-lab .lab-nav a[data-active="true"]{
+  color: rgba(255,255,255,.95);
+  background: rgba(255,255,255,.10);
+}
+.preload-lab .lab-nav a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.95;
+}
+.preload-lab /* ===== Nav dropdown (add-on) ===== */
+.nav{ position:relative; } .preload-lab /* menuの基準 */
+
+.nav-dd{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+}
+
+.preload-lab .nav-dd-btn{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color: rgba(255,255,255,.78);
+  padding: 10px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor:pointer;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  outline:none;
+  white-space:nowrap;
+  position:relative;
+}
+.preload-lab .nav-dd-btn:hover{
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.92);
+  transform: translateY(-1px);
+}
+.preload-lab .nav-dd-btn:focus-visible{ box-shadow: var(--focus); }
+
+.preload-lab .nav-dd[data-open="true"] .nav-dd-btn{
+  color: rgba(255,255,255,.95);
+  background: rgba(255,255,255,.10);
+}
+
+.preload-lab /* Catalog/Advertising が active のとき（子ページでも） */
+.nav-dd[data-active="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.95;
+}
+
+.preload-lab .chev{
+  width:10px; height:10px;
+  display:inline-block;
+  border-right:2px solid rgba(255,255,255,.55);
+  border-bottom:2px solid rgba(255,255,255,.55);
+  transform: rotate(45deg);
+  transition: transform .18s var(--ease), opacity .18s var(--ease);
+  opacity:.9;
+}
+.preload-lab .nav-dd[data-open="true"] .chev{
+  transform: rotate(225deg);
+}
+
+.preload-lab /* dropdown panel */
+.nav-menu{
+  position:absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset;
+  display:none;
+  z-index: 80;
+}
+
+.preload-lab .nav-dd[data-open="true"] .nav-menu{ display:block; }
+
+.preload-lab .nav-menu a{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  color: rgba(255,255,255,.86);
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
+  white-space:nowrap;
+}
+.preload-lab .nav-menu a:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.16);
+}
+.preload-lab .nav-menu a[data-active="true"]{
+  background: rgba(255,255,255,.10);
+  border-color: rgba(255,255,255,.18);
+  position:relative;
+}
+.preload-lab .nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.95;
+}
+
+.preload-lab /* Responsive: narrow screens */
+@media (max-width: 760px){
+  .nav{ flex-wrap:wrap; justify-content:center; }
+  .preload-lab .nav-menu{ left: 50%; transform: translateX(-50%); }
+}
+
+.preload-lab /* ===== Brand gradient hover/active (add-on) ===== */
+.preload-lab{
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+
+.preload-lab /* Top-level links (Media/Player/GA etc.) */
+.nav a:hover{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.96);
+}
+.preload-lab .lab-nav a:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+.preload-lab /* Dropdown trigger (Catalog/Advertising buttons) */
+.nav-dd-btn:hover{
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.96);
+}
+.preload-lab .nav-dd-btn:hover::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+.preload-lab /* Open state: subtle gradient "wash" + line */
+.nav-dd[data-open="true"] .nav-dd-btn{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.preload-lab .nav-dd[data-open="true"] .nav-dd-btn::after{
+  content:"";
+  position:absolute;
+  left:16px; right:16px; bottom:6px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+
+.preload-lab /* Menu items hover: gradient edge + subtle glow */
+.nav-menu a:hover{
+  background:
+    linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18);
+}
+
+.preload-lab /* Active menu item: stronger (still clean) */
+.nav-menu a[data-active="true"]{
+  background:
+    linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box,
+    var(--brand-grad) border-box;
+  border: 1px solid transparent;
+}
+.preload-lab .nav-menu a[data-active="true"]::after{
+  content:"";
+  position:absolute;
+  left:12px; right:12px; bottom:7px;
+  height:2px; border-radius:999px;
+  background: var(--brand-grad);
+  opacity:.95;
+}
+.preload-lab /* ===== Page ===== */
+.page{
+  padding: 22px 0 56px;
+  background:
+    radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%),
+    var(--black);
+}
+
+.preload-lab /* ===== Footer (identical) ===== */
+.footer{
+  margin-top:40px;
+  padding:20px 0;
+  border-top:1px solid rgba(255,255,255,.08);
+  color:rgba(255,255,255,.55);
+  font-size:12px;
+  text-align:center;
+}
+
+.preload-lab /* Compatibility vars for inspector */
+.preload-lab{
+  --bg: var(--black);
+  --line: rgba(255,255,255,.12);
+}
+
+.preload-lab h1{margin:0 0 10px;font-size:20px}
+.preload-lab .meta{font-size:13px;opacity:.85;margin-bottom:14px}
+
+.preload-lab .grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:16px;
+}
+
+.preload-lab /* ===== Gradient border card (bulletproof, .preload-lab no mask) ===== */
+.card{
+  border-radius:14px;
+  border:1px solid transparent; /* 枠を作るために透明border */
+  background:
+    linear-gradient(rgba(11,11,11,.92), rgba(11,11,11,.92)) padding-box, /* 中身 */
+    linear-gradient(120deg,var(--yellow),var(--orange),var(--purple),var(--blue)) border-box; /* 枠 */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.06) inset,
+    0 10px 30px rgba(0,0,0,.55),
+    0 4px 12px rgba(247,101,49,.25);
+  overflow:hidden; /* プレーヤーがはみ出しても枠の外に出ない */
+}
+
+.preload-lab /* もう inner を使わなくて良い（残すなら “透明” に） */
+.cardInner{
+  background:transparent;
+  border-radius:0;
+  padding:14px;
+  backdrop-filter: blur(6px);
+}
+
+.preload-lab /* プレーヤー下の謎余白対策 */
+.playerWrap{
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12);
+  background:#000;
+  line-height:0;
+}
+.preload-lab .playerWrap .video-js{ display:block; }
+
+.preload-lab .pill{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:linear-gradient(135deg,#0072CE,#00AEEF,#6E3FF3);
+}
+
+.preload-lab .playerWrap{
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  background:#000;
+}
+
+.preload-lab .log{
+  height:300px;
+  overflow:auto;
+  background:#070707;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  font-family:monospace;
+  font-size:12px;
+  white-space:pre-wrap;
+}
+
+.preload-lab pre{
+  background:#070707;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  overflow:auto;
+}
+.preload-lab /* Player card should NOT stretch when the right card grows */
+#playerCard{
+  align-self: start;
+  height: fit-content;
+}
+
+.preload-lab /* Safety: prevent grid items from stretching */
+.grid{
+  align-items: start;
+}
+.preload-lab /* ---- Event category tags (non-breaking add-on) ---- */
+.logLine{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:2px 0;
+}
+
+.preload-lab .tag{
+  flex:0 0 auto;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.02em;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  user-select:none;
+  white-space:nowrap;
+}
+
+.preload-lab .tag.play{   background: rgba(0,174,239,.18); border-color: rgba(0,174,239,.35); }
+.preload-lab .tag.ad{  background: linear-gradient(135deg, #EFD900, #F76531); border-color: rgba(247,101,49,.55); color:#000; box-shadow:0 0 6px rgba(247,101,49,.35);}
+.preload-lab .tag.error{  background: rgba(255,77,79,.18); border-color: rgba(255,77,79,.35); }
+.preload-lab .tag.buffer{ background: rgba(170,108,126,.18); border-color: rgba(170,108,126,.35); }
+.preload-lab .tag.info{   background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.14); }
+
+.preload-lab .logMsg{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size:12px;
+  line-height:1.55;
+  white-space:pre-wrap;
+  word-break:break-word;
+  opacity:.95;
+}
+
+.preload-lab /* ===== Footer ===== */
+.footer{
+  position:relative;
+  border-top: 1px solid rgba(255,255,255,.10);
+  background:
+    radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%),
+    radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%),
+    linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%),
+    var(--black);
+  overflow:hidden;
+}
+
+.preload-lab /* top accent line */
+.footer::before{
+  content:"";
+  position:absolute;
+  left:0; right:0; top:0;
+  height:1px;
+  background: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  opacity:.9;
+}
+
+.preload-lab /* subtle noise-ish sheen */
+.footer::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%);
+  pointer-events:none;
+  opacity:.6;
+}
+
+.preload-lab .footer-inner{
+  position:relative;
+  z-index:1;
+  padding: 40px 0 22px;
+}
+
+.preload-lab .footer-top{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 18px;
+  align-items:start;
+}
+
+.preload-lab .footer-brand{
+  display:flex;
+  align-items:flex-start;
+  gap:14px;
+  text-align:left;
+}
+
+.preload-lab .footer-logo{
+  width:34px;
+  height:34px;
+  object-fit:contain;
+  flex:0 0 auto;
+  opacity:.92;
+}
+
+.preload-lab .footer-brand h3{
+  margin:0 0 4px 0;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.2px;
+}
+
+.preload-lab .footer-brand p{
+  margin:0;
+  font-size:13px;
+  line-height:1.5;
+  color:rgba(255,255,255,.65);
+}
+
+.preload-lab .footer-col h4{
+  margin: 0 0 10px;
+  font-size: 12px;
+  letter-spacing:.35px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.preload-lab .footer-links{
+  display:grid;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(3, auto);
+  gap: 8px 14px;
+  align-content:start;
+}
+
+@media (max-width: 640px){
+  .footer-links{
+    grid-auto-flow: row;
+    grid-template-rows: none;
+  }
+}
+
+.preload-lab .footer-links a{
+  color: rgba(255,255,255,.70);
+  font-size: 13px;
+  line-height:1.4;
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  width: fit-content;
+  padding: 6px 8px;
+  border-radius: 10px;
+  transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease);
+  outline:none;
+}
+
+.preload-lab .footer-links a:hover{
+  color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.06);
+  transform: translateY(-1px);
+}
+
+.preload-lab .footer-links a:focus-visible{ box-shadow: var(--focus); }
+
+.preload-lab .footer-links .hint{
+  opacity:.75;
+  font-size: 12px;
+}
+
+.preload-lab .footer-divider{
+  margin: 22px 0 14px;
+  height:1px;
+  background: rgba(255,255,255,.10);
+}
+
+.preload-lab .footer-bottom{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+  flex-wrap:wrap;
+  color: rgba(255,255,255,.55);
+  font-size: 12px;
+}
+
+.preload-lab .footer-badges{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap:wrap;
+}
+
+.preload-lab .footer-pill{
+  display:inline-flex;
+  align-items:center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: rgba(255,255,255,.70);
+}
+
+.preload-lab /* responsive */
+@media (max-width: 980px){
+  .footer-top{ grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 640px){
+  .footer-inner{ padding: 34px 0 20px; }
+  .preload-lab .footer-top{ grid-template-columns: 1fr; }
+  .preload-lab .footer-bottom{ flex-direction:column; align-items:flex-start; }
+}
+
+.preload-lab /* ===== Preload Lab (scoped by lab- prefix) ===== */
+.preload-lab{
+  --bg:#050505;
+  --panel: rgba(255,255,255,.05);
+  --panel2: rgba(0,0,0,.35);
+  --line: rgba(255,255,255,.12);
+  --text: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.64);
+  --yellow:#EFD900;
+  --orange:#F76531;
+  --purple:#AA6C7E;
+  --blue:#4EA9D1;
+  --grad: linear-gradient(135deg,var(--yellow),var(--orange),var(--purple),var(--blue));
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+.preload-lab *{ box-sizing:border-box; }
+.preload-body{
+  margin:0;
+  background: radial-gradient(1100px 700px at 20% 10%, rgba(239,217,0,.14), transparent 55%),
+              radial-gradient(1000px 700px at 85% 15%, rgba(78,169,209,.16), transparent 55%),
+              radial-gradient(900px 700px at 50% 85%, rgba(247,101,49,.10), transparent 60%),
+              var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+.preload-main{ max-width: 1140px; margin: 34px auto; padding: 0 20px 60px; }
+.preload-lab .lab-header{
+  display:flex; align-items:flex-end; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border:1px solid transparent;
+  background: linear-gradient(var(--panel2), var(--panel2)) padding-box, var(--grad) border-box;
+  box-shadow: 0 18px 55px rgba(0,0,0,.45);
+}
+.preload-lab .lab-hgroup h1{ margin:0; font-size:22px; letter-spacing:.2px; }
+.preload-lab .lab-hgroup .lab-sub{ margin-top:6px; color:var(--muted); font-size:13px; line-height:1.4; }
+.preload-lab .lab-nav{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.preload-lab .lab-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding: 7px 12px; border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.86);
+  font-size: 12px; text-decoration:none;
+  transition: transform .18s var(--ease), background .18s var(--ease);
+}
+.preload-lab .lab-pill:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); }
+.preload-lab .lab-pill.lab-active{ border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.10); }
+
+.preload-lab .lab-grid{ display:grid; grid-template-columns: 1.15fr .85fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 980px){ .lab-grid{ grid-template-columns: 1fr; } }
+
+.preload-lab .lab-card{
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  overflow:hidden;
+  box-shadow: 0 14px 45px rgba(0,0,0,.35);
+}
+.preload-lab .lab-card .lab-hd{
+  padding: 12px 14px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  background: rgba(0,0,0,.25);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.preload-lab .lab-card .lab-hd .lab-title{ font-weight: 750; font-size: 13px; letter-spacing:.2px; }
+.preload-lab .lab-card .lab-bd{ padding: 14px; }
+
+.preload-lab .kpis{ display:grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 10px; }
+@media (max-width: 980px){ .kpis{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+.preload-lab .kpi{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
+  padding: 10px 12px;
+}
+.preload-lab .kpi .k{ font-size: 11px; color: var(--muted); }
+.preload-lab .kpi .v{ margin-top:4px; font-size: 18px; font-weight: 800; }
+
+.preload-lab .metrics{ margin-top:10px; display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px; }
+.preload-lab .metric{
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  padding: 10px 12px;
+}
+.preload-lab .metric .k{ font-size: 11px; color: var(--muted); }
+.preload-lab .metric .v{ margin-top:4px; font-size: 14px; font-weight: 800; }
+
+.preload-lab .lab-small{ color:var(--muted); font-size:12px; line-height:1.45; }
+
+.preload-lab .log{
+  height: 360px;
+  overflow:auto;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  background: #060606;
+  padding: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+}
+.preload-lab .line{ display:flex; gap:10px; margin-bottom:7px; align-items:flex-start; }
+.preload-lab .tag{
+  padding:2px 7px; border-radius: 999px;
+  font-weight: 800; font-size: 11px; line-height: 1.3;
+  flex: 0 0 auto;
+}
+.preload-lab .tag.manifest{ background: rgba(239,217,0,.95); color:#000; }
+.preload-lab .tag.playlist{ background: rgba(170,108,126,.95); color:#000; }
+.preload-lab .tag.init{ background: rgba(247,101,49,.95); color:#000; }
+.preload-lab .tag.segment{ background: rgba(78,169,209,.95); color:#000; }
+.preload-lab .tag.poster{ background: rgba(255,255,255,.16); color: rgba(255,255,255,.9); }
+.preload-lab .tag.info{ background: rgba(255,255,255,.16); color: rgba(255,255,255,.9); }
+.preload-lab .msg{ color: rgba(255,255,255,.84); word-break: break-word; }
+.preload-lab .badge{
+  display:inline-flex; align-items:center;
+  font-size: 10px; font-weight: 900;
+  padding: 2px 6px; border-radius: 999px;
+  border:1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.06);
+  color: rgba(255,255,255,.85);
+  margin-left: 8px;
+}
+.preload-lab .badge.net{ border-color: rgba(78,169,209,.45); }
+.preload-lab .badge.cache{ border-color: rgba(239,217,0,.45); }
+
+.preload-lab .table{ width:100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+.preload-lab .table th, .preload-lab .table td{ padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,.08); text-align:left; vertical-align: top; }
+.preload-lab .table th{ color: rgba(255,255,255,.70); font-weight: 800; }
+.preload-lab .table td{ color: rgba(255,255,255,.86); }
+.preload-lab .lab-mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+.preload-lab .lab-tip{ margin-top: 18px; color: rgba(255,255,255,.55); font-size: 12px; }
+.preload-lab code{ color: rgba(255,255,255,.85); }
+.preload-lab /* ===== Comparison table container ===== */
+
+.lab-compare{
+  margin-top:16px;
+  padding:16px;
+  border-radius:16px;
+
+  background:#070707;
+  border:1px solid rgba(255,255,255,.12);
+
+  box-shadow:0 12px 40px rgba(0,0,0,.45);
+}
+
+.preload-lab /* remove gradient glow */
+.lab-compare:before{
+  display:none;
+}
+
+.preload-lab /* ===== matrix cells ===== */
+
+.lab-matrix{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:150px repeat(4,minmax(110px,1fr));
+  gap:6px;
+}
+
+.preload-lab .lab-mcell{
+  padding:9px 10px;
+  border-radius:10px;
+
+  background:#0e0e0e;
+  border:1px solid rgba(255,255,255,.08);
+
+  font-size:12px;
+}
+
+.preload-lab /* header */
+
+.lab-mcell.lab-head{
+  background:#161616;
+  font-weight:700;
+}
+
+.preload-lab /* row labels */
+
+.lab-mcell.lab-row{
+  background:#0a0a0a;
+  color:rgba(255,255,255,.75);
+}
+
+.preload-lab /* hover */
+
+.lab-mcell:hover{
+  background:#151515;
+}
+
+.preload-lab /* highlight current column */
+
+.lab-mcell.current{
+  background:#141414;
+  border-color:rgba(239,217,0,.55);
+}
+.preload-lab .lab-dot{ font-weight: 800; letter-spacing:.3px; }
+.preload-lab .legend{
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  position:relative;
+  display:flex;
+  gap: 12px;
+  flex-wrap:wrap;
+}
+.preload-lab .legend b{ color: rgba(255,255,255,.86); font-weight:700; }
+@media (max-width: 900px){
+  .lab-matrix{ grid-template-columns: 1fr; }
+  .preload-lab .lab-mcell{ justify-content:space-between; }
+}
+
+/* ===== Preload Lab: adopt Media's page-head look ===== */
+.preload-lab .page-head{
+  position:relative;
+  border-radius: 18px;
+  background: var(--brand-grad);
+  overflow:hidden;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(255,255,255,.10);
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap: 14px;
+  padding: 14px 14px 16px;
+  margin-bottom: 10px;
+}
+.preload-lab .page-head::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,.42);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  pointer-events:none;
+}
+.preload-lab .page-head > *{ position:relative; z-index:1; }
+
+</style>
+</head>
+<body>
+<header class="header" id="siteHeader">
+<div class="header-inner">
+<a class="brand" href="index.html">
+<img alt="Brightcove Logo" class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg"/>
+<div class="brand-name">
+<strong>BRIGHTCOVE</strong>
+<span>Onboarding Engagement Manager</span>
+<span>Implementation Gallery</span>
+</div>
+</a>
+<nav aria-label="Primary" class="nav">
+  <a data-nav="media" href="media.html">Media</a>
+  <a data-nav="player" href="player.html">Player</a>
+  <!-- Catalog dropdown -->
+  <div class="nav-dd" data-nav-group="catalog">
+  <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+              Catalog
+              <span aria-hidden="true" class="chev"></span>
+  </button>
+  <div aria-label="Catalog menu" class="nav-menu" role="menu">
+  <a data-nav="api" href="api.html" role="menuitem">Catalog API</a>
+  <a data-nav="playlist" href="playlist.html" role="menuitem">Playlist</a>
+  <a data-nav="grid" href="grid.html" role="menuitem">Grid</a>
+  </div>
+  </div>
+<!-- Playback dropdown -->
+  <div class="nav-dd" data-nav-group="playback">
+      <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                  Playback
+                  <span aria-hidden="true" class="chev"></span>
+      </button>
+      <div aria-label="Playback menu" class="nav-menu" role="menu">
+      <a data-nav="overview" href="overview.html" role="menuitem">Overview</a>
+      <a data-nav="not set" href="notset.html" role="menuitem">Not Set</a>
+      <a data-nav="do not preload" href="none.html" role="menuitem">Do Not Preload</a>
+      <a data-nav="metadata" href="metadata.html" role="menuitem">Metadata</a>
+      <a data-nav="preload video" href="auto.html" role="menuitem">Preload Video</a>
+      <a data-nav="domain" href="domain.html" role="menuitem">Domain Restriction</a>
+      </div>
+      </div>
+  <!-- Advertising dropdown -->
+  <div class="nav-dd" data-nav-group="advertising">
+  <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+              Advertising
+              <span aria-hidden="true" class="chev"></span>
+  </button>
+  <div aria-label="Advertising menu" class="nav-menu" role="menu">
+  <a data-nav="csai" href="ad.html" role="menuitem">CSAI</a>
+  <a data-nav="ssai" href="ssai.html" role="menuitem">SSAI</a>
+  </div>
+  </div>
+  <a data-nav="ga" href="ga4_gallery.html">Google Analytics</a>
+  </nav>
+</div>
+</header>
+
+<div class="page">
+  <div class="container">
+    <div class="preload-lab preload-body">
+      <div class="preload-main">
+
+<div class="lab-header">
+<div class="lab-hgroup">
+<h1>Brightcove Preload • Comparison</h1>
+<div class="lab-sub">Now includes: Bytes (NET/ALL) + ABR hints (segment grouping).</div>
+</div>
+<div class="lab-nav">
+<a class="lab-pill lab-active" href="preload_index.html">Overview</a>
+<a class="lab-pill" href="preload_notset.html">Not Set</a>
+<a class="lab-pill" href="preload_none.html">Do Not Preload</a>
+<a class="lab-pill" href="preload_metadata.html">Metadata</a>
+<a class="lab-pill" href="preload_auto.html">Preload Video</a>
+</div>
+<section aria-label="Preload comparison" class="lab-compare" id="comparison">
+<div class="lab-compare-hd">
+<div>
+<div class="lab-t">Preload comparison</div>
+<div class="lab-s">Typical behavior <b>before playback</b> (varies by browser, CDN, and player)</div>
+</div>
+<div class="lab-s">Legend: <b>●</b> Likely · <b>◐</b> Possible · <b>○</b> Unlikely</div>
+</div>
+<div class="lab-matrix">
+<div class="lab-mcell lab-head lab-row">Request type</div>
+<div class="lab-mcell lab-head">Not Set</div>
+<div class="lab-mcell lab-head">Do Not Preload</div>
+<div class="lab-mcell lab-head">Metadata</div>
+<div class="lab-mcell lab-head">Preload Video</div>
+<div class="lab-mcell lab-row">Manifest</div>
+<div class="lab-mcell"><span class="lab-dot">◐</span><span style="color:var(--muted);font-size:11px;">Possible</span></div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell lab-row">Playlist</div>
+<div class="lab-mcell"><span class="lab-dot">◐</span><span style="color:var(--muted);font-size:11px;">Possible</span></div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell lab-row">Init segment</div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">◐</span><span style="color:var(--muted);font-size:11px;">Possible</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell lab-row">Media segments</div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">○</span><span style="color:var(--muted);font-size:11px;">Unlikely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell lab-row">Poster</div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+<div class="lab-mcell"><span class="lab-dot">●</span><span style="color:var(--muted);font-size:11px;">Likely</span></div>
+</div>
+<div class="lab-small" style="margin-top:12px;line-height:1.6;border-top:1px solid rgba(255,255,255,.10);padding-top:10px;">
+<b>Browser behavior may differ.</b><br/><br/>
+<b>Chrome:</b> Not Set ≈ Metadata<br/>
+<b>Safari:</b> Not Set ≈ Preload Video
+  </div>
+</section>
+</div>
+<div class="lab-grid">
+<section class="lab-card" style="grid-column: 1 / -1;">
+<div class="lab-hd">
+<div class="lab-title">How to demo</div>
+<div class="lab-small">Best practice for consistency</div>
+</div>
+<div class="lab-bd">
+<ol class="lab-small" style="margin:0; padding-left:18px;">
+<li>Open one preload page.</li>
+<li>Hard refresh (Shift+Reload). Optional: DevTools → Disable cache.</li>
+<li>Observe Summary + Log (before pressing play).</li>
+<li>Repeat in the other browser (Chrome vs Safari).</li>
+</ol>
+<hr style="border:0;border-top:1px solid rgba(255,255,255,.10);margin:14px 0;"/>
+<h3 style="margin:0 0 8px;font-size:14px;letter-spacing:.2px;">What the counters mean</h3>
+<div class="lab-small" style="line-height:1.6;">
+<ul style="margin:0 0 10px;padding-left:18px;">
+<li><b>Manifest</b>: <code>.mpd</code> (DASH) or (heuristic) HLS <b>master</b> <code>.m3u8</code>.</li>
+<li><b>Playlist</b>: HLS <b>media</b> <code>.m3u8</code> listing segments.</li>
+<li><b>Init segment</b>: <code>init*.m4s/mp4</code> or URLs containing <code>initialization</code> (fMP4/CMAF).</li>
+<li><b>Segments</b>: <code>.ts</code> / <code>.m4s</code> (excluding init).</li>
+<li><b>Poster</b>: <code>.jpg/.png/.webp</code> (may vary due to responsive sizing/CDN optimization).</li>
+</ul>
+<p style="margin:0;">
+            v4 adds <b>Bytes (NET/ALL)</b> and <b>ABR hints</b>. If you see multiple ABR keys early, the player may be probing multiple renditions.
+          </p>
+</div>
+</div>
+</section>
+</div>
+<section class="lab-card" style="grid-column: 1 / -1;">
+<div class="lab-hd">
+<div class="lab-title">How Streaming Works (Simple Explanation)</div>
+<div class="lab-small">A literacy-friendly view of HLS/DASH loading flow</div>
+</div>
+<div class="lab-bd">
+<p class="lab-small" style="margin-top:0; line-height:1.7;">
+        When a video player loads a streaming video (HLS or DASH), it <b>does not download the entire video at once</b>.
+        Instead, it downloads several small files in stages so playback can start quickly and adapt to network conditions.
+      </p>
+<div class="lab-small" style="line-height:1.75;">
+<h3 style="margin:14px 0 6px; font-size:14px; letter-spacing:.2px;">1) Poster Image (Optional)</h3>
+<p style="margin:0 0 10px;">
+          Before playback starts, the player may load a <b>poster image</b>. This is the thumbnail image displayed before the user presses play.
+          Poster is <b>not part of the streaming video</b>, but it improves UX by showing a preview.
+        </p>
+<ul style="margin:0 0 12px; padding-left:18px;">
+<li><span class="lab-mono">poster.jpg</span> / <span class="lab-mono">poster.png</span> / <span class="lab-mono">poster.webp</span></li>
+</ul>
+<h3 style="margin:14px 0 6px; font-size:14px; letter-spacing:.2px;">2) Manifest (Streaming Entry Point)</h3>
+<p style="margin:0 0 10px;">
+          The first streaming file is the <b>manifest</b> (a table of contents for the stream).
+          It tells the player what <b>qualities (renditions)</b> exist and where each rendition’s playlist is located.
+        </p>
+<ul style="margin:0 0 12px; padding-left:18px;">
+<li><span class="lab-mono">master.m3u8</span> (HLS) / <span class="lab-mono">manifest.mpd</span> (DASH)</li>
+<li>Example renditions: 1080p (high), 720p (mid), 360p (low)</li>
+</ul>
+<h3 style="margin:14px 0 6px; font-size:14px; letter-spacing:.2px;">3) Playlist (Segment List)</h3>
+<p style="margin:0 0 10px;">
+          After choosing a rendition, the player downloads a <b>playlist</b>. This contains a list of small media chunks (segments).
+          For live streams, this playlist may update repeatedly so the player can follow the newest segments.
+        </p>
+<ul style="margin:0 0 12px; padding-left:18px;">
+<li><span class="lab-mono">playlist_720p.m3u8</span> (example)</li>
+<li>Lists: <span class="lab-mono">segment0</span>, <span class="lab-mono">segment1</span>, <span class="lab-mono">segment2</span> …</li>
+</ul>
+<h3 style="margin:14px 0 6px; font-size:14px; letter-spacing:.2px;">4) Init Segment (For fMP4 / CMAF streams)</h3>
+<p style="margin:0 0 10px;">
+          Modern streaming often uses <b>fMP4/CMAF</b>. In that case, the player may download an <b>init segment</b> once,
+          before downloading media segments. It contains decoder configuration (codec/track/container metadata).
+        </p>
+<ul style="margin:0 0 12px; padding-left:18px;">
+<li><span class="lab-mono">init.mp4</span> / <span class="lab-mono">init.m4s</span> / URLs containing <span class="lab-mono">initialization</span></li>
+</ul>
+<h3 style="margin:14px 0 6px; font-size:14px; letter-spacing:.2px;">5) Media Segments (Actual Video/Audio Data)</h3>
+<p style="margin:0 0 10px;">
+          The actual video/audio arrives as <b>segments</b> (small chunks, often 2–6 seconds each). The player downloads these sequentially,
+          buffering ahead to keep playback smooth. This design enables fast startup and <b>ABR</b> (adaptive bitrate switching).
+        </p>
+<ul style="margin:0 0 12px; padding-left:18px;">
+<li>HLS TS: <span class="lab-mono">segment0.ts</span>, <span class="lab-mono">segment1.ts</span> …</li>
+<li>HLS/DASH fMP4: <span class="lab-mono">segment0.m4s</span>, <span class="lab-mono">segment1.m4s</span> …</li>
+</ul>
+<h3 style="margin:14px 0 6px; font-size:14px; letter-spacing:.2px;">Why This Matters for Preload</h3>
+<p style="margin:0 0 10px;">
+          The <b>preload setting</b> controls how many of these files are fetched <b>before</b> the user presses play.
+          That’s why preload affects startup speed, bandwidth usage, and (often) CDN cost.
+        </p>
+<div class="lab-card" style="border-radius:14px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.22); box-shadow:none;">
+<div class="lab-bd">
+<div class="lab-small" style="margin:0; line-height:1.75;">
+<div><b>preload = none</b> → usually Poster only</div>
+<div><b>preload = metadata</b> → Poster + Manifest + Playlist (structure, little/no media)</div>
+<div><b>preload = auto</b> → Poster + Manifest + Playlist + (Init) + first media segment(s)</div>
+</div>
+</div>
+</div>
+<p style="margin:12px 0 0;">
+          This lab visualizes <b>exactly which files were fetched and when</b>, so you can explain each preload mode clearly.
+        </p>
+</div>
+</div>
+</section>
+<section class="lab-card" style="grid-column: 1 / -1;">
+<div class="lab-hd">
+<div class="lab-title">Streaming Flow Diagram</div>
+<div class="lab-small">Poster → Manifest → Playlist → (Init) → Segments → Buffer → Playback</div>
+</div>
+<div class="lab-bd">
+<div class="lab-small" style="margin-bottom:10px; line-height:1.6;">
+        Read left-to-right. The player typically loads the stream “index” first, then selects a rendition, then downloads chunks.
+        ABR may probe multiple renditions early (e.g., segment0 appears more than once).
+      </div>
+<svg viewBox="0 0 1120 360" width="100%" height="auto" role="img" aria-label="Streaming flow diagram">
+        <defs>
+          <linearGradient id="bcGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#EFD900"/>
+            <stop offset="0.33" stop-color="#F76531"/>
+            <stop offset="0.66" stop-color="#AA6C7E"/>
+            <stop offset="1" stop-color="#4EA9D1"/>
+          </linearGradient>
+  
+          <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/>
+          </filter>
+  
+          <style>
+            .box { fill: rgba(0,0,0,0.35); stroke: rgba(255,255,255,0.16); stroke-width: 1; rx: 16; }
+            .boxGrad { fill: rgba(0,0,0,0.35); stroke: url(#bcGrad); stroke-width: 2; rx: 16; }
+            .t { fill: rgba(255,255,255,0.92); font: 700 14px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+            .s { fill: rgba(255,255,255,0.70); font: 12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+            .note { fill: rgba(255,255,255,0.70); font: 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; }
+            .arrow { stroke: rgba(255,255,255,0.30); stroke-width: 2; marker-end: url(#arrowHead); }
+            .dash { stroke-dasharray: 6 6; }
+          </style>
+  
+          <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+            <path d="M0,0 L10,5 L0,10 Z" fill="rgba(255,255,255,0.35)"></path>
+          </marker>
+        </defs>
+  
+        <!-- Row 1: Poster & Manifest -->
+        <rect class="box" x="40" y="40" width="240" height="86" filter="url(#softShadow)"></rect>
+        <text class="t" x="60" y="70">Poster (Optional)</text>
+        <text class="s" x="60" y="95">.jpg / .png / .webp</text>
+  
+        <rect class="boxGrad" x="320" y="40" width="260" height="86" filter="url(#softShadow)"></rect>
+        <text class="t" x="340" y="70">Manifest (Entry Point)</text>
+        <text class="s" x="340" y="95">master.m3u8 (HLS) / .mpd (DASH)</text>
+  
+        <line class="arrow" x1="280" y1="83" x2="320" y2="83"></line>
+  
+        <!-- Row 2: Playlist -->
+        <rect class="boxGrad" x="620" y="40" width="280" height="86" filter="url(#softShadow)"></rect>
+        <text class="t" x="640" y="70">Playlist (Rendition)</text>
+        <text class="s" x="640" y="95">media.m3u8 (lists segments)</text>
+  
+        <line class="arrow" x1="580" y1="83" x2="620" y2="83"></line>
+  
+        <!-- Row 2 lower: Init & Segments -->
+    <!-- Init Segment (fMP4) -->
+<rect class="box" x="320" y="160" width="260" height="92" filter="url(#softShadow)"></rect>
+<text class="t" x="340" y="190">Init Segment (fMP4)</text>
+
+<!-- ここを tspan で2行にする -->
+<text class="s" x="340" y="214">
+  <tspan x="340" dy="0">init.mp4 / init.m4s /</tspan>
+  <tspan x="340" dy="16">initialization</tspan>
+</text>
+  
+        <rect class="boxGrad" x="620" y="160" width="280" height="86" filter="url(#softShadow)"></rect>
+        <text class="t" x="640" y="190">Media Segments</text>
+        <text class="s" x="640" y="215">.ts / .m4s (actual A/V chunks)</text>
+  
+        <!-- Arrows down from playlist -->
+        <line class="arrow dash" x1="760" y1="126" x2="760" y2="160"></line>
+        <text class="note" x="780" y="150">Fetch chunks sequentially</text>
+  
+        <!-- Optional init path -->
+        <line class="arrow dash" x1="620" y1="203" x2="580" y2="203"></line>
+        <text class="note" x="450" y="270" text-anchor="middle">
+          Init is common in CMAF/fMP4, not in TS-HLS.
+        </text>
+  
+<!-- Buffer -->
+<rect class="box" x="40" y="280" width="240" height="74" filter="url(#softShadow)"></rect>
+<text class="t" x="60" y="308">Buffer (seconds)</text>
+
+<text class="note" x="60" y="328">
+  <tspan x="60" dy="0">Preload affects how much</tspan>
+  <tspan x="60" dy="16">buffers before play.</tspan>
+</text>
+
+<!-- Playback -->
+<rect class="boxGrad" x="320" y="280" width="260" height="74" filter="url(#softShadow)"></rect>
+<text class="t" x="340" y="308">Playback</text>
+
+<text class="note" x="340" y="328">
+  <tspan x="340" dy="0">ABR switches renditions</tspan>
+  <tspan x="340" dy="16">if network changes.</tspan>
+</text>
+
+<line class="arrow" x1="620" y1="246" x2="280" y2="290"></line>
+<!-- was y=314 -->
+<line class="arrow" x1="280" y1="317" x2="320" y2="317"></line>
+  
+        <!-- ABR probe callout -->
+        <rect class="box" x="930" y="160" width="150" height="180" filter="url(#softShadow)"></rect>
+        <text class="t" x="948" y="190">ABR Probe</text>
+        <text class="note" x="948" y="214">Player may</text>
+        <text class="note" x="948" y="232">download early</text>
+        <text class="note" x="948" y="250">segments from</text>
+        <text class="note" x="948" y="268">multiple renditions</text>
+        <text class="note" x="948" y="286">(segment0 twice).</text>
+        <line class="arrow dash" x1="900" y1="203" x2="930" y2="203"></line>
+      </svg>
+<div class="lab-small" style="margin-top:12px; line-height:1.7;">
+<b>Tip:</b> In your Preload Lab, compare browsers (Chrome vs Safari). Some browsers fetch playlists/segments more aggressively,
+        and caching can cause the same URL to appear more than once with <b>NET bytes = 0</b>.
+      </div>
+</div>
+</section>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer aria-label="Site footer" class="footer">
+<div class="container footer-inner">
+<div class="footer-top">
+<div class="footer-brand">
+<img alt="" aria-hidden="true" class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg"/>
+<div>
+<h3>Onboarding Engagement Manager</h3>
+<p>
+            A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.
+          </p>
+</div>
+</div>
+<div class="footer-col">
+<h4>Explore</h4>
+<nav aria-label="Footer navigation" class="footer-links">
+  <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+  <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+  <a href="player.html"><span aria-hidden="true">↗</span> Player showcase</a>
+  <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+  <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+  <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+  <a href="overview.html"><span aria-hidden="true">↗</span> Overview</a>
+  <a href="notset.html"><span aria-hidden="true">↗</span> Not Set</a>
+  <a href="none.html"><span aria-hidden="true">↗</span> None</a>
+  <a href="metadata.html"><span aria-hidden="true">↗</span> Metadata</a>
+  <a href="auto.html"><span aria-hidden="true">↗</span> Preload Video</a>
+  <a href="domain.html"><span aria-hidden="true">↗</span> Domain Restrction</a>
+  <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+  <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+  <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+  </nav>
+</div>
+</div>
+<div class="footer-divider" role="separator"></div>
+<div class="footer-bottom">
+<div>© <span id="footerYear"></span> Brightcove • Waku Matsuo</div>
+<div aria-label="Badges" class="footer-badges">
+<span class="footer-pill">Docs-aligned</span>
+<span class="footer-pill">Implementation-first</span>
+<span class="footer-pill">Brightcove Player</span>
+</div>
+</div>
+</div>
+</footer>
+<script>
+    // Header elevation
+    const header = document.getElementById('siteHeader');
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Segmented mode: compare / single / playlist
+    const segBtns = Array.from(document.querySelectorAll('.seg-btn'));
+    const compareGrid = document.getElementById('compareGrid');
+    function setMode(mode){
+      segBtns.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+      // show/hide panels
+      const single = compareGrid.querySelector('[data-pane="single"]');
+      const playlist = compareGrid.querySelector('[data-pane="playlist"]');
+      if(mode === 'compare'){ single.style.display=''; playlist.style.display=''; return; }
+      if(mode === 'single'){ single.style.display=''; playlist.style.display='none'; return; }
+      if(mode === 'playlist'){ single.style.display='none'; playlist.style.display=''; return; }
+    }
+    segBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    setMode('compare');
+</script>
+<script src="https://players.brightcove.net/6243204265001/i7bsDiyP9_default/index.min.js"></script>
+<script src="https://players.brightcove.net/6243204265001/69IXNadf9_default/index.min.js"></script>
+<script src="https://players.brightcove.net/6243204265001/nT47Bk9J7_default/index.min.js"></script>
+<script>
+(() => {
+  // Header elevation
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+
+  // Dropdown open/close
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+
+  dds.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+    dd.dataset.open = "false";
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      (dd.dataset.open === "true") ? closeAll() : openOne(dd);
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+
+  // Active state (by pathname)
+  const path = (location.pathname.split('/').pop() || '').toLowerCase();
+
+  // Reset active markers
+  document.querySelectorAll('.nav [data-active]').forEach(a => a.removeAttribute('data-active'));
+  document.querySelectorAll('.nav-dd').forEach(dd => dd.removeAttribute('data-active'));
+
+  const pageToNav = new Map([
+    ['media.html', 'media'],
+    ['player.html', 'player'],
+    ['api.html', 'api'],
+    ['playlist.html', 'playlist'],
+    ['grid.html', 'grid'],
+    ['ad.html', 'csai'],
+    ['ssai.html', 'ssai'],
+    ['ga.html', 'ga'],
+  ]);
+
+  const key = pageToNav.get(path);
+  if (!key) return;
+
+  // Direct links
+  const direct = document.querySelector(`.nav > a[data-nav="${key}"]`);
+  if (direct) direct.dataset.active = "true";
+
+  // Dropdown items + parent highlight
+  const item = document.querySelector(`.nav-menu a[data-nav="${key}"]`);
+  if (item) {
+    item.dataset.active = "true";
+    const group = item.closest('.nav-dd');
+    if (group) group.dataset.active = "true";
+  }
+})();
+</script>
+<script>
+(() => {
+  const y = document.getElementById('footerYear');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+</script>
+<script>
+      const header = document.getElementById('siteHeader');
+      if (header) {
+        const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+      }
+      </script>
+<script>
+        (() => {
+          // === Dropdown open/close ===
+          const dds = Array.from(document.querySelectorAll('.nav-dd'));
+          const closeAll = () => dds.forEach(dd => {
+            dd.dataset.open = "false";
+            const btn = dd.querySelector('.nav-dd-btn');
+            if (btn) btn.setAttribute('aria-expanded', 'false');
+          });
+        
+          const openOne = (dd) => {
+            closeAll();
+            dd.dataset.open = "true";
+            const btn = dd.querySelector('.nav-dd-btn');
+            if (btn) btn.setAttribute('aria-expanded', 'true');
+          };
+        
+          dds.forEach(dd => {
+            const btn = dd.querySelector('.nav-dd-btn');
+            if (!btn) return;
+        
+            dd.dataset.open = "false";
+        
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const isOpen = dd.dataset.open === "true";
+              if (isOpen) closeAll();
+              else openOne(dd);
+            });
+          });
+        
+          document.addEventListener('click', (e) => {
+            const inside = e.target.closest('.nav-dd');
+            if (!inside) closeAll();
+          });
+        
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeAll();
+          });
+        
+          // === Active state (by pathname) ===
+          const path = (location.pathname.split('/').pop() || '').toLowerCase();
+        
+          const setActive = (selector) => {
+            const el = document.querySelector(selector);
+            if (el) el.dataset.active = "true";
+          };
+        
+          // reset all active markers
+          document.querySelectorAll('.nav [data-active]').forEach(a => a.removeAttribute('data-active'));
+          document.querySelectorAll('.nav-dd').forEach(dd => dd.removeAttribute('data-active'));
+        
+          // map pages -> nav keys
+          const pageToNav = new Map([
+            ['media.html', 'media'],
+            ['player.html', 'player'],
+            ['api.html', 'api'],
+            ['playlist.html', 'playlist'],
+            ['grid.html', 'grid'],
+            ['ad.html', 'csai'],
+            ['ssai.html', 'ssai'],
+            ['ga.html', 'ga'],
+          ]);
+        
+          const key = pageToNav.get(path);
+          if (key) {
+            // direct links
+            const direct = document.querySelector(`.nav > a[data-nav="${key}"]`);
+            if (direct) direct.dataset.active = "true";
+        
+            // dropdown items
+            const item = document.querySelector(`.nav-menu a[data-nav="${key}"]`);
+            if (item) {
+              item.dataset.active = "true";
+              const group = item.closest('.nav-dd');
+              if (group) group.dataset.active = "true"; // parent highlight
+            }
+          } else {
+            // optional: default when landing page
+            // if (path === '' || path === 'index.html') { ... }
+          }
+        })();
+        </script>
+<script>
+(() => {
+  const y = document.getElementById('footerYear');
+  if (y) y.textContent = String(new Date().getFullYear());
+})();
+</script>
+</body>
+</html>
