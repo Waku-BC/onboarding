@@ -148,6 +148,56 @@ button, input{ font:inherit; }
 .domain-lab .url-wrap{ display:grid; place-items:center; height:100%; padding:18px; }
 .domain-lab .url-card{ width:min(100%, 460px); padding:18px; display:grid; gap:12px; background: linear-gradient(rgba(255,255,255,.04), rgba(255,255,255,.03)); }
 .domain-lab .url-card a{ color:#d9e9ff; text-decoration:underline; text-decoration-color: rgba(217,233,255,.45); overflow-wrap:anywhere; }
+
+.domain-lab .runtime-grid{ display:grid; grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr); gap:12px; padding-top:12px; }
+.domain-lab .runtime-copy{ display:grid; gap:12px; }
+.domain-lab .runtime-copy .panel-body{ display:block; }
+.domain-lab .runtime-copy p{ margin:0 0 10px; color:var(--fg); }
+.domain-lab .runtime-copy p.muted{ color:var(--muted); }
+.domain-lab .runtime-copy .callout-strong{ padding:12px 14px; border-radius:16px; border:1px solid rgba(255,255,255,.12); background: linear-gradient(135deg, rgba(239,217,0,.10), rgba(247,101,49,.08) 45%, rgba(78,169,209,.08)); }
+.domain-lab .runtime-copy .callout-strong p:last-child{ margin-bottom:0; }
+.domain-lab .runtime-copy .callout-title{ margin:0 0 6px; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:rgba(255,255,255,.78); }
+.domain-lab .runtime-visual{ display:grid; gap:14px; }
+.domain-lab .runtime-source-band{ display:grid; grid-template-columns:minmax(0,1.1fr) auto; gap:16px; align-items:center; padding:16px 18px; border-radius:20px; border:1px solid rgba(255,255,255,.12); background: linear-gradient(rgba(0,0,0,.38), rgba(0,0,0,.38)) padding-box, var(--brand-grad) border-box; box-shadow: inset 0 0 0 1px rgba(255,255,255,.03); }
+.domain-lab .runtime-source-copy{ min-width:0; }
+.domain-lab .runtime-source-copy .metric-label{ margin-bottom:8px; }
+.domain-lab .runtime-source-host{ margin:0; font-size:clamp(20px,2.6vw,34px); line-height:1.05; font-weight:800; letter-spacing:-.03em; color:var(--fg); word-break:break-word; }
+.domain-lab .runtime-source-note{ margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.65; }
+.domain-lab .runtime-source-pill{ justify-self:end; max-width:290px; padding:12px 14px; border-radius:16px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); }
+.domain-lab .runtime-source-pill p{ margin:0; }
+.domain-lab .runtime-source-pill .metric-value{ font-size:12px; }
+.domain-lab .runtime-drop{ display:grid; place-items:center; padding:2px 0 0; }
+.domain-lab .runtime-drop svg{ width:34px; height:44px; display:block; opacity:.9; }
+.domain-lab .runtime-cards{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.domain-lab .runtime-card{ min-width:0; border-radius:20px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); overflow:hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.03); }
+.domain-lab .runtime-card-head{ padding:14px 14px 10px; border-bottom:1px solid rgba(255,255,255,.08); }
+.domain-lab .runtime-card .title{ font-size:15px; }
+.domain-lab .runtime-card .sub{ font-size:12px; line-height:1.65; }
+.domain-lab .runtime-step{ display:grid; gap:10px; padding:12px 14px 14px; }
+.domain-lab .runtime-box{ min-width:0; padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); }
+.domain-lab .runtime-box .metric-value{ font-size:12px; line-height:1.6; word-break:break-word; overflow-wrap:anywhere; }
+.domain-lab .runtime-box .sub{ margin:8px 0 0; font-size:12px; }
+.domain-lab .runtime-arrow{ display:grid; place-items:center; }
+.domain-lab .runtime-arrow svg{ width:26px; height:34px; display:block; opacity:.88; }
+.domain-lab .runtime-result{ min-width:0; padding:14px; border-radius:16px; border:1px solid rgba(255,255,255,.10); background: linear-gradient(180deg, rgba(17,27,47,.92), rgba(11,19,34,.95)); }
+.domain-lab .runtime-result p{ margin:0; }
+.domain-lab .runtime-result .metric-value{ font-size:14px; line-height:1.55; }
+.domain-lab .runtime-result .sub{ margin-top:8px; font-size:12px; line-height:1.65; }
+.domain-lab .runtime-teach{ padding:14px 16px; border-radius:18px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); }
+.domain-lab .runtime-teach p{ margin:0; color:var(--fg); line-height:1.72; font-size:13px; }
+.domain-lab .runtime-teach strong{ color:#fff; }
+@media (max-width: 980px){ .domain-lab .runtime-source-band{ grid-template-columns:1fr; } .domain-lab .runtime-source-pill{ justify-self:start; max-width:none; } .domain-lab .runtime-cards{ grid-template-columns:1fr; } }
+.domain-lab .runtime-diagram{ position:relative; min-height:100%; }
+.domain-lab .runtime-diagram .panel-body{ display:block; }
+.domain-lab .runtime-svg{ width:100%; height:auto; display:block; border-radius:18px; }
+.domain-lab .runtime-caption{ margin:10px 0 0; color:var(--muted); font-size:12px; line-height:1.7; }
+.domain-lab .runtime-mini-grid{ display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px; margin-top:10px; }
+.domain-lab .runtime-mini{ min-width:0; padding:12px; border-radius:16px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03); }
+.domain-lab .runtime-mini p{ margin:0; }
+.domain-lab .runtime-mini .metric-label{ margin-bottom:6px; }
+@media (max-width: 980px){ .domain-lab .runtime-grid{ grid-template-columns:1fr; } }
+@media (max-width: 760px){ .domain-lab .runtime-mini-grid{ grid-template-columns:1fr; } }
+
 .domain-lab .eyebrow{ margin:0; font-size:12px; color: rgba(255,255,255,.58); text-transform:uppercase; letter-spacing:.08em; }
 .domain-lab .tip{ margin:10px 0 0; color: rgba(255,255,255,.56); font-size:12px; line-height:1.7; }
 @media (max-width: 1100px){
@@ -306,18 +356,7 @@ button, input{ font:inherit; }
             <span class="status-pill status-allowed" id="badgeVideoTag">allowed</span>
           </div>
           <div class="player" id="videoTagSlot">
-            <div style="max-width: 960px;">
-              <video-js
-                data-account="6243204265001"
-                data-player="iFxne2zRB"
-                data-embed="default"
-                controls=""
-                data-video-id="1849994446371340493"
-                data-playlist-id=""
-                data-application-id=""
-                class="vjs-16-9"></video-js>
-            </div>
-            <script src="https://players.brightcove.net/6243204265001/iFxne2zRB_default/index.min.js"></script>
+            <!-- rendered by JS from DOMAIN_DEMO_CONFIG -->
           </div>
           <div class="panel-body" style="display:block;">
             <div class="metric-grid">
@@ -340,14 +379,7 @@ button, input{ font:inherit; }
             <span class="status-pill status-shift" id="badgeIframe">context shift</span>
           </div>
           <div class="player" id="iframeSlot">
-            <div style="position: relative; display: block; max-width: 960px; width:100%; height:100%;">
-              <div style="padding-top: 56.25%;"></div>
-              <iframe
-                src="https://players.brightcove.net/6243204265001/iFxne2zRB_default/index.html?videoId=1849994446371340493"
-                allowfullscreen=""
-                allow="encrypted-media"
-                style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%;"></iframe>
-            </div>
+            <!-- rendered by JS from DOMAIN_DEMO_CONFIG -->
           </div>
           <div class="panel-body" style="display:block;">
             <div class="metric-grid">
@@ -370,16 +402,7 @@ button, input{ font:inherit; }
             <span class="status-pill status-blocked" id="badgePlayerUrl">blocked</span>
           </div>
           <div class="player" id="playerUrlSlot">
-            <div class="url-wrap">
-              <div class="url-card grad-card">
-                <p class="eyebrow">Hosted player URL</p>
-                <a href="https://bcove.video/4b9jlIH" rel="noopener noreferrer" target="_blank">https://bcove.video/4b9jlIH</a>
-                <div class="mini-panel">
-                  <p class="metric-label">Observed context</p>
-                  <p class="metric-value" id="metricPlayerContext">players.brightcove.net</p>
-                </div>
-              </div>
-            </div>
+            <!-- rendered by JS from DOMAIN_DEMO_CONFIG -->
           </div>
           <div class="panel-body" style="display:block;">
             <div class="metric-grid">
@@ -459,6 +482,176 @@ button, input{ font:inherit; }
               <li><span class="devtools-key">restriction outcome</span><span class="devtools-value" id="inspectPlayerOutcome">—</span></li>
             </ul>
             <p class="devtools-note">Direct player URL testing removes the host page entirely and shows pure hosted-player behavior.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+
+    <section class="section" id="runtimeExplainer">
+      <div class="section-head">
+        <div>
+          <h2>Understanding player runtime</h2>
+          <p>A simple visual explanation for why engineers often ask whether playback is “really happening on players.brightcove.net.”</p>
+        </div>
+        <span class="pill">Script source ≠ runtime context</span>
+      </div>
+      <div class="runtime-grid">
+        <section class="panel grad-card runtime-copy">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Plain-English explanation</p>
+              <h3 class="title">What “runtime” means on this page</h3>
+              <p class="sub">The key distinction is where the player script is delivered from versus where the player actually executes.</p>
+            </div>
+            <span class="pill">Support-ready</span>
+          </div>
+          <div class="panel-body">
+            <p>When someone says, “If the player script loads from <code>players.brightcove.net</code>, doesn’t that mean playback always happens there?”, the answer is <strong>not always</strong>.</p>
+            <p class="muted">The Brightcove Player JavaScript is <strong>served from</strong> <code>players.brightcove.net</code>, but the <strong>runtime execution context</strong> depends on how the player is embedded.</p>
+            <div class="callout-strong">
+              <p class="callout-title">The one sentence to teach</p>
+              <p><strong>Script delivery origin</strong> and <strong>player runtime context</strong> are not the same thing.</p>
+            </div>
+            <div class="runtime-mini-grid">
+              <div class="runtime-mini">
+                <p class="metric-label">Video Tag</p>
+                <p class="metric-value">The script is delivered from <code>players.brightcove.net</code>, but the player runs inside the current page DOM.</p>
+              </div>
+              <div class="runtime-mini">
+                <p class="metric-label">iFrame</p>
+                <p class="metric-value">The iframe loads a hosted player page, so the player runtime is inside that hosted frame.</p>
+              </div>
+              <div class="runtime-mini">
+                <p class="metric-label">Player URL</p>
+                <p class="metric-value">The hosted player page is opened directly, so the runtime is fully on the hosted player page.</p>
+              </div>
+            </div>
+            <p class="muted" id="runtimeSummaryText">That is why a site-only allowlist usually permits the video tag path but blocks the iframe and hosted player URL paths.</p>
+          </div>
+        </section>
+        <section class="panel grad-card runtime-diagram" aria-labelledby="runtimeDiagramTitle">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Visual model</p>
+              <h3 class="title" id="runtimeDiagramTitle">How the browser sees each embed path</h3>
+              <p class="sub">This diagram shows the same player asset flowing through three different runtime contexts.</p>
+            </div>
+            <span class="pill">Runtime explainer</span>
+          </div>
+          <div class="panel-body">
+            <div class="runtime-visual">
+              <div class="runtime-source-band">
+                <div class="runtime-source-copy">
+                  <p class="metric-label">Script source</p>
+                  <p class="runtime-source-host">players.brightcove.net</p>
+                  <p class="runtime-source-note">The Brightcove player JavaScript is downloaded from this host, but the runtime context still depends on how the player is embedded.</p>
+                </div>
+                <div class="runtime-source-pill">
+                  <p class="metric-label">Key distinction</p>
+                  <p class="metric-value">Script delivery origin ≠ player runtime context</p>
+                </div>
+              </div>
+
+              <div class="runtime-drop" aria-hidden="true">
+                <svg viewBox="0 0 34 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17 3V28" stroke="rgba(255,255,255,.82)" stroke-width="3" stroke-linecap="round"></path>
+                  <path d="M8 22L17 38L26 22" fill="rgba(255,255,255,.88)"></path>
+                </svg>
+              </div>
+
+              <div class="runtime-cards">
+                <article class="runtime-card">
+                  <div class="runtime-card-head">
+                    <p class="kicker">Video Tag</p>
+                    <h4 class="title">In-page runtime</h4>
+                    <p class="sub">The script comes from Brightcove, but playback stays inside the current page DOM.</p>
+                  </div>
+                  <div class="runtime-step">
+                    <div class="runtime-box">
+                      <p class="metric-label">Host page</p>
+                      <p class="metric-value">waku-bc.github.io</p>
+                    </div>
+                    <div class="runtime-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 26 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2V20" stroke="rgba(255,255,255,.82)" stroke-width="3" stroke-linecap="round"></path>
+                        <path d="M5 16L13 30L21 16" fill="rgba(255,255,255,.88)"></path>
+                      </svg>
+                    </div>
+                    <div class="runtime-result">
+                      <p class="metric-label">Player runtime</p>
+                      <p class="metric-value">Executes inside the current page DOM context.</p>
+                      <p class="sub">The browser loads the player script from Brightcove, then runs it within the page that embedded the video tag.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="runtime-card">
+                  <div class="runtime-card-head">
+                    <p class="kicker">iFrame</p>
+                    <h4 class="title">Hosted frame runtime</h4>
+                    <p class="sub">The top page stays visible, but the iframe loads a new hosted player page.</p>
+                  </div>
+                  <div class="runtime-step">
+                    <div class="runtime-box">
+                      <p class="metric-label">Top page</p>
+                      <p class="metric-value">waku-bc.github.io</p>
+                    </div>
+                    <div class="runtime-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 26 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2V20" stroke="rgba(255,255,255,.82)" stroke-width="3" stroke-linecap="round"></path>
+                        <path d="M5 16L13 30L21 16" fill="rgba(255,255,255,.88)"></path>
+                      </svg>
+                    </div>
+                    <div class="runtime-box">
+                      <p class="metric-label">iFrame src</p>
+                      <p class="metric-value">players.brightcove.net/.../index.html?videoId=...</p>
+                      <p class="sub">Hosted player page</p>
+                    </div>
+                    <div class="runtime-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 26 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2V20" stroke="rgba(255,255,255,.82)" stroke-width="3" stroke-linecap="round"></path>
+                        <path d="M5 16L13 30L21 16" fill="rgba(255,255,255,.88)"></path>
+                      </svg>
+                    </div>
+                    <div class="runtime-result">
+                      <p class="metric-label">Player runtime</p>
+                      <p class="metric-value">Executes inside the hosted iframe page.</p>
+                      <p class="sub">The runtime context moves into the frame, so domain restriction can behave differently than an in-page embed.</p>
+                    </div>
+                  </div>
+                </article>
+
+                <article class="runtime-card">
+                  <div class="runtime-card-head">
+                    <p class="kicker">Player URL</p>
+                    <h4 class="title">Hosted page runtime</h4>
+                    <p class="sub">No host page wrapper is involved. The hosted player page becomes the full page context.</p>
+                  </div>
+                  <div class="runtime-step">
+                    <div class="runtime-box">
+                      <p class="metric-label">Direct URL</p>
+                      <p class="metric-value">players.brightcove.net/.../index.html?videoId=...</p>
+                    </div>
+                    <div class="runtime-arrow" aria-hidden="true">
+                      <svg viewBox="0 0 26 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M13 2V20" stroke="rgba(255,255,255,.82)" stroke-width="3" stroke-linecap="round"></path>
+                        <path d="M5 16L13 30L21 16" fill="rgba(255,255,255,.88)"></path>
+                      </svg>
+                    </div>
+                    <div class="runtime-result">
+                      <p class="metric-label">Player runtime</p>
+                      <p class="metric-value">Entire page is the hosted player context.</p>
+                      <p class="sub">This is the cleanest path for validating hosted-player behavior without any site wrapper involved.</p>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <div class="runtime-teach">
+                <p>Use this model when someone asks, <strong>“Isn't everything playing on players.brightcove.net because that's where the script comes from?”</strong> The correct answer is: <strong>the script source is hosted there, but the runtime context depends on the embed method.</strong></p>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -584,6 +777,34 @@ button, input{ font:inherit; }
 (function () {
   const page = document.getElementById('pageContent');
   if (!page) return;
+
+  const DOMAIN_DEMO_CONFIG = {
+    waku: {
+      allowlist: 'waku-bc.github.io',
+      videoTag: {
+        account: '6243204265001',
+        player: 'iFxne2zRB',
+        videoId: '1849994446371340493'
+      },
+      iframe: {
+        src: 'https://players.brightcove.net/6243204265001/iFxne2zRB_default/index.html?videoId=1849994446371340493'
+      },
+      playerUrl: 'https://bcove.video/4b9jlIH'
+    },
+    player: {
+      allowlist: 'players.brightcove.net',
+      videoTag: {
+        account: '6243204265001',
+        player: 'REPLACE_WITH_PLAYER_ID_ALLOWING_PLAYERS_DOMAIN',
+        videoId: '1849994446371340493'
+      },
+      iframe: {
+        src: 'https://players.brightcove.net/6243204265001/REPLACE_WITH_PLAYER_ID_ALLOWING_PLAYERS_DOMAIN_default/index.html?videoId=1849994446371340493'
+      },
+      playerUrl: 'https://bcove.video/REPLACE_WITH_SHORT_LINK_FOR_PLAYERS_DOMAIN'
+    }
+  };
+
   const scenarioButtons = page.querySelectorAll('.scenario-btn');
   const configuredAllowlist = page.querySelector('#configuredAllowlist');
   const allowlistTargets = page.querySelectorAll('[data-role="allowlist"]');
@@ -606,6 +827,10 @@ button, input{ font:inherit; }
   const noteVideoTag = page.querySelector('#noteVideoTag');
   const noteIframe = page.querySelector('#noteIframe');
   const notePlayerUrl = page.querySelector('#notePlayerUrl');
+  const videoTagSlot = page.querySelector('#videoTagSlot');
+  const iframeSlot = page.querySelector('#iframeSlot');
+  const playerUrlSlot = page.querySelector('#playerUrlSlot');
+
   function setBadge(el, tone, text) { if (!el) return; el.className = 'status-pill ' + tone; el.textContent = text; }
   function setText(el, value) { if (el) el.textContent = value; }
   const inspectVideoLocation = page.querySelector('#inspectVideoLocation');
@@ -620,12 +845,93 @@ button, input{ font:inherit; }
   const inspectPlayerTop = page.querySelector('#inspectPlayerTop');
   const inspectPlayerOrigin = page.querySelector('#inspectPlayerOrigin');
   const inspectPlayerOutcome = page.querySelector('#inspectPlayerOutcome');
+  const runtimeSummaryText = page.querySelector('#runtimeSummaryText');
 
   function readOrigin(url) {
     try { return new URL(url, window.location.href).origin; } catch (e) { return 'unavailable'; }
   }
 
-  function inspectContexts() {
+  function renderVideoTag(slot, conf) {
+    slot.innerHTML = '';
+    if (!conf || !conf.account || !conf.player || String(conf.player).indexOf('REPLACE_') === 0) {
+      slot.innerHTML = '<div class="slot-placeholder">VIDEO TAG PLAYER NOT CONFIGURED FOR THIS SCENARIO<br>Update DOMAIN_DEMO_CONFIG.player.videoTag</div>';
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.style.maxWidth = '960px';
+    const v = document.createElement('video-js');
+    v.setAttribute('data-account', conf.account);
+    v.setAttribute('data-player', conf.player);
+    v.setAttribute('data-embed', 'default');
+    v.setAttribute('controls', '');
+    v.setAttribute('data-video-id', conf.videoId || '');
+    v.setAttribute('data-playlist-id', conf.playlistId || '');
+    v.setAttribute('data-application-id', '');
+    v.className = 'vjs-16-9';
+    wrap.appendChild(v);
+    slot.appendChild(wrap);
+    const s = document.createElement('script');
+    s.src = 'https://players.brightcove.net/' + conf.account + '/' + conf.player + '_default/index.min.js';
+    slot.appendChild(s);
+  }
+
+  function renderIframe(slot, conf) {
+    slot.innerHTML = '';
+    if (!conf || !conf.src || String(conf.src).indexOf('REPLACE_') >= 0) {
+      slot.innerHTML = '<div class="slot-placeholder">IFRAME PLAYER NOT CONFIGURED FOR THIS SCENARIO<br>Update DOMAIN_DEMO_CONFIG.player.iframe.src</div>';
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position: relative; display: block; max-width: 960px; width:100%; height:100%;';
+    const pad = document.createElement('div');
+    pad.style.paddingTop = '56.25%';
+    const iframe = document.createElement('iframe');
+    iframe.src = conf.src;
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('allow', 'encrypted-media');
+    iframe.style.cssText = 'position:absolute;top:0;right:0;bottom:0;left:0;width:100%;height:100%;';
+    wrap.appendChild(pad);
+    wrap.appendChild(iframe);
+    slot.appendChild(wrap);
+  }
+
+  function renderPlayerUrl(slot, url) {
+    slot.innerHTML = '';
+    if (!url || String(url).indexOf('REPLACE_') >= 0) {
+      slot.innerHTML = '<div class="slot-placeholder">PLAYER URL NOT CONFIGURED FOR THIS SCENARIO<br>Update DOMAIN_DEMO_CONFIG.player.playerUrl</div>';
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.className = 'url-wrap';
+    const card = document.createElement('div');
+    card.className = 'url-card grad-card';
+    const eyebrow = document.createElement('p');
+    eyebrow.className = 'eyebrow';
+    eyebrow.textContent = 'Hosted player URL';
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.textContent = url;
+    const mini = document.createElement('div');
+    mini.className = 'mini-panel';
+    mini.innerHTML = '<p class="metric-label">Observed context</p><p class="metric-value" id="metricPlayerContext">' + readOrigin(url).replace(/</g, '&lt;') + '</p>';
+    card.appendChild(eyebrow);
+    card.appendChild(a);
+    card.appendChild(mini);
+    wrap.appendChild(card);
+    slot.appendChild(wrap);
+  }
+
+  function renderScenarioEmbeds(name) {
+    const conf = DOMAIN_DEMO_CONFIG[name];
+    renderVideoTag(videoTagSlot, conf.videoTag);
+    renderIframe(iframeSlot, conf.iframe);
+    renderPlayerUrl(playerUrlSlot, conf.playerUrl);
+  }
+
+  function inspectContexts(name) {
+    const conf = DOMAIN_DEMO_CONFIG[name];
     const pageHref = window.location.href;
     const topHref = window.top === window ? window.location.href : 'cross-origin top window';
     const iframe = page.querySelector('#iframeSlot iframe');
@@ -648,14 +954,21 @@ button, input{ font:inherit; }
         setText(inspectIframeAccess, 'cross-origin access denied');
         inspectIframeAccess.className = 'devtools-value is-bad';
       }
+    } else {
+      setText(inspectIframeSrc, 'not configured');
+      setText(inspectIframeAccess, 'not configured');
+      inspectIframeAccess.className = 'devtools-value';
     }
 
     if (playerLink) {
       setText(inspectPlayerOrigin, readOrigin(playerLink.getAttribute('href') || ''));
+    } else {
+      setText(inspectPlayerOrigin, 'not configured');
     }
   }
 
   function applyScenario(name) {
+    renderScenarioEmbeds(name);
     scenarioButtons.forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === name ? 'true' : 'false'));
 
     if (name === 'player') {
@@ -666,13 +979,13 @@ button, input{ font:inherit; }
       setText(flowRestrictionCheck, 'allowlist compared against players.brightcove.net');
       setText(flowResult, 'video tag blocked, iframe allowed, player URL allowed');
 
-      setBadge(badgeVideoTag, 'status-blocked', 'blocked');
+      setBadge(badgeVideoTag, 'status-allowed', 'allowed');
       setBadge(badgeIframe, 'status-allowed', 'allowed');
       setBadge(badgePlayerUrl, 'status-allowed', 'allowed');
 
       setText(metricVideoContext, 'waku-bc.github.io');
-      setText(metricVideoExpected, 'blocked when only hosted origin is allowlisted');
-      setText(metricVideoInterpretation, 'page-context mismatch');
+      setText(metricVideoExpected, 'allowed because Brightcove player runtime is hosted on players.brightcove.net');
+      setText(metricVideoInterpretation, 'players-domain allowlist is effectively broad');
 
       setText(metricIframeContext, 'players.brightcove.net');
       setText(metricIframeExpected, 'allowed because iframe loads hosted player page');
@@ -721,9 +1034,9 @@ button, input{ font:inherit; }
       setText(inspectIframeOutcome, 'blocked: iframe src origin does not match allowlist');
       setText(inspectPlayerOutcome, 'blocked: hosted player URL origin does not match allowlist');
     }
-  }
 
-  inspectContexts();
+    inspectContexts(name);
+  }
 
   scenarioButtons.forEach(btn => btn.addEventListener('click', () => applyScenario(btn.dataset.scenario)));
   applyScenario('waku');
