@@ -1582,11 +1582,11 @@ margin-bottom: 10px;
                   <span aria-hidden="true" class="chev"></span>
       </button>
       <div aria-label="Playback menu" class="nav-menu" role="menu">
-      <a data-nav="overview" href="overview.html" role="menuitem">Overview</a>
-      <a data-nav="not set" href="notset.html" role="menuitem">Not Set</a>
-      <a data-nav="do not preload" href="none.html" role="menuitem">Do Not Preload</a>
-      <a data-nav="metadata" href="metadata.html" role="menuitem">Metadata</a>
-      <a data-nav="preload video" href="auto.html" role="menuitem">Preload Video</a>
+      <a data-nav="preload_overview" href="overview.html" role="menuitem">Overview</a>
+      <a data-nav="preload_notset" href="notset.html" role="menuitem">Not Set</a>
+      <a data-nav="preload_none" href="none.html" role="menuitem">Do Not Preload</a>
+      <a data-nav="preload_metadata" href="metadata.html" role="menuitem">Metadata</a>
+      <a data-nav="preload_auto" href="auto.html" role="menuitem">Preload Video</a>
       <a data-nav="domain" href="domain.html" role="menuitem">Domain Restriction</a>
       </div>
       </div>
@@ -1617,11 +1617,11 @@ margin-bottom: 10px;
 <div class="lab-sub">Now includes: Bytes (NET/ALL) + ABR hints (segment grouping).</div>
 </div>
 <div class="lab-nav">
-<a class="lab-pill lab-active" href="preload_index.html">Overview</a>
-<a class="lab-pill" href="preload_notset.html">Not Set</a>
-<a class="lab-pill" href="preload_none.html">Do Not Preload</a>
-<a class="lab-pill" href="preload_metadata.html">Metadata</a>
-<a class="lab-pill" href="preload_auto.html">Preload Video</a>
+<a class="lab-pill lab-active" href="overview.html">Overview</a>
+<a class="lab-pill" href="notset.html">Not Set</a>
+<a class="lab-pill" href="none.html">Do Not Preload</a>
+<a class="lab-pill" href="metadata.html">Metadata</a>
+<a class="lab-pill" href="auto.html">Preload Video</a>
 </div>
 <section aria-label="Preload comparison" class="lab-compare" id="comparison">
 <div class="lab-compare-hd">
@@ -2146,5 +2146,66 @@ margin-bottom: 10px;
   if (y) y.textContent = String(new Date().getFullYear());
 })();
 </script>
+
+<script>
+/* LAB_DROPDOWN_V2: robust dropdown behavior for .nav-dd (click/touch/keyboard) */
+(() => {
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  if (!dds.length) return;
+
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+
+  // init
+  dds.forEach(dd => {
+    if (!dd.dataset.open) dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    const menu = dd.querySelector('.nav-menu');
+    if (!btn || !menu) return;
+
+    // click toggle (stop bubbling so document handler won't race on some mobile browsers)
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = dd.dataset.open === "true";
+      if (isOpen) closeAll();
+      else openOne(dd);
+    });
+
+    // close when focus leaves the dropdown (keyboard users)
+    dd.addEventListener('focusout', (e) => {
+      // if focus moved outside this dropdown, close
+      const next = e.relatedTarget;
+      if (next && dd.contains(next)) return;
+      // defer to allow click on menu items
+      setTimeout(() => {
+        const active = document.activeElement;
+        if (!active || !dd.contains(active)) closeAll();
+      }, 0);
+    });
+  });
+
+  // outside click closes
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+
+  // escape closes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+</script>
+
 </body>
 </html>
