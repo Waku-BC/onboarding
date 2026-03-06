@@ -642,38 +642,49 @@ pre{
         </div>
       </a>
   
-      <nav class="nav" aria-label="Primary">
-        <a href="media.html" data-nav="media">Media</a>
-        <a href="player.html" data-nav="player">Player</a>
-      
-        <!-- Catalog dropdown -->
-        <div class="nav-dd" data-nav-group="catalog">
-          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-            Catalog
-            <span class="chev" aria-hidden="true"></span>
-          </button>
-          <div class="nav-menu" role="menu" aria-label="Catalog menu">
-            <a role="menuitem" href="api.html" data-nav="api">Catalog API</a>
-            <a role="menuitem" href="playlist.html" data-nav="playlist">Playlist</a>
-            <a role="menuitem" href="grid.html" data-nav="grid">Grid</a>
-          </div>
+<nav aria-label="Primary" class="nav">
+    <a data-nav="media" href="media.html">Media</a>
+    <a data-nav="player" href="player.html">Player</a>
+    <!-- Catalog dropdown -->
+    <div class="nav-dd" data-nav-group="catalog">
+    <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                Catalog
+                <span aria-hidden="true" class="chev"></span>
+    </button>
+    <div aria-label="Catalog menu" class="nav-menu" role="menu">
+    <a data-nav="api" href="api.html" role="menuitem">Catalog API</a>
+    <a data-nav="playlist" href="playlist.html" role="menuitem">Playlist</a>
+    <a data-nav="grid" href="grid.html" role="menuitem">Grid</a>
+    </div>
+    </div>
+<!-- Playback dropdown -->
+    <div class="nav-dd" data-nav-group="playback">
+        <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                    Playback
+                    <span aria-hidden="true" class="chev"></span>
+        </button>
+        <div aria-label="Playback menu" class="nav-menu" role="menu">
+        <a data-nav="overview" href="overview.html" role="menuitem">Overview</a>
+        <a data-nav="not set" href="notset.html" role="menuitem">Not Set</a>
+        <a data-nav="do not preload" href="none.html" role="menuitem">Do Not Preload</a>
+        <a data-nav="metadata" href="metadata.html" role="menuitem">Metadata</a>
+        <a data-nav="preload video" href="auto.html" role="menuitem">Preload Video</a>
+        <a data-nav="domain" href="domain.html" role="menuitem">Domain Restriction</a>
         </div>
-      
-        <!-- Advertising dropdown -->
-        <div class="nav-dd" data-nav-group="advertising">
-          <button class="nav-dd-btn" type="button" aria-haspopup="menu" aria-expanded="false">
-            Advertising
-            <span class="chev" aria-hidden="true"></span>
-          </button>
-          <div class="nav-menu" role="menu" aria-label="Advertising menu">
-            <a role="menuitem" href="ad.html" data-nav="csai">CSAI</a>
-            <a role="menuitem" href="ssai.html" data-nav="ssai">SSAI</a>
-            <a role="menuitem" href="outstream.html" data-nav="outstream">Outstream</a>
-          </div>
         </div>
-      
-        <a href="ga4_gallery.html" data-nav="ga">Google Analytics</a>
-      </nav>
+    <!-- Advertising dropdown -->
+    <div class="nav-dd" data-nav-group="advertising">
+    <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                Advertising
+                <span aria-hidden="true" class="chev"></span>
+    </button>
+    <div aria-label="Advertising menu" class="nav-menu" role="menu">
+    <a data-nav="csai" href="ad.html" role="menuitem">CSAI</a>
+    <a data-nav="ssai" href="ssai.html" role="menuitem">SSAI</a>
+    </div>
+    </div>
+    <a data-nav="ga" href="ga4_gallery.html">Google Analytics</a>
+    </nav>
     </div>
   </header>
 
@@ -1255,17 +1266,22 @@ pre{
 
       <div class="footer-col">
         <h4>Explore</h4>
-        <nav class="footer-links" aria-label="Footer navigation">
-          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
-          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
-          <a href="player.html"><span aria-hidden="true">↗</span> Player showcase</a>
-          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
-          <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
-          <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
-          <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
-          <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
-          <a href="outstream.html"><span aria-hidden="true">↗</span> Outstream</a>
-          <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
+    <nav aria-label="Footer navigation" class="footer-links">
+        <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+        <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+        <a href="player.html"><span aria-hidden="true">↗</span> Player showcase</a>
+        <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+        <a href="playlist.html"><span aria-hidden="true">↗</span> Playlist</a>
+        <a href="grid.html"><span aria-hidden="true">↗</span> Grid</a>
+        <a href="overview.html"><span aria-hidden="true">↗</span> Overview</a>
+        <a href="notset.html"><span aria-hidden="true">↗</span> Not Set</a>
+        <a href="none.html"><span aria-hidden="true">↗</span> None</a>
+        <a href="metadata.html"><span aria-hidden="true">↗</span> Metadata</a>
+        <a href="auto.html"><span aria-hidden="true">↗</span> Preload Video</a>
+        <a href="domain.html"><span aria-hidden="true">↗</span> Domain Restrction</a>
+        <a href="ad.html"><span aria-hidden="true">↗</span> Advertising (CSAI)</a>
+        <a href="ssai.html"><span aria-hidden="true">↗</span> Advertising (SSAI)</a>
+        <a href="ga4_gallery.html"><span aria-hidden="true">↗</span> Google Analytics</a>
         </nav>
       </div>
     </div>
