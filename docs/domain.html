@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Domain Restriction — Implementation Gallery</title>
+<style>
+:root{
+  --black:#000;
+  --yellow:#EFD900;
+  --orange:#F76531;
+  --purple:#AA6C7E;
+  --blue:#4EA9D1;
+  --fg: rgba(255,255,255,.92);
+  --muted: rgba(255,255,255,.64);
+  --line: rgba(255,255,255,.12);
+  --max: 1160px;
+  --h: 72px;
+  --shadow-soft: 0 8px 22px rgba(0,0,0,.22);
+  --ease: cubic-bezier(.2,.8,.2,1);
+  --focus: 0 0 0 3px rgba(78,169,209,.35);
+  --brand-grad: linear-gradient(90deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+  --brand-grad-reverse: linear-gradient(270deg, var(--yellow), var(--orange), var(--purple), var(--blue));
+}
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background: var(--black);
+  color: var(--fg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans JP", "Hiragino Sans", "Apple Color Emoji","Segoe UI Emoji";
+  overflow-x:hidden;
+}
+a{ color:inherit; text-decoration:none; }
+button, input{ font:inherit; }
+.container{ width:min(var(--max), calc(100% - 32px)); margin:0 auto; }
+.header{
+  position:sticky; top:0; z-index:50; height:var(--h); display:flex; align-items:center;
+  background: linear-gradient(to bottom, rgba(0,0,0,.78), rgba(0,0,0,.35));
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  transition: background .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+}
+.header.is-scrolled{ background: rgba(0,0,0,.84); box-shadow: var(--shadow-soft); border-bottom-color: rgba(255,255,255,.12); }
+.header-inner{ width:min(var(--max), calc(100% - 32px)); margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:14px; }
+.brand{ display:flex; align-items:center; gap:12px; min-width:220px; }
+.logo-img{ width:34px; height:34px; object-fit:contain; display:block; }
+.brand-name{ display:flex; flex-direction:column; line-height:1.08; }
+.brand-name strong{ font-weight:800; letter-spacing:.6px; }
+.brand-name span{ font-size:12px; color: var(--muted); }
+.nav{ position:relative; display:flex; align-items:center; gap:2px; padding:6px; border-radius:999px; border: 1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.25); }
+.nav a, .nav-dd-btn{ padding: 10px 12px; border-radius:999px; font-size:14px; color: rgba(255,255,255,.78); transition: background .18s var(--ease), color .18s var(--ease), transform .18s var(--ease); position:relative; outline:none; white-space:nowrap; }
+.nav a:hover, .nav-dd-btn:hover{ background: rgba(255,255,255,.06); color: rgba(255,255,255,.96); transform: translateY(-1px); }
+.nav a:hover::after, .nav-dd-btn:hover::after{ content:""; position:absolute; left:16px; right:16px; bottom:6px; height:2px; border-radius:999px; background: var(--brand-grad); opacity:.95; }
+.nav a:focus-visible, .nav-dd-btn:focus-visible{ box-shadow: var(--focus); }
+.nav a[data-active="true"]{ color: rgba(255,255,255,.95); background: rgba(255,255,255,.10); }
+.nav a[data-active="true"]::after{ content:""; position:absolute; left:16px; right:16px; bottom:6px; height:2px; border-radius:999px; background: var(--brand-grad); opacity:.95; }
+.nav-dd{ position:relative; display:inline-flex; align-items:center; }
+.nav-dd-btn{ appearance:none; border:0; background:transparent; cursor:pointer; display:inline-flex; align-items:center; gap:10px; }
+.nav-dd[data-open="true"] .nav-dd-btn{ color: rgba(255,255,255,.95); background: linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box, var(--brand-grad) border-box; border: 1px solid transparent; }
+.nav-dd[data-active="true"] .nav-dd-btn::after{ content:""; position:absolute; left:16px; right:16px; bottom:6px; height:2px; border-radius:999px; background: var(--brand-grad); opacity:.95; }
+.chev{ width:10px; height:10px; display:inline-block; border-right:2px solid rgba(255,255,255,.55); border-bottom:2px solid rgba(255,255,255,.55); transform: rotate(45deg); transition: transform .18s var(--ease), opacity .18s var(--ease); opacity:.9; }
+.nav-dd[data-open="true"] .chev{ transform: rotate(225deg); }
+.nav-menu{ position:absolute; top: calc(100% + 10px); left: 0; min-width: 220px; padding: 8px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.72); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 14px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06) inset; display:none; z-index:80; }
+.nav-dd[data-open="true"] .nav-menu{ display:block; }
+.nav-menu a{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding: 10px 10px; border-radius: 12px; color: rgba(255,255,255,.86); border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.04); transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease), box-shadow .18s var(--ease); white-space:nowrap; position:relative; }
+.nav-menu a:hover{ transform: translateY(-1px); background: linear-gradient(rgba(255,255,255,.06), rgba(255,255,255,.06)) padding-box, var(--brand-grad) border-box; border: 1px solid transparent; box-shadow: 0 8px 22px rgba(0,0,0,.35), 0 0 18px rgba(247,101,49,.18); }
+.nav-menu a[data-active="true"]{ background: linear-gradient(rgba(255,255,255,.08), rgba(255,255,255,.08)) padding-box, var(--brand-grad) border-box; border: 1px solid transparent; }
+.nav-menu a[data-active="true"]::after{ content:""; position:absolute; left:12px; right:12px; bottom:7px; height:2px; border-radius:999px; background: var(--brand-grad); opacity:.95; }
+.page{ padding: 22px 0 56px; background: radial-gradient(900px 520px at 15% -10%, rgba(239,217,0,.10), transparent 60%), radial-gradient(860px 520px at 90% -20%, rgba(78,169,209,.08), transparent 55%), var(--black); }
+.page-head, .section-head{ position:relative; border-radius: 18px; background: var(--brand-grad); overflow:hidden; box-shadow: var(--shadow-soft); }
+.page-head::before, .section-head::before{ content:""; position:absolute; inset:0; background: rgba(0,0,0,.42); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); pointer-events:none; }
+.page-head > *, .section-head > *{ position:relative; z-index:1; }
+.page-head{ display:flex; align-items:flex-end; justify-content:space-between; gap: 14px; padding: 14px 14px 16px; border: 1px solid rgba(255,255,255,.10); margin-bottom: 10px; }
+.page-head::after{ content:""; display:block; height: 2px; margin-top: 12px; border-radius: 999px; background: var(--brand-grad); opacity: .85; }
+.page-head h1{ margin:0; font-size: clamp(18px, 2.1vw, 26px); letter-spacing: -.2px; }
+.page-head p{ margin:8px 0 0; color: rgba(255,255,255,.70); font-size: 13px; line-height:1.65; max-width: 80ch; }
+.seg{ display:flex; gap:6px; padding:6px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.28); }
+.seg button{ border:0; background: transparent; color: rgba(255,255,255,.72); padding: 10px 12px; border-radius: 999px; cursor:pointer; transition: background .18s var(--ease), color .18s var(--ease); outline:none; white-space:nowrap; font-size: 13px; }
+.seg button[aria-pressed="true"]{ background: rgba(255,255,255,.10); color: rgba(255,255,255,.92); position:relative; }
+.seg button[aria-pressed="true"]::after{ content:""; position:absolute; left:14px; right:14px; bottom:7px; height:2px; border-radius:999px; background: var(--brand-grad); opacity:.95; }
+.seg button:focus-visible{ box-shadow: var(--focus); }
+.section{ margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,.10); }
+.section-head{ display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; padding: 12px; border-radius: 18px; border: 1px solid transparent; background: linear-gradient(rgba(0,0,0,.42), rgba(0,0,0,.42)) padding-box, var(--brand-grad-reverse) border-box, var(--brand-grad) padding-box; overflow:hidden; box-shadow: var(--shadow-soft); }
+.section-head h2{ margin:0; font-size: 14px; letter-spacing:.2px; }
+.section-head p{ margin:6px 0 0; color: rgba(255,255,255,.70); font-size: 13px; line-height:1.6; max-width: 90ch; }
+.grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap: 12px; padding-top: 12px; }
+.panel{ grid-column: span 4; border-radius: 22px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.34); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: var(--shadow-soft); overflow:hidden; position:relative; }
+.grad-card{ border: 1px solid transparent; background: linear-gradient(rgba(0,0,0,.34), rgba(0,0,0,.34)) padding-box, var(--brand-grad) border-box; box-shadow: 0 0 0 1px rgba(255,255,255,.06) inset, var(--shadow-soft); filter: saturate(.92); }
+.grad-card:hover, .grad-card:focus-within{ box-shadow: 0 0 0 1px rgba(255,255,255,.08) inset, 0 10px 30px rgba(0,0,0,.55), 0 0 18px rgba(247,101,49,.16); }
+.panel-head{ padding: 14px 14px 10px; display:flex; align-items:flex-start; justify-content:space-between; gap: 12px; }
+.kicker{ margin:0; font-size:12px; color: rgba(255,255,255,.62); text-transform: uppercase; letter-spacing:.08em; }
+.title{ margin:0; font-size:15px; line-height:1.25; }
+.sub{ margin:8px 0 0; color: rgba(255,255,255,.70); font-size:13px; line-height:1.6; }
+.pill{ display:inline-flex; align-items:center; gap:8px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.22); color: rgba(255,255,255,.72); font-size: 12px; white-space:nowrap; }
+.player{ position:relative; aspect-ratio: 16/9; background:#000; border-top: 1px solid rgba(255,255,255,.08); }
+.player .video-js, .player video-js, .player video, .player iframe{ position:absolute !important; inset:0; width:100% !important; height:100% !important; }
+.panel-body{ padding: 12px 14px 14px; display:flex; gap: 10px; flex-wrap:wrap; align-items:center; justify-content:space-between; border-top: 1px solid rgba(255,255,255,.08); }
+.bullets{ margin:0; padding-left: 18px; color: rgba(255,255,255,.70); font-size: 13px; line-height:1.6; max-width: 70ch; }
+.footer{ position:relative; border-top: 1px solid rgba(255,255,255,.10); background: radial-gradient(900px 420px at 15% 120%, rgba(239,217,0,.10), transparent 60%), radial-gradient(860px 420px at 85% 120%, rgba(78,169,209,.10), transparent 60%), linear-gradient(to top, rgba(255,255,255,.03), rgba(0,0,0,0) 45%), var(--black); overflow:hidden; }
+.footer::before{ content:""; position:absolute; left:0; right:0; top:0; height:1px; background: var(--brand-grad); opacity:.9; }
+.footer::after{ content:""; position:absolute; inset:-2px; background: radial-gradient(900px 520px at 50% 130%, rgba(255,255,255,.05), transparent 60%); pointer-events:none; opacity:.6; }
+.footer-inner{ position:relative; z-index:1; padding: 40px 0 22px; display:block; }
+.footer-top{ display:grid; grid-template-columns: 1.6fr .8fr .8fr; gap: 18px; }
+.footer-brand{ display:flex; gap:14px; align-items:flex-start; }
+.footer-logo{ width:42px; height:42px; object-fit:contain; }
+.footer h3, .footer h4{ margin:0; }
+.footer-brand p, .footer-col p{ margin:8px 0 0; color: var(--muted); font-size:13px; line-height:1.7; }
+.footer-links{ display:grid; gap:8px; margin-top:10px; }
+.footer-links a{ display:inline-flex; align-items:center; gap:8px; color: rgba(255,255,255,.82); }
+.footer-links a:hover{ color:#fff; }
+.footer-bottom{ display:flex; align-items:center; justify-content:space-between; gap:14px; margin-top: 22px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.10); color: var(--muted); font-size:12px; }
+.footer-badges{ display:flex; gap:8px; flex-wrap:wrap; }
+.footer-badge{ padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.04); }
+.domain-lab .meta-grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:12px; padding-top:12px; }
+.domain-lab .meta-card, .domain-lab .flow-card, .domain-lab .mini-panel, .domain-lab .url-card{ border-radius:18px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03); box-shadow: inset 0 0 0 1px rgba(255,255,255,.03); }
+.domain-lab .meta-card{ grid-column: span 6; padding:14px; }
+.domain-lab .meta-card p{ margin:0; }
+.domain-lab .meta-label, .domain-lab .flow-label, .domain-lab .metric-label{ margin:0 0 6px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color: rgba(255,255,255,.58); }
+.domain-lab .meta-value, .domain-lab .flow-value, .domain-lab .metric-value, .domain-lab .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; line-height:1.65; color: rgba(255,255,255,.86); }
+.domain-lab .flow-grid{ display:grid; grid-template-columns: repeat(5, 1fr); gap:12px; padding-top:12px; }
+.domain-lab .flow-card{ padding:14px; min-height:110px; position:relative; }
+.domain-lab .flow-card:not(:last-child)::after{ content:"→"; position:absolute; right:-10px; top:50%; transform:translateY(-50%); color: rgba(255,255,255,.34); font-size:18px; }
+.domain-lab .status-pill{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-size:11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; border:1px solid rgba(255,255,255,.12); }
+.domain-lab .status-pill::before{ content:""; width:8px; height:8px; border-radius:50%; background:currentColor; }
+.domain-lab .status-allowed{ color:#b8f4c8; background:rgba(34,197,94,.14); border-color:rgba(34,197,94,.22); }
+.domain-lab .status-shift{ color:#ffd98e; background:rgba(245,158,11,.14); border-color:rgba(245,158,11,.22); }
+.domain-lab .status-blocked{ color:#ffb6b6; background:rgba(239,68,68,.14); border-color:rgba(239,68,68,.22); }
+.domain-lab .metric-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:10px; }
+.domain-lab .mini-panel{ padding:12px; }
+.domain-lab .tech-grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap:12px; padding-top:12px; }
+.domain-lab .tech-grid .panel{ grid-column: span 6; }
+
+.domain-lab .inspector-grid{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; padding-top:10px; }
+.domain-lab .inspector-card{ border-radius:18px; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); overflow:hidden; }
+.domain-lab .inspector-head{ padding:12px 14px 10px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; border-bottom:1px solid rgba(255,255,255,.08); }
+.domain-lab .inspector-body{ padding:12px 14px 14px; }
+.domain-lab .devtools{ margin:0; padding:0; list-style:none; border-radius:14px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.28); overflow:hidden; }
+.domain-lab .devtools li{ display:grid; grid-template-columns: 140px 1fr; gap:12px; padding:10px 12px; border-top:1px solid rgba(255,255,255,.07); }
+.domain-lab .devtools li:first-child{ border-top:0; }
+.domain-lab .devtools-key{ color: rgba(255,255,255,.55); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+.domain-lab .devtools-value{ color: rgba(255,255,255,.88); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size:12px; line-height:1.55; word-break:break-word; }
+.domain-lab .devtools-value.is-ok{ color:#b8f4c4; }
+.domain-lab .devtools-value.is-warn{ color:#ffd58e; }
+.domain-lab .devtools-value.is-bad{ color:#ffb3b3; }
+.domain-lab .devtools-note{ margin:10px 0 0; color: rgba(255,255,255,.62); font-size:12px; line-height:1.65; }
+.domain-lab .debug-log{ margin:0; padding:14px; border-radius:16px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.24); color: rgba(255,255,255,.82); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size:12px; line-height:1.8; white-space:pre-wrap; }
+.domain-lab .url-wrap{ display:grid; place-items:center; height:100%; padding:18px; }
+.domain-lab .url-card{ width:min(100%, 460px); padding:18px; display:grid; gap:12px; background: linear-gradient(rgba(255,255,255,.04), rgba(255,255,255,.03)); }
+.domain-lab .url-card a{ color:#d9e9ff; text-decoration:underline; text-decoration-color: rgba(217,233,255,.45); overflow-wrap:anywhere; }
+.domain-lab .eyebrow{ margin:0; font-size:12px; color: rgba(255,255,255,.58); text-transform:uppercase; letter-spacing:.08em; }
+.domain-lab .tip{ margin:10px 0 0; color: rgba(255,255,255,.56); font-size:12px; line-height:1.7; }
+@media (max-width: 1100px){
+  .domain-lab .flow-grid{ grid-template-columns: 1fr; }
+  .domain-lab .flow-card:not(:last-child)::after{ content:"↓"; right:auto; left:50%; top:auto; bottom:-16px; transform:translateX(-50%); }
+  .panel{ grid-column: span 6; }
+}
+
+@media (max-width: 980px){
+  .domain-lab .inspector-grid{ grid-template-columns:1fr; }
+  .domain-lab .devtools li{ grid-template-columns:1fr; gap:6px; }
+}
+@media (max-width: 980px){
+  .page-head{ flex-direction:column; align-items:flex-start; }
+  .domain-lab .meta-card, .domain-lab .tech-grid .panel, .panel{ grid-column: span 12; }
+  .footer-top{ grid-template-columns: 1fr; }
+}
+@media (max-width: 760px){ .nav{ flex-wrap:wrap; justify-content:center; } .nav-menu{ left:50%; transform:translateX(-50%); } }
+</style>
+</head>
+<body>
+<header aria-label="Site header" class="header" id="siteHeader">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <img alt="Brightcove Logo" class="logo-img" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg"/>
+      <div class="brand-name">
+        <strong>BRIGHTCOVE</strong>
+        <span>Onboarding Engagement Manager</span>
+        <span>Implementation Gallery</span>
+      </div>
+    </a>
+    <nav aria-label="Primary" class="nav">
+      <a data-nav="media" href="media.html">Media</a>
+      <a data-nav="player" href="player.html">Player</a>
+      <!-- Catalog dropdown -->
+      <div class="nav-dd" data-nav-group="catalog">
+      <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                  Catalog
+                  <span aria-hidden="true" class="chev"></span>
+      </button>
+      <div aria-label="Catalog menu" class="nav-menu" role="menu">
+      <a data-nav="api" href="api.html" role="menuitem">Catalog API</a>
+      <a data-nav="playlist" href="playlist.html" role="menuitem">Playlist</a>
+      <a data-nav="grid" href="grid.html" role="menuitem">Grid</a>
+      </div>
+      </div>
+  <!-- Playback dropdown -->
+      <div class="nav-dd" data-nav-group="playback">
+          <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                      Playback
+                      <span aria-hidden="true" class="chev"></span>
+          </button>
+          <div aria-label="Playback menu" class="nav-menu" role="menu">
+          <a data-nav="overview" href="overview.html" role="menuitem">Overview</a>
+          <a data-nav="not set" href="notset.html" role="menuitem">Not Set</a>
+          <a data-nav="do not preload" href="none.html" role="menuitem">Do Not Preload</a>
+          <a data-nav="metadata" href="metadata.html" role="menuitem">Metadata</a>
+          <a data-nav="preload video" href="auto.html" role="menuitem">Preload Video</a>
+          <a data-nav="domain" href="domain.html" role="menuitem">Domain Restriction</a>
+          </div>
+          </div>
+      <!-- Advertising dropdown -->
+      <div class="nav-dd" data-nav-group="advertising">
+      <button aria-expanded="false" aria-haspopup="menu" class="nav-dd-btn" type="button">
+                  Advertising
+                  <span aria-hidden="true" class="chev"></span>
+      </button>
+      <div aria-label="Advertising menu" class="nav-menu" role="menu">
+      <a data-nav="csai" href="ad.html" role="menuitem">CSAI</a>
+      <a data-nav="ssai" href="ssai.html" role="menuitem">SSAI</a>
+      </div>
+      </div>
+      <a data-nav="ga" href="ga4_gallery.html">Google Analytics</a>
+      </nav>
+  </div>
+</header>
+<main class="page domain-lab" id="pageContent">
+  <div class="container">
+    <div class="page-head">
+      <div>
+        <h1>Domain Restriction</h1>
+        <p>
+          Compare the same Brightcove asset through video tag, iframe, and hosted player URL access.
+          This page is designed to show why iframe testing can be misleading when engineers assume the visible page origin is always the evaluated playback context.
+        </p>
+      </div>
+      <div aria-label="Restriction scenarios" class="seg" role="tablist">
+        <button aria-pressed="true" class="scenario-btn" data-scenario="waku" type="button">Allow: waku-bc.github.io</button>
+        <button aria-pressed="false" class="scenario-btn" data-scenario="player" type="button">Allow: players.brightcove.net</button>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Common misconception</h2>
+          <p>Same asset, different execution context. Restriction results change depending on where playback is actually evaluated.</p>
+        </div>
+        <span class="pill">Playback / Security / Embed Context</span>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-card grad-card">
+          <p class="meta-label">Wrong assumption</p>
+          <p class="sub" style="margin:0;">“I restricted playback to my site domain, so the iframe should behave the same as the in-page embed.”</p>
+        </div>
+        <div class="meta-card grad-card">
+          <p class="meta-label">Actual behavior</p>
+          <p class="sub" id="scenarioSummary" style="margin:0;">Restriction should succeed when playback is evaluated against the site domain and fail when the observed context shifts elsewhere.</p>
+        </div>
+      </div>
+      <div class="meta-grid" style="padding-top:10px;">
+        <div class="meta-card">
+          <p class="meta-label">Configured allowlist</p>
+          <p class="meta-value" id="configuredAllowlist">waku-bc.github.io</p>
+        </div>
+        <div class="meta-card">
+          <p class="meta-label">Teaching note</p>
+          <p class="meta-value">Use <span class="mono">context shift</span> for iframe explanations instead of only pass/fail.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Restriction evaluation path</h2>
+          <p>Engineers can inspect how the request path changes what the player sees during domain restriction checks.</p>
+        </div>
+        <span class="pill">Observed runtime context</span>
+      </div>
+      <div class="flow-grid">
+        <div class="flow-card"><p class="flow-label">1. Top page origin</p><p class="flow-value" id="flowTopOrigin">https://waku-bc.github.io</p></div>
+        <div class="flow-card"><p class="flow-label">2. Embed method</p><p class="flow-value">video tag / iframe / player URL</p></div>
+        <div class="flow-card"><p class="flow-label">3. Observed playback context</p><p class="flow-value" id="flowObservedContext">video tag tracks page context, iframe/player URL may shift</p></div>
+        <div class="flow-card"><p class="flow-label">4. Restriction check</p><p class="flow-value" id="flowRestrictionCheck">allowlist compared against waku-bc.github.io</p></div>
+        <div class="flow-card"><p class="flow-label">5. Result</p><p class="flow-value" id="flowResult">video tag allowed, hosted-player path blocked, iframe may be misleading</p></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Playback context comparison</h2>
+          <p>Three access patterns, one asset, three different ways to interpret restriction behavior.</p>
+        </div>
+        <span class="pill">Engineer lab view</span>
+      </div>
+      <div class="grid">
+        <section class="panel grad-card">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Video tag</p>
+              <h3 class="title">Direct in-page playback</h3>
+              <p class="sub">The clearest validation path when you want restriction behavior in the current page context.</p>
+            </div>
+            <span class="status-pill status-allowed" id="badgeVideoTag">allowed</span>
+          </div>
+          <div class="player" id="videoTagSlot">
+            <div style="max-width: 960px;">
+              <video-js
+                data-account="6243204265001"
+                data-player="iFxne2zRB"
+                data-embed="default"
+                controls=""
+                data-video-id="1849994446371340493"
+                data-playlist-id=""
+                data-application-id=""
+                class="vjs-16-9"></video-js>
+            </div>
+            <script src="https://players.brightcove.net/6243204265001/iFxne2zRB_default/index.min.js"></script>
+          </div>
+          <div class="panel-body" style="display:block;">
+            <div class="metric-grid">
+              <div class="mini-panel"><p class="metric-label">Configured allowlist</p><p class="metric-value" data-role="allowlist">waku-bc.github.io</p></div>
+              <div class="mini-panel"><p class="metric-label">Observed context</p><p class="metric-value" id="metricVideoContext">top page origin</p></div>
+              <div class="mini-panel"><p class="metric-label">Expected result</p><p class="metric-value" id="metricVideoExpected">allowed when site domain matches</p></div>
+              <div class="mini-panel"><p class="metric-label">Interpretation</p><p class="metric-value" id="metricVideoInterpretation">lowest ambiguity</p></div>
+            </div>
+            <p class="tip" id="noteVideoTag">Use this mode when you want to validate how restriction behaves in the page where playback is directly embedded.</p>
+          </div>
+        </section>
+
+        <section class="panel grad-card">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">iFrame</p>
+              <h3 class="title">Embedded hosted player</h3>
+              <p class="sub">Useful for demos and support workflows, but the easiest place to create a wrong mental model.</p>
+            </div>
+            <span class="status-pill status-shift" id="badgeIframe">context shift</span>
+          </div>
+          <div class="player" id="iframeSlot">
+            <div style="position: relative; display: block; max-width: 960px; width:100%; height:100%;">
+              <div style="padding-top: 56.25%;"></div>
+              <iframe
+                src="https://players.brightcove.net/6243204265001/iFxne2zRB_default/index.html?videoId=1849994446371340493"
+                allowfullscreen=""
+                allow="encrypted-media"
+                style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%;"></iframe>
+            </div>
+          </div>
+          <div class="panel-body" style="display:block;">
+            <div class="metric-grid">
+              <div class="mini-panel"><p class="metric-label">Configured allowlist</p><p class="metric-value" data-role="allowlist">waku-bc.github.io</p></div>
+              <div class="mini-panel"><p class="metric-label">Observed context</p><p class="metric-value" id="metricIframeContext">player-hosted / shifted runtime context</p></div>
+              <div class="mini-panel"><p class="metric-label">Expected result</p><p class="metric-value" id="metricIframeExpected">may not match intuitive page-level expectation</p></div>
+              <div class="mini-panel"><p class="metric-label">Interpretation</p><p class="metric-value" id="metricIframeInterpretation">most commonly misunderstood</p></div>
+            </div>
+            <p class="tip" id="noteIframe">iframe embeds can make engineers assume the visible page origin is always the evaluated playback origin. That assumption is frequently wrong.</p>
+          </div>
+        </section>
+
+        <section class="panel grad-card">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Player URL</p>
+              <h3 class="title">Hosted player access</h3>
+              <p class="sub">Direct URL testing isolates player-hosted behavior from page integration questions.</p>
+            </div>
+            <span class="status-pill status-blocked" id="badgePlayerUrl">blocked</span>
+          </div>
+          <div class="player" id="playerUrlSlot">
+            <div class="url-wrap">
+              <div class="url-card grad-card">
+                <p class="eyebrow">Hosted player URL</p>
+                <a href="https://bcove.video/4b9jlIH" rel="noopener noreferrer" target="_blank">https://bcove.video/4b9jlIH</a>
+                <div class="mini-panel">
+                  <p class="metric-label">Observed context</p>
+                  <p class="metric-value" id="metricPlayerContext">players.brightcove.net</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-body" style="display:block;">
+            <div class="metric-grid">
+              <div class="mini-panel"><p class="metric-label">Configured allowlist</p><p class="metric-value" data-role="allowlist">waku-bc.github.io</p></div>
+              <div class="mini-panel"><p class="metric-label">Observed context</p><p class="metric-value">players.brightcove.net</p></div>
+              <div class="mini-panel"><p class="metric-label">Expected result</p><p class="metric-value" id="metricPlayerExpected">blocked when allowlist is site-only</p></div>
+              <div class="mini-panel"><p class="metric-label">Interpretation</p><p class="metric-value" id="metricPlayerInterpretation">useful isolation path</p></div>
+            </div>
+            <p class="tip" id="notePlayerUrl">A direct hosted player URL is useful when you need to separate page integration questions from player-hosted playback behavior.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Observed origin inspector</h2>
+          <p>DevTools-style runtime hints that make the current page origin, iframe source, and hosted player context explicit.</p>
+        </div>
+        <span class="pill">document.location / window.top / iframe context</span>
+      </div>
+      <div class="inspector-grid">
+        <section class="inspector-card grad-card">
+          <div class="inspector-head">
+            <div>
+              <p class="kicker">Video tag</p>
+              <h3 class="title">In-page runtime</h3>
+            </div>
+            <span class="status-pill status-allowed" id="inspectorBadgeVideo">same origin</span>
+          </div>
+          <div class="inspector-body">
+            <ul class="devtools">
+              <li><span class="devtools-key">document.location</span><span class="devtools-value" id="inspectVideoLocation">—</span></li>
+              <li><span class="devtools-key">window.top.location</span><span class="devtools-value" id="inspectVideoTop">—</span></li>
+              <li><span class="devtools-key">iframe context</span><span class="devtools-value is-ok" id="inspectVideoFrame">not used</span></li>
+              <li><span class="devtools-key">restriction outcome</span><span class="devtools-value" id="inspectVideoOutcome">—</span></li>
+            </ul>
+            <p class="devtools-note">For a video tag embed, the player runs in the host page DOM, so the top page origin is the main thing to compare with the allowlist.</p>
+          </div>
+        </section>
+
+        <section class="inspector-card grad-card">
+          <div class="inspector-head">
+            <div>
+              <p class="kicker">iFrame</p>
+              <h3 class="title">Cross-origin hosted player</h3>
+            </div>
+            <span class="status-pill status-blocked" id="inspectorBadgeIframe">cross origin</span>
+          </div>
+          <div class="inspector-body">
+            <ul class="devtools">
+              <li><span class="devtools-key">document.location</span><span class="devtools-value" id="inspectIframeLocation">—</span></li>
+              <li><span class="devtools-key">window.top.location</span><span class="devtools-value" id="inspectIframeTop">—</span></li>
+              <li><span class="devtools-key">iframe src origin</span><span class="devtools-value" id="inspectIframeSrc">—</span></li>
+              <li><span class="devtools-key">iframe contentWindow</span><span class="devtools-value is-bad" id="inspectIframeAccess">—</span></li>
+              <li><span class="devtools-key">restriction outcome</span><span class="devtools-value" id="inspectIframeOutcome">—</span></li>
+            </ul>
+            <p class="devtools-note">The iframe source is a hosted player page. That is why engineers often feel the result is surprising when only the site domain is allowlisted.</p>
+          </div>
+        </section>
+
+        <section class="inspector-card grad-card">
+          <div class="inspector-head">
+            <div>
+              <p class="kicker">Player URL</p>
+              <h3 class="title">Hosted page directly opened</h3>
+            </div>
+            <span class="status-pill status-blocked" id="inspectorBadgePlayer">hosted origin</span>
+          </div>
+          <div class="inspector-body">
+            <ul class="devtools">
+              <li><span class="devtools-key">document.location</span><span class="devtools-value" id="inspectPlayerLocation">—</span></li>
+              <li><span class="devtools-key">window.top.location</span><span class="devtools-value" id="inspectPlayerTop">—</span></li>
+              <li><span class="devtools-key">player url origin</span><span class="devtools-value" id="inspectPlayerOrigin">—</span></li>
+              <li><span class="devtools-key">iframe context</span><span class="devtools-value is-ok" id="inspectPlayerFrame">not applicable</span></li>
+              <li><span class="devtools-key">restriction outcome</span><span class="devtools-value" id="inspectPlayerOutcome">—</span></li>
+            </ul>
+            <p class="devtools-note">Direct player URL testing removes the host page entirely and shows pure hosted-player behavior.</p>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Technical notes and debug checklist</h2>
+          <p>Keep the guidance structural: what was configured, where playback was evaluated, and what result that should produce.</p>
+        </div>
+        <span class="pill">Troubleshooting</span>
+      </div>
+      <div class="tech-grid">
+        <section class="panel grad-card">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Technical notes</p>
+              <h3 class="title">What to teach engineers</h3>
+            </div>
+          </div>
+          <div class="panel-body">
+            <ul class="bullets">
+              <li>Domain restriction should always be interpreted together with the embed method being tested.</li>
+              <li>A video tag embed is usually the clearest way to verify behavior in the current page context.</li>
+              <li>iframe tests can be misleading when engineers assume the visible host page is always the restriction evaluation target.</li>
+              <li>Testing the hosted player URL helps isolate player-side behavior from integration-side behavior.</li>
+              <li>If results look inconsistent, compare the configured allowlist against the actual runtime context observed by the player.</li>
+            </ul>
+          </div>
+        </section>
+        <section class="panel grad-card">
+          <div class="panel-head">
+            <div>
+              <p class="kicker">Debug checklist</p>
+              <h3 class="title">When playback looks wrong</h3>
+            </div>
+          </div>
+          <div class="panel-body" style="display:block;">
+            <pre class="debug-log">[check] configured allowlist domain
+[check] embed type under test
+[check] top-level page origin
+[check] player-hosted URL / iframe source origin
+[check] actual playback error message
+[check] whether the test validates page context or hosted player context
+[check] whether the conclusion is "blocked", "allowed", or "context shift"</pre>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+</main>
+<footer aria-label="Site footer" class="footer" id="siteFooter">
+  <div class="container footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img alt="" aria-hidden="true" class="footer-logo" src="https://solutions.brightcove.com/wmatsuo/Blogo.svg"/>
+        <div>
+          <h3>Onboarding Engagement Manager</h3>
+          <p>A lightweight Brightcove onboarding/demo gallery—player patterns, catalog surfaces, and advertising inspectors.</p>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <nav aria-label="Footer navigation" class="footer-links">
+          <a href="index.html"><span aria-hidden="true">↗</span> Home</a>
+          <a href="media.html"><span aria-hidden="true">↗</span> Media</a>
+          <a href="playershow.html"><span aria-hidden="true">↗</span> Player showcase</a>
+          <a href="api.html"><span aria-hidden="true">↗</span> Catalog API</a>
+        </nav>
+      </div>
+      <div class="footer-col">
+        <h4>Notes</h4>
+        <p>Built for practical onboarding, implementation reviews, and internal demo workflows.</p>
+        <div class="footer-badges" style="margin-top:10px;">
+          <span class="footer-badge">Developer-first</span>
+          <span class="footer-badge">Docs-aligned</span>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© Brightcove Demo Lab</span>
+      <span>Streaming behavior / embed patterns / diagnostics</span>
+    </div>
+  </div>
+</footer>
+<script>
+(() => {
+  const header = document.getElementById('siteHeader');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 6);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+  const dds = Array.from(document.querySelectorAll('.nav-dd'));
+  const closeAll = () => dds.forEach(dd => {
+    dd.dataset.open = "false";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  });
+  const openOne = (dd) => {
+    closeAll();
+    dd.dataset.open = "true";
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+  };
+  dds.forEach(dd => {
+    const btn = dd.querySelector('.nav-dd-btn');
+    if (!btn) return;
+    dd.dataset.open = "false";
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      (dd.dataset.open === "true") ? closeAll() : openOne(dd);
+    });
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-dd')) closeAll();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
+})();
+(function () {
+  const page = document.getElementById('pageContent');
+  if (!page) return;
+  const scenarioButtons = page.querySelectorAll('.scenario-btn');
+  const configuredAllowlist = page.querySelector('#configuredAllowlist');
+  const allowlistTargets = page.querySelectorAll('[data-role="allowlist"]');
+  const scenarioSummary = page.querySelector('#scenarioSummary');
+  const flowObservedContext = page.querySelector('#flowObservedContext');
+  const flowRestrictionCheck = page.querySelector('#flowRestrictionCheck');
+  const flowResult = page.querySelector('#flowResult');
+  const badgeVideoTag = page.querySelector('#badgeVideoTag');
+  const badgeIframe = page.querySelector('#badgeIframe');
+  const badgePlayerUrl = page.querySelector('#badgePlayerUrl');
+  const metricVideoContext = page.querySelector('#metricVideoContext');
+  const metricVideoExpected = page.querySelector('#metricVideoExpected');
+  const metricVideoInterpretation = page.querySelector('#metricVideoInterpretation');
+  const metricIframeContext = page.querySelector('#metricIframeContext');
+  const metricIframeExpected = page.querySelector('#metricIframeExpected');
+  const metricIframeInterpretation = page.querySelector('#metricIframeInterpretation');
+  const metricPlayerContext = page.querySelector('#metricPlayerContext');
+  const metricPlayerExpected = page.querySelector('#metricPlayerExpected');
+  const metricPlayerInterpretation = page.querySelector('#metricPlayerInterpretation');
+  const noteVideoTag = page.querySelector('#noteVideoTag');
+  const noteIframe = page.querySelector('#noteIframe');
+  const notePlayerUrl = page.querySelector('#notePlayerUrl');
+  function setBadge(el, tone, text) { if (!el) return; el.className = 'status-pill ' + tone; el.textContent = text; }
+  function setText(el, value) { if (el) el.textContent = value; }
+  const inspectVideoLocation = page.querySelector('#inspectVideoLocation');
+  const inspectVideoTop = page.querySelector('#inspectVideoTop');
+  const inspectVideoOutcome = page.querySelector('#inspectVideoOutcome');
+  const inspectIframeLocation = page.querySelector('#inspectIframeLocation');
+  const inspectIframeTop = page.querySelector('#inspectIframeTop');
+  const inspectIframeSrc = page.querySelector('#inspectIframeSrc');
+  const inspectIframeAccess = page.querySelector('#inspectIframeAccess');
+  const inspectIframeOutcome = page.querySelector('#inspectIframeOutcome');
+  const inspectPlayerLocation = page.querySelector('#inspectPlayerLocation');
+  const inspectPlayerTop = page.querySelector('#inspectPlayerTop');
+  const inspectPlayerOrigin = page.querySelector('#inspectPlayerOrigin');
+  const inspectPlayerOutcome = page.querySelector('#inspectPlayerOutcome');
+
+  function readOrigin(url) {
+    try { return new URL(url, window.location.href).origin; } catch (e) { return 'unavailable'; }
+  }
+
+  function inspectContexts() {
+    const pageHref = window.location.href;
+    const topHref = window.top === window ? window.location.href : 'cross-origin top window';
+    const iframe = page.querySelector('#iframeSlot iframe');
+    const playerLink = page.querySelector('#playerUrlSlot a');
+
+    setText(inspectVideoLocation, pageHref);
+    setText(inspectVideoTop, topHref);
+    setText(inspectIframeLocation, pageHref);
+    setText(inspectIframeTop, topHref);
+    setText(inspectPlayerLocation, pageHref + ' (current lab page)');
+    setText(inspectPlayerTop, topHref);
+
+    if (iframe) {
+      setText(inspectIframeSrc, readOrigin(iframe.getAttribute('src') || ''));
+      try {
+        const href = iframe.contentWindow.location.href;
+        setText(inspectIframeAccess, href || 'accessible');
+        inspectIframeAccess.className = 'devtools-value is-ok';
+      } catch (e) {
+        setText(inspectIframeAccess, 'cross-origin access denied');
+        inspectIframeAccess.className = 'devtools-value is-bad';
+      }
+    }
+
+    if (playerLink) {
+      setText(inspectPlayerOrigin, readOrigin(playerLink.getAttribute('href') || ''));
+    }
+  }
+
+  function applyScenario(name) {
+    scenarioButtons.forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === name ? 'true' : 'false'));
+
+    if (name === 'player') {
+      setText(configuredAllowlist, 'players.brightcove.net');
+      allowlistTargets.forEach(el => el.textContent = 'players.brightcove.net');
+      setText(scenarioSummary, 'Hosted player access aligns with the allowlist. Direct in-page video tag playback on waku-bc.github.io does not.');
+      setText(flowObservedContext, 'iframe and player URL resolve to hosted player origin');
+      setText(flowRestrictionCheck, 'allowlist compared against players.brightcove.net');
+      setText(flowResult, 'video tag blocked, iframe allowed, player URL allowed');
+
+      setBadge(badgeVideoTag, 'status-blocked', 'blocked');
+      setBadge(badgeIframe, 'status-allowed', 'allowed');
+      setBadge(badgePlayerUrl, 'status-allowed', 'allowed');
+
+      setText(metricVideoContext, 'waku-bc.github.io');
+      setText(metricVideoExpected, 'blocked when only hosted origin is allowlisted');
+      setText(metricVideoInterpretation, 'page-context mismatch');
+
+      setText(metricIframeContext, 'players.brightcove.net');
+      setText(metricIframeExpected, 'allowed because iframe loads hosted player page');
+      setText(metricIframeInterpretation, 'hosted-player context');
+
+      setText(metricPlayerContext, 'players.brightcove.net');
+      setText(metricPlayerExpected, 'allowed when hosted domain is allowlisted');
+      setText(metricPlayerInterpretation, 'clean hosted-player validation path');
+
+      setText(noteVideoTag, 'The video tag player runs in the host page DOM, so a players.brightcove.net-only allowlist will block playback on waku-bc.github.io.');
+      setText(noteIframe, 'The iframe itself points to the hosted player page, so allowing players.brightcove.net makes this path pass.');
+      setText(notePlayerUrl, 'This is the most direct way to validate a hosted-player allowlist without any host page variables.');
+
+      setText(inspectVideoOutcome, 'blocked: document.location origin is not allowlisted');
+      setText(inspectIframeOutcome, 'allowed: iframe src origin matches allowlist');
+      setText(inspectPlayerOutcome, 'allowed: hosted player URL origin matches allowlist');
+    } else {
+      setText(configuredAllowlist, 'waku-bc.github.io');
+      allowlistTargets.forEach(el => el.textContent = 'waku-bc.github.io');
+      setText(scenarioSummary, 'Site-domain allowlisting makes the video tag pass, while iframe and direct player URL resolve to hosted-player context and fail.');
+      setText(flowObservedContext, 'video tag runs on host page, iframe and player URL resolve to hosted player page');
+      setText(flowRestrictionCheck, 'allowlist compared against waku-bc.github.io');
+      setText(flowResult, 'video tag allowed, iframe blocked, player URL blocked');
+
+      setBadge(badgeVideoTag, 'status-allowed', 'allowed');
+      setBadge(badgeIframe, 'status-blocked', 'blocked');
+      setBadge(badgePlayerUrl, 'status-blocked', 'blocked');
+
+      setText(metricVideoContext, 'waku-bc.github.io');
+      setText(metricVideoExpected, 'allowed when site domain matches');
+      setText(metricVideoInterpretation, 'lowest ambiguity');
+
+      setText(metricIframeContext, 'players.brightcove.net');
+      setText(metricIframeExpected, 'blocked because iframe loads hosted player page');
+      setText(metricIframeInterpretation, 'common source of confusion');
+
+      setText(metricPlayerContext, 'players.brightcove.net');
+      setText(metricPlayerExpected, 'blocked when allowlist is site-only');
+      setText(metricPlayerInterpretation, 'useful isolation path');
+
+      setText(noteVideoTag, 'Use this mode when you want to validate how restriction behaves in the page where playback is directly embedded.');
+      setText(noteIframe, 'An iframe embed loads the hosted player page, so a site-only allowlist will not match the iframe origin.');
+      setText(notePlayerUrl, 'A direct hosted player URL is useful when you need to separate page integration questions from player-hosted playback behavior.');
+
+      setText(inspectVideoOutcome, 'allowed: document.location origin matches allowlist');
+      setText(inspectIframeOutcome, 'blocked: iframe src origin does not match allowlist');
+      setText(inspectPlayerOutcome, 'blocked: hosted player URL origin does not match allowlist');
+    }
+  }
+
+  inspectContexts();
+
+  scenarioButtons.forEach(btn => btn.addEventListener('click', () => applyScenario(btn.dataset.scenario)));
+  applyScenario('waku');
+})();
+</script>
+</body>
+</html>
