@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brightcove Streaming Inspector v3.1</title>
+  <style>
+    :root{
+      --bg:#070b10;
+      --panel:#0d131b;
+      --line:rgba(255,255,255,.11);
+      --line-2:rgba(255,255,255,.18);
+      --text:#edf3fb;
+      --muted:#9aa7b8;
+      --soft:#c9d4e1;
+      --gold:#f4d24b;
+      --cyan:#77d4ff;
+      --green:#65e0a3;
+      --amber:#ffcb6b;
+      --red:#ff8f8f;
+      --shadow:0 18px 48px rgba(0,0,0,.35);
+      --radius-xl:24px;
+      --radius-lg:18px;
+      --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      min-height:100vh;
+      font-family:var(--sans);
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(244,210,75,.13), transparent 22%),
+        radial-gradient(circle at top right, rgba(119,212,255,.12), transparent 24%),
+        linear-gradient(180deg, #06090e 0%, #070b10 100%);
+    }
+    .shell{max-width:1380px;margin:0 auto;padding:28px 22px 72px}
+    .hero{
+      position:relative;overflow:hidden;border:1px solid var(--line);border-radius:var(--radius-xl);
+      background:
+        linear-gradient(135deg, rgba(244,210,75,.16), rgba(255,111,97,.12) 38%, rgba(119,212,255,.16)),
+        linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      box-shadow:var(--shadow);padding:22px 22px 20px;margin-bottom:20px;
+    }
+    .hero-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+    .eyebrow{display:inline-block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#fff5b1;font-weight:800}
+    .hero h1{margin:8px 0 8px;font-size:clamp(30px,4vw,46px);line-height:1.04;letter-spacing:-.03em}
+    .hero p{margin:0;max-width:940px;color:#e8eef8;opacity:.9;line-height:1.7;font-size:15px}
+    .hero-pill{
+      align-self:flex-start;white-space:nowrap;border:1px solid rgba(255,255,255,.14);
+      background:rgba(17,27,39,.3);border-radius:999px;padding:10px 14px;color:#f2f6fc;font-size:13px;
+    }
+    .grid-main{display:grid;grid-template-columns:1.06fr .94fr;gap:20px}
+    @media (max-width:1120px){.grid-main{grid-template-columns:1fr}}
+    .panel{
+      border:1px solid var(--line);border-radius:var(--radius-xl);
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.025)), #0b1017;
+      box-shadow:var(--shadow);overflow:hidden;
+    }
+    .panel-head{padding:18px 20px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+    .panel-title{margin:0;font-size:21px;letter-spacing:-.02em}
+    .panel-sub{margin:6px 0 0;color:var(--muted);line-height:1.65;font-size:14px}
+    .panel-badge{
+      flex:0 0 auto;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:8px 12px;
+      font-size:12px;color:#eff4fb;background:rgba(255,255,255,.04);font-family:var(--mono)
+    }
+    .panel-body{padding:18px 20px 20px}
+    .form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:12px;align-items:end}
+    @media (max-width:980px){.form-grid{grid-template-columns:1fr}}
+    .field label{
+      display:block;margin:0 0 8px;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)
+    }
+    .field input{
+      width:100%;appearance:none;border:1px solid var(--line-2);background:rgba(255,255,255,.03);color:var(--text);
+      border-radius:14px;padding:14px 14px;font:inherit;outline:none
+    }
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .btn{
+      appearance:none;border:1px solid rgba(255,255,255,.12);cursor:pointer;border-radius:14px;padding:14px 16px;
+      font:inherit;font-weight:800;color:#0b1117;background:linear-gradient(135deg, var(--gold), #ffe58f)
+    }
+    .btn.secondary{background:rgba(255,255,255,.04);color:var(--text)}
+    .summary-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:6px}
+    @media (max-width:1180px){.summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:800px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:560px){.summary-grid{grid-template-columns:1fr}}
+    .metric{
+      border:1px solid var(--line);border-radius:18px;padding:14px 14px 13px;
+      background:linear-gradient(135deg, rgba(244,210,75,.12), rgba(255,111,97,.08) 42%, rgba(119,212,255,.12)), rgba(255,255,255,.025)
+    }
+    .metric .k{margin:0 0 6px;color:#fff4b1;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+    .metric .v{margin:0;font-size:20px;line-height:1.2;font-weight:900;letter-spacing:-.02em;overflow-wrap:anywhere}
+    .metric .h{margin:8px 0 0;font-size:13px;line-height:1.6;color:#d0dae6;min-height:2.8em}
+    .status-good{color:var(--green)} .status-warn{color:var(--amber)} .status-bad{color:var(--red)} .status-info{color:var(--cyan)} .status-plain{color:var(--text)}
+    .player-wrap{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(320px,.84fr);gap:18px}
+    @media (max-width:1120px){.player-wrap{grid-template-columns:1fr}}
+    .player-stage{
+      border:1px solid var(--line);border-radius:20px;
+      background:radial-gradient(circle at top left, rgba(119,212,255,.09), transparent 26%), radial-gradient(circle at bottom right, rgba(244,210,75,.09), transparent 24%), #070d13;
+      overflow:hidden;min-height:360px;position:relative;
+    }
+    .player-stage .player-slot{aspect-ratio:16/9;width:100%;min-height:360px;display:grid;place-items:center}
+    .placeholder{padding:24px;text-align:center;color:var(--muted);font-family:var(--mono);line-height:1.8;font-size:13px}
+    .info-stack{display:grid;gap:12px}
+    .mini{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);padding:14px}
+    .mini .k{margin:0 0 6px;color:var(--soft);font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+    .mini .v{margin:0;font-size:14px;line-height:1.7;color:var(--text);overflow-wrap:anywhere;word-break:break-word;font-family:var(--mono)}
+    .mini .s{margin:7px 0 0;color:var(--muted);line-height:1.65;font-size:13px}
+    .note{border-left:3px solid rgba(244,210,75,.75);padding-left:12px;margin-top:12px;color:var(--muted);line-height:1.75;font-size:14px}
+    .flow-panel{margin-top:20px}
+    .flow-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;align-items:stretch}
+    @media (max-width:1180px){.flow-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:720px){.flow-grid{grid-template-columns:1fr}}
+    .flow-step{
+      position:relative;border:1px solid var(--line);border-radius:18px;padding:14px;
+      background:linear-gradient(135deg, rgba(244,210,75,.08), rgba(255,111,97,.05) 40%, rgba(119,212,255,.08)), rgba(255,255,255,.02)
+    }
+    .flow-step .n{margin:0 0 6px;color:#fff4b1;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+    .flow-step .t{margin:0 0 6px;font-size:22px;line-height:1.15;font-weight:900;letter-spacing:-.03em;overflow-wrap:anywhere}
+    .flow-step .d{margin:0;font-size:13px;line-height:1.65;color:#d0dae6}
+    .log{
+      margin:0;border:1px solid var(--line);border-radius:18px;background:#04080d;color:#dbe6f2;padding:14px;
+      font-family:var(--mono);font-size:12px;line-height:1.75;min-height:340px;max-height:520px;overflow:auto;white-space:pre-wrap;word-break:break-word
+    }
+    .log-row{display:block;padding:0 0 8px;border-bottom:1px dashed rgba(255,255,255,.06);margin-bottom:8px}
+    .tag{
+      display:inline-block;min-width:72px;text-align:center;margin-right:10px;border-radius:999px;padding:4px 8px;
+      font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.1);vertical-align:top
+    }
+    .tag.info{background:rgba(119,212,255,.12);color:#a7e5ff}
+    .tag.good{background:rgba(101,224,163,.11);color:#9eecbf}
+    .tag.warn{background:rgba(255,203,107,.12);color:#ffd78d}
+    .tag.bad{background:rgba(255,143,143,.12);color:#ffb3b3}
+    .explain{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:4px}
+    @media (max-width:900px){.explain{grid-template-columns:1fr}}
+    .footer-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.8;font-family:var(--mono)}
+    .video-js, video-js{width:100% !important;height:100% !important;display:block}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="hero-row">
+        <div>
+          <div class="eyebrow">Brightcove Streaming Inspector</div>
+          <h1>DRM</h1>
+          <p>Load any Brightcove player by Account ID, Player ID, and Video ID, then inspect the stream with a simplified DRM-first summary: <strong>DRM Signal</strong>, <strong>DRM System</strong>, <strong>License Exchange</strong>, <strong>License Latency</strong>, and <strong>Protected Playback</strong>.</p>
+        </div>
+        <div class="hero-pill">drm-first view</div>
+      </div>
+    </section>
+
+    <div class="grid-main">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">Run Inspector</h2>
+            <p class="panel-sub">Use customer-specific account, player, and video IDs. This keeps the tool account-agnostic and suitable for troubleshooting.</p>
+          </div>
+          <div class="panel-badge">dynamic player loader</div>
+        </div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="field">
+              <label for="accountId">Account ID</label>
+              <input id="accountId" type="text" placeholder="e.g. 123456789001" />
+            </div>
+            <div class="field">
+              <label for="playerId">Player ID</label>
+              <input id="playerId" type="text" placeholder="e.g. default or your custom player ID" />
+            </div>
+            <div class="field">
+              <label for="videoId">Video ID</label>
+              <input id="videoId" type="text" placeholder="e.g. 1234567890001" />
+            </div>
+            <div class="actions">
+              <button class="btn" id="runBtn" type="button">Run Inspector</button>
+              <button class="btn secondary" id="clearBtn" type="button">Clear</button>
+            </div>
+          </div>
+
+          <div class="summary-grid">
+            <div class="metric">
+              <p class="k">DRM Signal</p>
+              <p class="v status-plain" id="metricDrmSignal">Not observed</p>
+              <p class="h" id="hintDrmSignal">No DRM signal observed yet.</p>
+            </div>
+            <div class="metric">
+              <p class="k">DRM System</p>
+              <p class="v status-plain" id="metricDrmSystem">Unknown</p>
+              <p class="h" id="hintDrmSystem">Widevine, FairPlay, or PlayReady will appear here when detected.</p>
+            </div>
+            <div class="metric">
+              <p class="k">License Exchange</p>
+              <p class="v status-plain" id="metricLicense">Not observed</p>
+              <p class="h" id="hintLicense">A real DRM license request usually appears after playback begins.</p>
+            </div>
+            <div class="metric">
+              <p class="k">License Latency</p>
+              <p class="v status-plain" id="metricLatency">Unknown</p>
+              <p class="h" id="hintLatency">Shown when a DRM-style license request/response is observed.</p>
+            </div>
+            <div class="metric">
+              <p class="k">Protected Playback</p>
+              <p class="v status-plain" id="metricProtectedPlayback">Unknown</p>
+              <p class="h" id="hintProtectedPlayback">Best signal: encrypted event or confirmed key/license flow plus playback.</p>
+            </div>
+          </div>
+
+          <div class="note">This v3.1 summary keeps the headline UX focused on what most users actually care about: Is DRM configured, what DRM system is involved, did a license exchange happen, how long did it take, and did protected playback succeed?</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2 class="panel-title">How to read this page</h2>
+            <p class="panel-sub">This tool is optimized for support and onboarding, not for replacing the full browser Network tab.</p>
+          </div>
+          <div class="panel-badge">support mode</div>
+        </div>
+        <div class="panel-body">
+          <div class="explain">
+            <div class="mini">
+              <p class="k">Step 1</p>
+              <p class="v">DRM configured</p>
+              <p class="s">Manifest signal or DRM-specific request pattern indicates that the stream is intended to be protected.</p>
+            </div>
+            <div class="mini">
+              <p class="k">Step 2</p>
+              <p class="v">License exchange</p>
+              <p class="s">A POST request to a license-style endpoint is a strong sign that the player is negotiating keys.</p>
+            </div>
+            <div class="mini">
+              <p class="k">Step 3</p>
+              <p class="v">Protected playback</p>
+              <p class="s">Playback plus EME/DRM signals usually means the content is playing through a protected path.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Player & Runtime</h2>
+          <p class="panel-sub">The Brightcove player is created dynamically from the IDs you enter above.</p>
+        </div>
+        <div class="panel-badge">runtime view</div>
+      </div>
+      <div class="panel-body">
+        <div class="player-wrap">
+          <div class="player-stage">
+            <div class="player-slot" id="playerContainer">
+              <div class="placeholder">Player slot is waiting for input.<br />Enter Account ID, Player ID, and Video ID, then click <strong>Run Inspector</strong>.</div>
+            </div>
+          </div>
+          <div class="info-stack">
+            <div class="mini">
+              <p class="k">Player Script URL</p>
+              <p class="v" id="scriptUrlValue">Not loaded yet</p>
+              <p class="s">This is the Brightcove player runtime script that will be loaded dynamically.</p>
+            </div>
+            <div class="mini">
+              <p class="k">Player URL Pattern</p>
+              <p class="v" id="playerUrlValue">Not loaded yet</p>
+              <p class="s">Useful for comparing direct player access with in-page playback or iframe-based playback.</p>
+            </div>
+            <div class="mini">
+              <p class="k">Observed Page Context</p>
+              <p class="v" id="pageContextValue">Waiting for player load</p>
+              <p class="s">Shows where the current page itself is running, which helps when explaining runtime context.</p>
+            </div>
+            <div class="mini">
+              <p class="k">Player Status</p>
+              <p class="v" id="playerStatusValue">Idle</p>
+              <p class="s">Tracks dynamic load, player readiness, and playback lifecycle hints.</p>
+            </div>
+          </div>
+        </div>
+        <div class="footer-note">Note: browser security and DRM implementation differences mean some details can only be reported as observed, likely, or unknown.</div>
+      </div>
+    </section>
+
+    <section class="panel flow-panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">How DRM playback actually starts</h2>
+          <p class="panel-sub">License requests usually do not happen when the player first loads. In most cases, they happen after playback begins and the browser detects encrypted media.</p>
+        </div>
+        <div class="panel-badge">play → license → key → playback</div>
+      </div>
+      <div class="panel-body">
+        <div class="flow-grid">
+          <div class="flow-step">
+            <p class="n">1</p>
+            <p class="t">Player loads</p>
+            <p class="d">The Brightcove player script loads and the player requests the manifest.</p>
+          </div>
+          <div class="flow-step">
+            <p class="n">2</p>
+            <p class="t">User presses play</p>
+            <p class="d">The browser starts actual playback startup work instead of only loading the player UI.</p>
+          </div>
+          <div class="flow-step">
+            <p class="n">3</p>
+            <p class="t">Encrypted media is detected</p>
+            <p class="d">The browser or player encounters DRM-protected media and starts the EME path.</p>
+          </div>
+          <div class="flow-step">
+            <p class="n">4</p>
+            <p class="t">License request is sent</p>
+            <p class="d">The CDM generates a challenge and the player sends it to the DRM license server.</p>
+          </div>
+          <div class="flow-step">
+            <p class="n">5</p>
+            <p class="t">License response returns keys</p>
+            <p class="d">The license server returns data the browser can use to unlock decryption for that session.</p>
+          </div>
+          <div class="flow-step">
+            <p class="n">6</p>
+            <p class="t">Protected playback starts</p>
+            <p class="d">Once usable keys are installed, encrypted media segments can be decrypted and playback can continue.</p>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:16px;"><strong>Why license latency matters:</strong> because the license exchange usually happens during playback startup, a slow or overloaded license server can directly increase startup delay or cause playback failures.</div>
+
+        <div class="mini" style="margin-top:16px;background:linear-gradient(135deg, rgba(244,210,75,.06), rgba(119,212,255,.06)), rgba(255,255,255,.02);">
+          <p class="k">Visual Handshake Model</p>
+          <p class="s" style="margin-top:0;">This SVG shows the typical communication path after the user presses play. It is not a packet-level trace; it is a support-friendly model of how protected playback usually starts.</p>
+
+          
+<svg viewBox="0 0 1200 440" width="100%" height="auto" role="img" style="display:block;margin-top:8px;">
+<title>DRM handshake flow</title>
+<desc>Play → encrypted media detected → license challenge → license response → keys installed → protected playback</desc>
+
+<defs>
+  <linearGradient id="boxFill2" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="rgba(244,210,75,.14)"/>
+    <stop offset="60%" stop-color="rgba(255,111,97,.08)"/>
+    <stop offset="100%" stop-color="rgba(119,212,255,.14)"/>
+  </linearGradient>
+
+  <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+    <path d="M0,0 L10,5 L0,10 z" fill="#8fdfff"/>
+  </marker>
+</defs>
+
+<rect x="20" y="20" width="1160" height="400" rx="18"
+fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)"/>
+
+<!-- STEP 1 -->
+<rect x="60" y="70" width="190" height="110" rx="14"
+fill="url(#boxFill2)" stroke="rgba(255,255,255,.16)"/>
+<text x="155" y="100" text-anchor="middle" fill="#fff4b1" font-size="11" font-weight="800">TRIGGER</text>
+<text x="155" y="130" text-anchor="middle" fill="#edf3fb" font-size="22" font-weight="800">Play pressed</text>
+<text x="155" y="155" text-anchor="middle" fill="#cfd9e6" font-size="12">
+User action starts playback
+</text>
+
+<!-- STEP 2 -->
+<rect x="300" y="70" width="210" height="110" rx="14"
+fill="url(#boxFill2)" stroke="rgba(255,255,255,.16)"/>
+<text x="405" y="100" text-anchor="middle" fill="#fff4b1" font-size="11" font-weight="800">PLAYER / BROWSER</text>
+<text x="405" y="130" text-anchor="middle" fill="#edf3fb" font-size="22" font-weight="800">Encrypted media</text>
+<text x="405" y="155" text-anchor="middle" fill="#cfd9e6" font-size="12">
+Browser detects DRM protected stream
+</text>
+
+<!-- STEP 3 -->
+<rect x="560" y="70" width="210" height="110" rx="14"
+fill="url(#boxFill2)" stroke="rgba(255,255,255,.16)"/>
+<text x="665" y="100" text-anchor="middle" fill="#fff4b1" font-size="11" font-weight="800">CDM / PLAYER</text>
+<text x="665" y="130" text-anchor="middle" fill="#edf3fb" font-size="22" font-weight="800">License challenge</text>
+<text x="665" y="155" text-anchor="middle" fill="#cfd9e6" font-size="12">
+Player prepares DRM license request
+</text>
+
+<!-- STEP 4 -->
+<rect x="820" y="70" width="260" height="110" rx="14"
+fill="url(#boxFill2)" stroke="rgba(255,255,255,.16)"/>
+<text x="950" y="100" text-anchor="middle" fill="#fff4b1" font-size="11" font-weight="800">LICENSE SERVER</text>
+<text x="950" y="130" text-anchor="middle" fill="#edf3fb" font-size="22" font-weight="800">License response</text>
+<text x="950" y="155" text-anchor="middle" fill="#cfd9e6" font-size="12">
+Server returns decryption keys
+</text>
+
+<!-- arrows -->
+<line x1="250" y1="125" x2="300" y2="125" stroke="#8fdfff" stroke-width="3" marker-end="url(#arrow2)"/>
+<line x1="510" y1="125" x2="560" y2="125" stroke="#8fdfff" stroke-width="3" marker-end="url(#arrow2)"/>
+<line x1="770" y1="125" x2="820" y2="125" stroke="#8fdfff" stroke-width="3" marker-end="url(#arrow2)"/>
+
+<!-- return arrow -->
+<path d="M960 190 C960 240, 720 260, 650 260"
+fill="none" stroke="#77d4ff" stroke-width="3" marker-end="url(#arrow2)"/>
+<text x="780" y="220" fill="#aee7ff" font-size="12">keys returned</text>
+
+<!-- STEP 5 -->
+<rect x="520" y="260" width="240" height="110" rx="14"
+fill="rgba(119,212,255,.08)" stroke="rgba(119,212,255,.22)"/>
+<text x="640" y="290" text-anchor="middle" fill="#aee7ff" font-size="11" font-weight="800">CDM</text>
+<text x="640" y="315" text-anchor="middle" fill="#edf3fb" font-size="22" font-weight="800">Keys installed</text>
+<text x="640" y="340" text-anchor="middle" fill="#cfd9e6" font-size="12">
+Browser can decrypt segments
+</text>
+
+<!-- arrow to playback -->
+<line x1="520" y1="315" x2="340" y2="315" stroke="#65e0a3" stroke-width="3" marker-end="url(#arrow2)"/>
+<text x="430" y="300" fill="#aff0c8" font-size="12">decrypt path enabled</text>
+
+<!-- STEP 6 -->
+<rect x="90" y="260" width="220" height="110" rx="14"
+fill="rgba(101,224,163,.09)" stroke="rgba(101,224,163,.22)"/>
+<text x="200" y="290" text-anchor="middle" fill="#aff0c8" font-size="11" font-weight="800">PLAYBACK</text>
+<text x="200" y="315" text-anchor="middle" fill="#edf3fb" font-size="22" font-weight="800">Protected playback</text>
+<text x="200" y="340" text-anchor="middle" fill="#cfd9e6" font-size="12">
+Video decrypts and starts playing
+</text>
+
+<text x="60" y="405" fill="#9aa7b8" font-size="12">
+Typical flow: Play → encrypted media → license request → license response → keys installed → playback
+</text>
+
+</svg>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" style="margin-top:20px;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Network-ish Log</h2>
+          <p class="panel-sub">Detailed events stay here instead of cluttering the headline summary.</p>
+        </div>
+        <div class="panel-badge">devtools-inspired</div>
+      </div>
+      <div class="panel-body">
+        <div class="log" id="networkLog" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function(){
+      const app = {
+        state: {
+          currentScriptEl: null,
+          currentPlayerId: 'bcInspectorPlayer',
+          encryptedSeen: false,
+          playingSeen: false,
+          manifestDrmSeen: false,
+          licenseSeen: false,
+          drmSystem: null,
+          licenseStatusText: null,
+          playerReadySeen: false,
+          playerPoll: null,
+          lastLatencyMs: null
+        },
+        refs: {
+          accountId: document.getElementById('accountId'),
+          playerId: document.getElementById('playerId'),
+          videoId: document.getElementById('videoId'),
+          runBtn: document.getElementById('runBtn'),
+          clearBtn: document.getElementById('clearBtn'),
+          playerContainer: document.getElementById('playerContainer'),
+          networkLog: document.getElementById('networkLog'),
+          scriptUrlValue: document.getElementById('scriptUrlValue'),
+          playerUrlValue: document.getElementById('playerUrlValue'),
+          pageContextValue: document.getElementById('pageContextValue'),
+          playerStatusValue: document.getElementById('playerStatusValue'),
+          metricDrmSignal: document.getElementById('metricDrmSignal'),
+          hintDrmSignal: document.getElementById('hintDrmSignal'),
+          metricDrmSystem: document.getElementById('metricDrmSystem'),
+          hintDrmSystem: document.getElementById('hintDrmSystem'),
+          metricLicense: document.getElementById('metricLicense'),
+          hintLicense: document.getElementById('hintLicense'),
+          metricLatency: document.getElementById('metricLatency'),
+          hintLatency: document.getElementById('hintLatency'),
+          metricProtectedPlayback: document.getElementById('metricProtectedPlayback'),
+          hintProtectedPlayback: document.getElementById('hintProtectedPlayback')
+        }
+      };
+
+      const licenseRegex = /(\/license\/|license(?=\/|\?|$)|widevine|fairplay|playready|\/fps\/|\/cenc\/|drm)/i;
+      const manifestRegex = /(\.m3u8(\?|$)|\.mpd(\?|$)|master\.m3u8|manifest)/i;
+
+      function now() {
+        const d = new Date();
+        return d.toLocaleTimeString([], {hour12:false});
+      }
+      function escapeHtml(s){
+        return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+      }
+      function log(message, tone='info') {
+        const row = document.createElement('div');
+        row.className = 'log-row';
+        row.innerHTML = '<span class="tag '+tone+'">'+tone+'</span>['+now()+'] '+escapeHtml(message);
+        app.refs.networkLog.prepend(row);
+      }
+      function setMetric(el, value, cls) {
+        el.textContent = value;
+        el.className = 'v ' + (cls || 'status-plain');
+      }
+      function setHint(el, text) { el.textContent = text; }
+      function setPlayerStatus(text) { app.refs.playerStatusValue.textContent = text; }
+
+      function resetSummary() {
+        app.state.encryptedSeen = false;
+        app.state.playingSeen = false;
+        app.state.manifestDrmSeen = false;
+        app.state.licenseSeen = false;
+        app.state.drmSystem = null;
+        app.state.licenseStatusText = null;
+        app.state.playerReadySeen = false;
+        app.state.lastLatencyMs = null;
+
+        setMetric(app.refs.metricDrmSignal, 'Not observed', 'status-plain');
+        setHint(app.refs.hintDrmSignal, 'No DRM signal observed yet.');
+        setMetric(app.refs.metricDrmSystem, 'Unknown', 'status-plain');
+        setHint(app.refs.hintDrmSystem, 'Widevine, FairPlay, or PlayReady will appear here when detected.');
+        setMetric(app.refs.metricLicense, 'Not observed', 'status-plain');
+        setHint(app.refs.hintLicense, 'A real DRM license request usually appears after playback begins.');
+        setMetric(app.refs.metricLatency, 'Unknown', 'status-plain');
+        setHint(app.refs.hintLatency, 'Shown when a DRM-style license request/response is observed.');
+        setMetric(app.refs.metricProtectedPlayback, 'Unknown', 'status-plain');
+        setHint(app.refs.hintProtectedPlayback, 'Best signal: encrypted event or confirmed key/license flow plus playback.');
+      }
+
+      function clearPlayerDom() {
+        if (app.state.playerPoll) {
+          clearInterval(app.state.playerPoll);
+          app.state.playerPoll = null;
+        }
+        app.refs.playerContainer.innerHTML = '<div class="placeholder">Player slot is waiting for input.<br />Enter Account ID, Player ID, and Video ID, then click <strong>Run Inspector</strong>.</div>';
+        if (app.state.currentScriptEl && app.state.currentScriptEl.parentNode) {
+          app.state.currentScriptEl.parentNode.removeChild(app.state.currentScriptEl);
+        }
+        app.state.currentScriptEl = null;
+      }
+
+      function fullScriptUrl(account, player) {
+        return 'https://players.brightcove.net/' + account + '/' + player + '_default/index.min.js';
+      }
+      function fullPlayerUrl(account, player, video) {
+        return 'https://players.brightcove.net/' + account + '/' + player + '_default/index.html?videoId=' + encodeURIComponent(video);
+      }
+
+      function detectDrmSystemFromText(text) {
+        const lower = String(text || '').toLowerCase();
+        if (lower.includes('widevine')) return 'Widevine';
+        if (lower.includes('fairplay') || lower.includes('skd://') || lower.includes('com.apple.fps')) return 'FairPlay';
+        if (lower.includes('playready')) return 'PlayReady';
+        return null;
+      }
+
+      function latencyTone(ms) {
+        if (ms == null) return ['Unknown', 'status-plain'];
+        if (ms < 150) return [ms + ' ms', 'status-good'];
+        if (ms < 500) return [ms + ' ms', 'status-warn'];
+        return [ms + ' ms', 'status-bad'];
+      }
+      function latencyHint(ms) {
+        if (ms == null) return 'Shown when a DRM-style license request/response is observed.';
+        if (ms < 150) return 'Low latency. License exchange is unlikely to be the main startup bottleneck.';
+        if (ms < 500) return 'Moderate latency. This can contribute to slower playback startup.';
+        return 'High latency. A slow license exchange may delay startup or cause failures under load.';
+      }
+
+      function updateSummaryFromState() {
+        if (app.state.manifestDrmSeen) {
+          setMetric(app.refs.metricDrmSignal, 'Detected', 'status-good');
+          setHint(app.refs.hintDrmSignal, 'Manifest or DRM-specific traffic indicates that the stream is configured for protected playback.');
+        } else {
+          setMetric(app.refs.metricDrmSignal, 'Not observed', 'status-plain');
+          setHint(app.refs.hintDrmSignal, 'No manifest-level DRM signal has been confirmed yet.');
+        }
+
+        if (app.state.drmSystem) {
+          setMetric(app.refs.metricDrmSystem, app.state.drmSystem, 'status-info');
+          setHint(app.refs.hintDrmSystem, 'Detected from manifest content or DRM-related endpoint naming.');
+        } else {
+          setMetric(app.refs.metricDrmSystem, 'Unknown', 'status-plain');
+          setHint(app.refs.hintDrmSystem, 'No key system has been confidently identified yet.');
+        }
+
+        if (app.state.licenseSeen && app.state.licenseStatusText) {
+          setMetric(app.refs.metricLicense, app.state.licenseStatusText, 'status-good');
+          setHint(app.refs.hintLicense, 'A DRM-style license request/response was observed after playback startup activity.');
+        } else if (app.state.licenseSeen) {
+          setMetric(app.refs.metricLicense, 'Observed', 'status-good');
+          setHint(app.refs.hintLicense, 'A DRM-style license request was observed, but the exact response state is limited by browser visibility.');
+        } else {
+          setMetric(app.refs.metricLicense, 'Not observed', 'status-plain');
+          setHint(app.refs.hintLicense, 'No DRM-style license request has been confirmed yet.');
+        }
+
+        const lat = latencyTone(app.state.lastLatencyMs);
+        setMetric(app.refs.metricLatency, lat[0], lat[1]);
+        setHint(app.refs.hintLatency, latencyHint(app.state.lastLatencyMs));
+
+        if (app.state.encryptedSeen && app.state.playingSeen) {
+          setMetric(app.refs.metricProtectedPlayback, 'Confirmed', 'status-good');
+          setHint(app.refs.hintProtectedPlayback, 'Encrypted media event plus active playback is the strongest signal available in-page.');
+        } else if (app.state.licenseSeen && app.state.playingSeen) {
+          setMetric(app.refs.metricProtectedPlayback, 'Likely', 'status-warn');
+          setHint(app.refs.hintProtectedPlayback, 'Playback is active and a DRM-style license flow was observed.');
+        } else if (app.state.playingSeen) {
+          setMetric(app.refs.metricProtectedPlayback, 'Playing', 'status-info');
+          setHint(app.refs.hintProtectedPlayback, 'Playback started, but protected playback has not been fully confirmed.');
+        } else {
+          setMetric(app.refs.metricProtectedPlayback, 'Unknown', 'status-plain');
+          setHint(app.refs.hintProtectedPlayback, 'Waiting for playback or DRM lifecycle signals.');
+        }
+      }
+
+      function observeManifestBody(url, bodyText) {
+        const detectedSystem = detectDrmSystemFromText(bodyText);
+        const lower = String(bodyText || '').toLowerCase();
+        if (lower.includes('#ext-x-key') || lower.includes('contentprotection') || detectedSystem) {
+          if (!app.state.manifestDrmSeen) log('Manifest DRM signal detected in ' + url, 'good');
+          app.state.manifestDrmSeen = true;
+        }
+        if (detectedSystem && app.state.drmSystem !== detectedSystem) {
+          app.state.drmSystem = detectedSystem;
+          log('DRM system detected from manifest: ' + detectedSystem, 'good');
+        }
+        updateSummaryFromState();
+      }
+
+      async function inspectFetchResponse(url, response, startedAt) {
+        const elapsed = Date.now() - startedAt;
+        const statusText = response ? String(response.status) : 'unknown';
+        if (licenseRegex.test(url)) {
+          app.state.licenseSeen = true;
+          app.state.lastLatencyMs = elapsed;
+          const sys = detectDrmSystemFromText(url);
+          if (sys && !app.state.drmSystem) app.state.drmSystem = sys;
+          app.state.licenseStatusText = response ? ('HTTP ' + statusText) : 'Observed';
+          app.state.manifestDrmSeen = true;
+          log('License fetch ' + statusText + ' - ' + truncate(url) + ' - ' + elapsed + ' ms', response && response.ok ? 'good' : 'warn');
+          updateSummaryFromState();
+          return;
+        }
+        if (manifestRegex.test(url)) {
+          log('Manifest fetch ' + statusText + ' - ' + truncate(url) + ' - ' + elapsed + ' ms', 'info');
+          try {
+            const clone = response.clone();
+            const text = await clone.text();
+            observeManifestBody(url, text);
+          } catch (_) {}
+          return;
+        }
+        if (/\.(m4s|m4f|ts|cmf|mp4)(\?|$)/i.test(url)) {
+          log('Segment fetch - ' + truncate(url), 'info');
+        }
+      }
+
+      function truncate(url) {
+        if (url.length <= 118) return url;
+        return url.slice(0, 86) + ' … ' + url.slice(-24);
+      }
+
+      function installNetworkHooks() {
+        if (window.__bcInspectorHooksInstalled) return;
+        window.__bcInspectorHooksInstalled = true;
+
+        const originalFetch = window.fetch.bind(window);
+        window.fetch = async function(...args) {
+          const requestUrl = typeof args[0] === 'string' ? args[0] : (args[0] && args[0].url ? args[0].url : '');
+          const startedAt = Date.now();
+          try {
+            const response = await originalFetch(...args);
+            if (requestUrl) inspectFetchResponse(requestUrl, response, startedAt);
+            return response;
+          } catch (error) {
+            if (requestUrl && licenseRegex.test(requestUrl)) {
+              app.state.licenseSeen = true;
+              app.state.manifestDrmSeen = true;
+              app.state.licenseStatusText = 'Error';
+              app.state.lastLatencyMs = Date.now() - startedAt;
+              updateSummaryFromState();
+              log('License fetch failed - ' + truncate(requestUrl), 'bad');
+            } else if (requestUrl) {
+              log('Fetch failed - ' + truncate(requestUrl), 'bad');
+            }
+            throw error;
+          }
+        };
+
+        const OriginalXHR = window.XMLHttpRequest;
+        function WrappedXHR() {
+          const xhr = new OriginalXHR();
+          let method = 'GET';
+          let url = '';
+          let startedAt = 0;
+          const open = xhr.open;
+          xhr.open = function(m, u, ...rest) {
+            method = String(m || 'GET').toUpperCase();
+            url = u || '';
+            return open.call(xhr, m, u, ...rest);
+          };
+          const send = xhr.send;
+          xhr.send = function(...rest) {
+            startedAt = Date.now();
+            xhr.addEventListener('loadend', function() {
+              const elapsed = Date.now() - startedAt;
+              if (!url) return;
+              if (licenseRegex.test(url)) {
+                app.state.licenseSeen = true;
+                app.state.manifestDrmSeen = true;
+                app.state.lastLatencyMs = elapsed;
+                const sys = detectDrmSystemFromText(url);
+                if (sys && !app.state.drmSystem) app.state.drmSystem = sys;
+                app.state.licenseStatusText = 'HTTP ' + xhr.status;
+                updateSummaryFromState();
+                log('License XHR ' + xhr.status + ' - ' + truncate(url) + ' - ' + elapsed + ' ms', xhr.status >= 200 && xhr.status < 300 ? 'good' : 'warn');
+              } else if (manifestRegex.test(url)) {
+                log('Manifest XHR ' + xhr.status + ' - ' + truncate(url) + ' - ' + elapsed + ' ms', 'info');
+                try {
+                  const text = typeof xhr.responseText === 'string' ? xhr.responseText : '';
+                  if (text) observeManifestBody(url, text);
+                } catch (_) {}
+              } else if (/\.(m4s|m4f|ts|cmf|mp4)(\?|$)/i.test(url)) {
+                log(method + ' segment - ' + truncate(url), 'info');
+              }
+            });
+            return send.apply(xhr, rest);
+          };
+          return xhr;
+        }
+        window.XMLHttpRequest = WrappedXHR;
+      }
+
+      function wirePlayerLifecycle(player) {
+        player.ready(function(){
+          app.state.playerReadySeen = true;
+          setPlayerStatus('Ready');
+          log('Player ready', 'good');
+          player.on('play', function(){ log('Play requested', 'info'); });
+          player.on('playing', function(){
+            app.state.playingSeen = true;
+            setPlayerStatus('Playing');
+            log('Playback started', 'good');
+            updateSummaryFromState();
+          });
+          player.on('error', function(){
+            const err = player.error && player.error();
+            setPlayerStatus('Error');
+            log('Player error: ' + (err && err.message ? err.message : 'unknown error'), 'bad');
+          });
+          try {
+            const tech = player.tech(true);
+            const techEl = tech && tech.el ? tech.el() : null;
+            if (techEl) {
+              techEl.addEventListener('encrypted', function(){
+                app.state.encryptedSeen = true;
+                app.state.manifestDrmSeen = true;
+                log('EME encrypted event detected', 'good');
+                updateSummaryFromState();
+              }, { passive:true });
+              techEl.addEventListener('waiting', function(){ log('Playback waiting/buffering', 'warn'); }, { passive:true });
+            }
+          } catch (_) {
+            log('Could not attach directly to tech element for EME inspection', 'warn');
+          }
+        });
+      }
+
+      function waitForPlayerAndInit() {
+        let attempts = 0;
+        app.state.playerPoll = setInterval(function(){
+          attempts += 1;
+          const hasVideoJs = typeof window.videojs === 'function';
+          const player = hasVideoJs ? window.videojs.getPlayer(app.state.currentPlayerId) : null;
+          if (player) {
+            clearInterval(app.state.playerPoll);
+            app.state.playerPoll = null;
+            wirePlayerLifecycle(player);
+            return;
+          }
+          if (attempts > 80) {
+            clearInterval(app.state.playerPoll);
+            app.state.playerPoll = null;
+            setPlayerStatus('Load timeout');
+            log('Timed out waiting for Brightcove player runtime', 'bad');
+          }
+        }, 250);
+      }
+
+      function loadPlayer() {
+        const account = app.refs.accountId.value.trim();
+        const player = app.refs.playerId.value.trim();
+        const video = app.refs.videoId.value.trim();
+        if (!account || !player || !video) {
+          log('Please fill Account ID, Player ID, and Video ID before running the inspector.', 'warn');
+          return;
+        }
+
+        resetSummary();
+        app.refs.networkLog.innerHTML = '';
+        clearPlayerDom();
+
+        const scriptUrl = fullScriptUrl(account, player);
+        const playerUrl = fullPlayerUrl(account, player, video);
+
+        app.refs.scriptUrlValue.textContent = scriptUrl;
+        app.refs.playerUrlValue.textContent = playerUrl;
+        app.refs.pageContextValue.textContent = window.location.href;
+        setPlayerStatus('Loading');
+        log('Starting dynamic Brightcove player load', 'info');
+        log('Account=' + account + ' Player=' + player + ' Video=' + video, 'info');
+
+        const videoTag = document.createElement('video-js');
+        videoTag.id = app.state.currentPlayerId;
+        videoTag.className = 'video-js';
+        videoTag.setAttribute('data-account', account);
+        videoTag.setAttribute('data-player', player);
+        videoTag.setAttribute('data-embed', 'default');
+        videoTag.setAttribute('data-video-id', video);
+        videoTag.setAttribute('controls', '');
+        videoTag.setAttribute('playsinline', '');
+        videoTag.setAttribute('preload', 'auto');
+
+        app.refs.playerContainer.innerHTML = '';
+        app.refs.playerContainer.appendChild(videoTag);
+
+        const script = document.createElement('script');
+        script.src = scriptUrl;
+        script.async = true;
+        script.onload = function(){
+          log('Player runtime script loaded', 'good');
+          waitForPlayerAndInit();
+        };
+        script.onerror = function(){
+          setPlayerStatus('Script load error');
+          log('Failed to load Brightcove player runtime script', 'bad');
+        };
+        document.body.appendChild(script);
+        app.state.currentScriptEl = script;
+      }
+
+      function clearAll() {
+        clearPlayerDom();
+        app.refs.networkLog.innerHTML = '';
+        resetSummary();
+        app.refs.scriptUrlValue.textContent = 'Not loaded yet';
+        app.refs.playerUrlValue.textContent = 'Not loaded yet';
+        app.refs.pageContextValue.textContent = 'Waiting for player load';
+        setPlayerStatus('Idle');
+      }
+
+      app.refs.runBtn.addEventListener('click', loadPlayer);
+      app.refs.clearBtn.addEventListener('click', clearAll);
+      installNetworkHooks();
+      resetSummary();
+      app.refs.pageContextValue.textContent = window.location.href;
+    })();
+  </script>
+</body>
+</html>
